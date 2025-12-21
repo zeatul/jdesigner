@@ -1,0 +1,10 @@
+plugins {
+    id 'buildlogic.java-library-conventions'
+}
+
+description = 'Provides a base implementation for model definitions.'
+
+dependencies {
+    implementation 'io.github.zeatul:hawk-core'
+    implementation project(':jdesigner-spec')
+}

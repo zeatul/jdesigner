@@ -1,0 +1,11 @@
+plugins {
+    id 'buildlogic.java-library-conventions'
+}
+
+description = 'Define models with annotations.'
+
+dependencies {
+    implementation project(':jdesigner-spec')
+    implementation 'org.springframework:spring-context'
+    implementation 'com.google.guava:guava'
+}

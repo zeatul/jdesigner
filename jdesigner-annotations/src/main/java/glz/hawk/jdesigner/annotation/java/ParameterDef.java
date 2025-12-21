@@ -1,0 +1,47 @@
+/*
+ * Copyright 2025-2026 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package glz.hawk.jdesigner.annotation.java;
+
+import glz.hawk.jdesigner.spec.java.Parameter;
+import glz.hawk.jdesigner.annotation.name.NameConverter;
+import org.springframework.core.annotation.AliasFor;
+
+/**
+ * This annotation defines a {@link Parameter}.
+ *
+ * @author Hawk
+ */
+public @interface ParameterDef {
+
+    @AliasFor("name")
+    String value() default "";
+
+    /**
+     * This attribute represents the name of {@code Parameter}.
+     * <p>If this attribute's value is blank, use the annotated element's name.</p>
+     */
+    @AliasFor("value")
+    String name() default "";
+
+
+    /**
+     * This attributes defines a class of {@code NameConverter} which is used to convert the {@code Name} to the required {@code Name}.
+     * <p>If this attribute's value is empty, use the {@code NameConverter} in the environment.</p>
+     * <p>Only the first value of this attribute will be taken.</p>
+     */
+    Class<? extends NameConverter>[] converterClass() default {};
+}

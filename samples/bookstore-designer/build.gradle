@@ -1,0 +1,52 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Central Portal Snapshots'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+    dependencies {
+        classpath 'io.github.zeatul:jdesigner-defaults:1.0.0-SNAPSHOT'
+    }
+}
+
+plugins {
+    id 'buildlogic.java-library-conventions'
+    id 'net.bytebuddy.byte-buddy-gradle-plugin'
+}
+
+
+description = 'Define models for the bookstore.'
+
+dependencies {
+    implementation project(':jdesigner-spec')
+    implementation project(':jdesigner-annotations')
+    implementation project(':jdesigner-extensions')
+    implementation project(':jdesigner-builder')
+    implementation project(':samples:bookstore-annotations')
+    annotationProcessor project(':jdesigner-indexer')
+}
+
+ext.processorOptions = [
+    'indexerPackageName': 'glz.hawk.bookstore.designer',
+    'indexerClassName'  : 'BookstoreModelIndexer'
+]
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-parameters'
+    options.compilerArgs += processorOptions.collect { key, value ->
+        "-A${key}=${value}"
+    }
+}
+
+byteBuddy {
+    transformation {
+        plugin = glz.hawk.jdesigner.defaults.AutoFieldInitializerPlugin
+    }
+}
+
+
+
+

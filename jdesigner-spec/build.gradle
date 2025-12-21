@@ -1,0 +1,9 @@
+plugins {
+    id 'buildlogic.java-library-conventions'
+}
+
+description = 'Provides definitions across three layers: Metadata (data types, domains, metadata), Database Tables (columns, tables, indexes, primary keys), and Java Code (types, fields, methods, annotations, constructors, and exceptions).'
+
+dependencies {
+    api 'com.google.code.findbugs:jsr305'
+}

@@ -1,0 +1,28 @@
+plugins {
+    id 'buildlogic.java-library-conventions'
+}
+
+description = 'The pub layer for the bookstore.'
+
+dependencies {
+    implementation project(':samples:bookstore-annotations')
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += 'src/generated/java'
+        }
+        resources {
+            srcDirs += 'src/generated/resources'
+        }
+    }
+    test {
+        java {
+            srcDirs += 'src/generatedTest/java'
+        }
+        resources {
+            srcDirs += 'src/generatedTest/resources'
+        }
+    }
+}

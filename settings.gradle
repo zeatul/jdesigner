@@ -1,0 +1,47 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    plugins {
+        id 'net.bytebuddy.byte-buddy-gradle-plugin' version '1.18.2'
+    }
+}
+
+import org.gradle.api.initialization.resolve.RepositoriesMode
+
+rootProject.name = 'jdesigner'
+
+//This builder has no functionality; it is solely intended to work around the bug of the byte-buddy-gradle-plugin used in the bookstore-designer project.
+includeBuild("virtual-builder")
+
+include 'jdesigner-spec'
+include 'jdesigner-spec-impl'
+include 'jdesigner-annotations'
+include 'jdesigner-builder'
+include 'jdesigner-translator'
+include 'jdesigner-defaults'
+include 'jdesigner-extensions'
+include 'jdesigner-indexer'
+
+include 'samples:bookstore-annotations'
+include 'samples:bookstore-designer'
+include 'samples:bookstore-generator'
+include 'samples:bookstore-persist'
+include 'samples:bookstore-pub'
+
+dependencyResolutionManagement {
+
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Central Portal Snapshots'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+}
+
+

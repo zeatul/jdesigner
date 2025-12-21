@@ -1,0 +1,10 @@
+plugins {
+    id 'buildlogic.java-library-conventions'
+}
+
+description = 'Auto-populates fields with their names using ByteBuddy.'
+
+dependencies {
+    implementation project(':jdesigner-annotations')
+    implementation 'net.bytebuddy:byte-buddy'
+}

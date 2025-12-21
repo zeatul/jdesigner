@@ -1,0 +1,15 @@
+plugins {
+    id 'buildlogic.java-library-conventions'
+}
+
+description = 'An annotation processor that generates an index of the models.'
+
+dependencies {
+    implementation project(':jdesigner-spec')
+    implementation project(':jdesigner-annotations')
+    implementation project(':jdesigner-builder')
+    implementation 'io.github.zeatul:hawk-core'
+//    implementation project(':bean-mapper:bean-mapper-annotations')
+    implementation 'io.github.zeatul:codepoet-core'
+    implementation 'io.github.zeatul:javapoet-pro'
+}

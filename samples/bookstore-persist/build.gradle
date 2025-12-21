@@ -1,0 +1,62 @@
+//file:noinspection GroovyAssignabilityCheck
+plugins {
+    id 'buildlogic.java-library-conventions'
+}
+
+description = 'The persist layer for the bookstore.'
+
+configurations {
+    configureEach {
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
+    }
+//    compileClasspath {
+//        exclude group: 'javax.servlet', module: 'servlet-api'
+//    }
+}
+
+dependencies {
+    implementation 'io.github.zeatul:hawk-core'
+    implementation 'io.github.zeatul:hawk-dao-base'
+    implementation 'io.github.zeatul:j4sql'
+    implementation 'io.github.zeatul:j4sql-mybatis'
+    implementation 'io.github.zeatul:codepoet-core'
+
+    implementation 'org.mybatis:mybatis'
+    implementation 'org.springframework:spring-beans'
+    implementation 'org.springframework:spring-context'
+    implementation 'org.slf4j:slf4j-api'
+
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter'
+    testImplementation 'mysql:mysql-connector-java'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    testImplementation 'net.datafaker:datafaker'
+    testImplementation 'org.jeasy:easy-random-core'
+    testImplementation 'com.lmax:disruptor'
+    testImplementation 'org.apache.logging.log4j:log4j-core'
+    testImplementation 'org.apache.logging.log4j:log4j-api'
+    testImplementation 'org.apache.logging.log4j:log4j-slf4j2-impl'
+    testImplementation 'org.apache.logging.log4j:log4j-jul'
+    testImplementation 'org.slf4j:jul-to-slf4j'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += 'src/generated/java'
+        }
+        resources {
+            srcDirs += 'src/generated/resources'
+        }
+    }
+    test {
+        java {
+            srcDirs += 'src/generatedTest/java'
+        }
+        resources {
+            srcDirs += 'src/generatedTest/resources'
+        }
+    }
+}

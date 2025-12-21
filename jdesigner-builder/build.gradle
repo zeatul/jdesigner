@@ -1,0 +1,16 @@
+plugins {
+    id 'buildlogic.java-library-conventions'
+}
+
+description = 'Construct a model warehouse instance.'
+
+dependencies {
+    implementation 'io.github.zeatul:hawk-core'
+    implementation project(':jdesigner-spec')
+    implementation project(':jdesigner-spec-impl')
+    implementation project(':jdesigner-annotations')
+    implementation 'org.slf4j:slf4j-api'
+    implementation 'org.springframework:spring-core'
+    implementation 'com.google.code.findbugs:jsr305'
+//    api 'com.google.code.findbugs:jsr305'
+}
