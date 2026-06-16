@@ -16,14 +16,15 @@
 
 package glz.hawk.bookstore.designer.java.inf;
 
+import glz.hawk.bookstore.designer.java.vo.CreateBookInVo;
+import glz.hawk.bookstore.designer.java.vo.CreateBookOutVo;
+import glz.hawk.jdesigner.annotation.base.DisplayDef;
 import glz.hawk.jdesigner.annotation.common.DeclaringOrder;
 import glz.hawk.jdesigner.annotation.java.ClassDef;
 import glz.hawk.jdesigner.annotation.java.MethodDef;
 import glz.hawk.jdesigner.annotation.java.ThrowableDef;
 import glz.hawk.jdesigner.annotation.java.type.ClassTypeDef;
 import glz.hawk.jdesigner.spec.java.ClassKind;
-import glz.hawk.bookstore.designer.java.vo.CreateBookInVo;
-import glz.hawk.bookstore.designer.java.vo.CreateBookOutVo;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -37,10 +38,12 @@ import java.util.List;
  * @author Hawk
  */
 @ClassDef(ClassKind.INTERFACE)
+@DisplayDef("书籍管理")
 public interface BookService<K extends String, S> extends RedService, GreenService {
 
     @DeclaringOrder(100)
     @MethodDef
+    @DisplayDef("汇总计算")
     int sum(int a1, int a2, int a3);
 
 
@@ -52,7 +55,8 @@ public interface BookService<K extends String, S> extends RedService, GreenServi
     @NotBlank
     @DeclaringOrder(200)
     @MethodDef
-    String read(File file) throws IOException;
+    @NotNull
+    String read(@NotNull File file) throws IOException;
 
     @DeclaringOrder(400)
     @MethodDef
@@ -61,4 +65,8 @@ public interface BookService<K extends String, S> extends RedService, GreenServi
     @DeclaringOrder(500)
     @MethodDef
     CreateBookOutVo<K, S> create2(CreateBookInVo<K, S> inVo);
+
+    @DeclaringOrder(500)
+    @MethodDef
+    List<@NotNull CreateBookOutVo<K, S>> createAll(List<@NotNull CreateBookInVo<K, S>> inVos);
 }

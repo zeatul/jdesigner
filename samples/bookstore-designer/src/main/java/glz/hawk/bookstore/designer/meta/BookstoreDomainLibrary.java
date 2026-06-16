@@ -16,6 +16,7 @@
 
 package glz.hawk.bookstore.designer.meta;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import glz.hawk.jdesigner.annotation.base.DisplayDef;
 import glz.hawk.jdesigner.annotation.meta.domain.DomainDef;
 import glz.hawk.jdesigner.annotation.meta.domain.DomainDefContainer;
@@ -63,6 +64,7 @@ public interface BookstoreDomainLibrary {
 
     @DateDef
     @DomainDef
+    @JsonFormat(pattern = "domain")
     String DATE = "DATE";
 
     @DateTimeDef(3)

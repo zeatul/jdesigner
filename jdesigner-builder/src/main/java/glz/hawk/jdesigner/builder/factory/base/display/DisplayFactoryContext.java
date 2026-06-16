@@ -16,8 +16,8 @@
 
 package glz.hawk.jdesigner.builder.factory.base.display;
 
-import glz.hawk.jdesigner.spec.base.Display;
 import glz.hawk.jdesigner.builder.factory.common.AbstractCommonFactoryContext;
+import glz.hawk.jdesigner.spec.base.Display;
 
 /**
  * This class is responsible for providing necessary information for {@link DisplayFactory} to build a {@link Display}.

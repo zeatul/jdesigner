@@ -1,0 +1,10 @@
+plugins {
+    id 'buildlogic.java-library-conventions'
+}
+
+description = 'Based on the configuration information provided by jdesigner-translator-annotations, execute jdesigner-translator to generate the required code.'
+
+dependencies {
+    api project(':jdesigner-generator')
+    api project(':jdesigner-generator-annotations')
+}

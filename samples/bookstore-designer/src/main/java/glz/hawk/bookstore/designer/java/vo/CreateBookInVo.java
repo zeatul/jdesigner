@@ -16,6 +16,8 @@
 
 package glz.hawk.bookstore.designer.java.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
 import glz.hawk.jdesigner.annotation.java.ClassDef;
 import glz.hawk.jdesigner.annotation.java.FieldDef;
 import glz.hawk.jdesigner.annotation.java.Getter;
@@ -24,9 +26,9 @@ import glz.hawk.jdesigner.annotation.java.type.ArrayWrapper;
 import glz.hawk.jdesigner.annotation.java.type.TypeWrapper;
 import glz.hawk.jdesigner.annotation.meta.metadata.ReferencedMetadata;
 import glz.hawk.jdesigner.annotation.name.UpperUnderscoreToLowerCamelNameConverter;
-import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
 import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -42,9 +44,13 @@ import java.util.Map;
 @Setter
 @Component
 public abstract class CreateBookInVo<K extends String, S> {
+    @FieldDef
+    @ReferencedMetadata(lib = BookstoreMetadataLibrary.class,index ="BOOK_CATEGORY")
+    String bookCategory;
 
     @NotNull(message = "NOT NULL")
     @FieldDef
+    @JsonProperty("KITE")
     K kite = null;
 
     @FieldDef
@@ -58,12 +64,15 @@ public abstract class CreateBookInVo<K extends String, S> {
     @FieldDef
     List<S[]> stiesList = null;
 
+    @NotBlank
     @ReferencedMetadata(BookstoreMetadataLibrary.class)
     @FieldDef(converterClass = UpperUnderscoreToLowerCamelNameConverter.class)
+    @JsonProperty("ISBN222")
     String ISBN = "";
 
     @ReferencedMetadata(BookstoreMetadataLibrary.class)
     @FieldDef(converterClass = UpperUnderscoreToLowerCamelNameConverter.class)
+//    @JsonFormat(pattern = "field")
     String PUBLISH_DATE = "";
 
     @TypeWrapper(List.class)

@@ -16,12 +16,13 @@
 
 package glz.hawk.bookstore.designer.database;
 
+import glz.hawk.bookstore.designer.database.template.TRACE;
+import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
 import glz.hawk.jdesigner.annotation.common.ImportDef;
 import glz.hawk.jdesigner.annotation.database.*;
 import glz.hawk.jdesigner.annotation.meta.metadata.ReferencedMetadata;
-import glz.hawk.jdesigner.extension.column.RecordId;
-import glz.hawk.bookstore.designer.database.template.TRACE;
-import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
+import glz.hawkframework.dao.column.annotation.RecordId;
+import glz.hawkframework.dao.table.annotation.ColumnCount;
 
 import static glz.hawk.bookstore.designer.database.BOOK_AUTHOR_MAP.*;
 
@@ -33,6 +34,7 @@ import static glz.hawk.bookstore.designer.database.BOOK_AUTHOR_MAP.*;
 @PrimaryKeyDef(@IndexColumnDef(BOOK_AUTHOR_MAP_ID))
 @IndexDef(name = "UI_BOOK_AUTHOR_MAP", isUnique = true, indexColumns = {@IndexColumnDef(BOOK_ID), @IndexColumnDef(AUTHOR_ID)})
 @ImportDef(TRACE.class)
+@ColumnCount(100)
 @TableDef
 public interface BOOK_AUTHOR_MAP {
 

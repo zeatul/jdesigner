@@ -18,7 +18,6 @@ package glz.hawk.jdesigner.builder.factory.java.executable;
 
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
 import glz.hawk.jdesigner.builder.factory.common.AbstractModelFactory;
-import glz.hawk.jdesigner.builder.factory.java.type.TypeFactorySupport;
 import glz.hawk.jdesigner.spec.impl.base.EmptyDisplay;
 import glz.hawk.jdesigner.spec.impl.base.ModelPartSupplier;
 import glz.hawk.jdesigner.spec.impl.java.SimpleThrowableSupplier;
@@ -47,6 +46,6 @@ public class ThrowableSupplierFactory<T extends Executable<T>> extends AbstractM
 
     @Override
     protected ModelPartSupplier<T, Throwable<T>> executeBuild() {
-        return new SimpleThrowableSupplier<>(getLocation(), EmptyDisplay.INSTANCE, TypeFactorySupport.convertFrom(factoryContext.getClassTypeFactoryContext()), factoryContext.getAllExtensions());
+        return new SimpleThrowableSupplier<>(getLocation(), EmptyDisplay.INSTANCE, builderContext.getTypeFactorySupport().convertFrom(factoryContext.getClassTypeFactoryContext()), factoryContext.getAllExtensions());
     }
 }

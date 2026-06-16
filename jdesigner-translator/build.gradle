@@ -5,11 +5,8 @@ plugins {
 description = 'An example project that uses javapoet-pro to translate the models to the Java codes.'
 
 dependencies {
-    implementation 'io.github.zeatul:hawk-core'
-    implementation project(':jdesigner-spec')
-    implementation project(':jdesigner-extensions')
-    implementation 'io.github.zeatul:codepoet-core'
-    implementation 'io.github.zeatul:javapoet-pro'
-    implementation 'io.github.zeatul:ddlpoet'
-    implementation 'com.google.guava:guava'
+    api project(':jdesigner-spec')
+    api 'io.github.zeatul:hawk-core'
+    api 'io.github.zeatul:javapoet-pro'
+    api 'io.github.zeatul:ddlpoet'
 }

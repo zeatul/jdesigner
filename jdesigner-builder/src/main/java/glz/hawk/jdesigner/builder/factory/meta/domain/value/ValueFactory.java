@@ -16,10 +16,10 @@
 
 package glz.hawk.jdesigner.builder.factory.meta.domain.value;
 
-import glz.hawk.jdesigner.spec.base.Display;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
 import glz.hawk.jdesigner.builder.factory.base.display.DisplayFactory;
 import glz.hawk.jdesigner.builder.factory.common.AbstractCommonFactory;
+import glz.hawk.jdesigner.spec.base.Display;
 import glz.hawk.jdesigner.spec.impl.meta.domain.value.SimpleValue;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 import glz.hawk.jdesigner.spec.meta.domain.value.Value;

@@ -44,4 +44,10 @@ public @interface ColumnDef {
      * Whether the column supports {@code null} value.
      */
     boolean nullable() default true;
+
+    /**
+     * 唯一标识
+     * <p>导入功能用: 用来关联导入数据</p>
+     */
+    String columnId() default "";
 }

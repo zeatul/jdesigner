@@ -20,7 +20,6 @@ import glz.hawk.jdesigner.spec.base.Display;
 import glz.hawk.jdesigner.spec.base.ModelPart;
 
 import javax.annotation.Nonnull;
-
 import java.util.Map;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;

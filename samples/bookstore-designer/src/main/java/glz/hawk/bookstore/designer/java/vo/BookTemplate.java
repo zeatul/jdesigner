@@ -16,10 +16,10 @@
 
 package glz.hawk.bookstore.designer.java.vo;
 
-import glz.hawk.jdesigner.annotation.java.ClassDef;
 import glz.hawk.bookstore.annotation.Author;
 import glz.hawk.bookstore.annotation.Book;
 import glz.hawk.bookstore.annotation.Location;
+import glz.hawk.jdesigner.annotation.java.ClassDef;
 
 /**
  * This class is responsible for

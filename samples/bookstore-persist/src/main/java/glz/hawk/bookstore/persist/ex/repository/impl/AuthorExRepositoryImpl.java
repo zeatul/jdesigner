@@ -16,17 +16,27 @@
 
 package glz.hawk.bookstore.persist.ex.repository.impl;
 
-import glz.hawkframework.dao.process.InsertProcessor;
-import glz.hawk.j4sql.mybatis.batch.BatchExecutor;
 import glz.hawk.bookstore.persist.ex.repository.AuthorExRepository;
 import glz.hawk.bookstore.persist.mapper.AuthorMapper;
 import glz.hawk.bookstore.persist.po.AuthorPo;
+import glz.hawk.bookstore.persist.repository.abs.AbstractAuthorRepository;
 import glz.hawk.bookstore.persist.sql.provider.AuthorSqlProvider;
+import glz.hawk.bookstore.persist.update.AuthorUpdate;
+import glz.hawk.j4sql.mybatis.batch.BatchExecutor;
+import glz.hawk.j4sql.util.ConditionBuilder;
+import glz.hawk.j4sql.util.QueryWrapper;
+import glz.hawkframework.core.tuple.Tuple2;
+import glz.hawkframework.core.tuple.Tuple3;
+import glz.hawkframework.dao.process.InsertParameter;
+import glz.hawkframework.dao.process.InsertProcessor;
+import glz.hawkframework.dao.process.UpdateParameter;
+import glz.hawkframework.dao.process.UpdateProcessor;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigInteger;
 import java.util.List;
 
-import static glz.hawkframework.core.support.ArgumentSupport.argNotEmptyAndNoNulElement;
+import static glz.hawk.bookstore.persist.support.BookAuthorMapSupport.AUTHOR_ID;
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
 /**
@@ -35,25 +45,79 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
  * @author Hawk
  */
 @Repository
-public class AuthorExRepositoryImpl implements AuthorExRepository {
+public class AuthorExRepositoryImpl extends AbstractAuthorRepository implements AuthorExRepository {
 
     private final BatchExecutor batchExecutor;
-    private final InsertProcessor insertProcessor;
-    private final AuthorSqlProvider authorSqlProvider;
 
-    public AuthorExRepositoryImpl(BatchExecutor batchExecutor, AuthorSqlProvider authorSqlProvider, InsertProcessor insertProcessor) {
+    private final InsertProcessor insertProcessor;
+
+    private final UpdateProcessor updateProcessor;
+
+    public AuthorExRepositoryImpl(BatchExecutor batchExecutor, AuthorMapper authorMapper,AuthorSqlProvider authorSqlProvider, InsertProcessor insertProcessor, UpdateProcessor updateProcessor) {
+        super(authorMapper,authorSqlProvider);
         this.batchExecutor = argNotNull(batchExecutor, "batchExecutor");
-        this.authorSqlProvider = argNotNull(authorSqlProvider, "authorSqlProvider");
         this.insertProcessor = argNotNull(insertProcessor, "insertProcessor");
+        this.updateProcessor = argNotNull(updateProcessor, "updateProcessor");
     }
 
     @Override
     public void insertBatch(List<AuthorPo> authorPos, int batchSize) {
-        argNotEmptyAndNoNulElement(authorPos, "authorPos");
-        batchExecutor.execute(AuthorMapper.class, authorPos, batchSize, (m, p) -> {
-            insertProcessor.beforeInsert(p);
-            m.insert(authorSqlProvider.insert(p));
-        });
+        batchExecutor.execute(
+            AuthorMapper.class, authorPos, batchSize, (m, p) -> {
+                InsertParameter insertParameter = InsertParameter.builder().setInsertObject(p).build();
+                insertProcessor.beforeInsert(insertParameter);
+                m.insert(authorSqlProvider.insert(p));
+            }
+        );
+    }
 
+    @Override
+    public void updateBatch(List<Tuple3<AuthorUpdate, BigInteger, Long>> authorUpdateWraps, int batchSize) {
+        batchExecutor.execute(
+            AuthorMapper.class,
+            authorUpdateWraps,
+            batchSize,
+            (m, p) -> {
+                UpdateParameter updateParameter = UpdateParameter.builder().setFieldUpdateObject(p.t1).setRecordVersion(p.t3).addParam("authorId",p.t2).build();
+                updateProcessor.beforeUpdate(updateParameter);
+                m.update(authorSqlProvider.updateByPrimaryKey(p.t1, p.t2, p.t3));
+            },
+            (executedCountBefore, batchResult) -> {
+                for (int i = 0; i < batchSize; i++) {
+                    if (batchResult.getUpdateCounts()[i] != 1) {
+                        throw new IllegalStateException(String.format("The SQL statement at index %d failed to execute, as the number of affected rows is not 1.", executedCountBefore + i));
+                    }
+                }
+            }
+        );
+    }
+
+    @Override
+    public void deleteBatch(List<Tuple2<BigInteger, Long>> authorDeleteWraps, int batchSize) {
+        batchExecutor.execute(
+            AuthorMapper.class,
+            authorDeleteWraps,
+            batchSize,
+            (m, p) -> {
+                m.deleteGeneral(authorSqlProvider.deleteByPrimaryKey(p.t1, p.t2));
+            },
+            (executedCountBefore, batchResult) -> {
+                for (int i = 0; i < batchSize; i++) {
+                    if (batchResult.getUpdateCounts()[i] != 1) {
+                        throw new IllegalStateException(String.format("The SQL statement at index %d failed to execute, as the number of affected rows is not 1.", executedCountBefore + i));
+                    }
+                }
+            }
+        );
+    }
+
+
+    @Override
+    public List<AuthorPo> queryByIds(List<BigInteger> ids) {
+        QueryWrapper queryWrapper = QueryWrapper.builder()
+            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(ids)).build())
+            .setOrderColumns(AUTHOR_ID.asc())
+            .build();
+        return queryMany(queryWrapper);
     }
 }

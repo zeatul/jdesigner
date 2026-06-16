@@ -23,7 +23,6 @@ import glz.hawk.jdesigner.spec.database.SortType;
 import glz.hawk.jdesigner.spec.impl.base.AbstractModelPart;
 
 import javax.annotation.Nonnull;
-
 import java.util.Collections;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;

@@ -18,6 +18,8 @@ package glz.hawk.jdesigner.spec.database;
 
 import glz.hawk.jdesigner.spec.base.Nameable;
 
+import java.util.Optional;
+
 /**
  * This class is responsible for defining the {@code Index} of {@link Table}.
  *
@@ -31,4 +33,10 @@ public interface Index extends Nameable, IndexSupport<Index> {
      * @return {@code true} if the index is unique index;
      */
     boolean isUnique();
+
+    /**
+     * Gets the short name of index.
+     * <p>It can be used to generate index-related code.</p>
+     */
+    Optional<String> getShortName();
 }

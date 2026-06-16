@@ -16,11 +16,11 @@
 
 package glz.hawk.jdesigner.builder.factory.common;
 
+import glz.hawk.jdesigner.spec.base.Extensible;
+import glz.hawk.jdesigner.spec.java.Annotation;
+
 import java.lang.reflect.AnnotatedElement;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotBlank;
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
@@ -49,17 +49,31 @@ public abstract class AbstractCommonFactoryContext implements CommonFactoryConte
         }
     }
 
-    public void putExtensions(Map<String,Object> extensions){
-        if (extensions !=null){
+    public void putExtensions(Map<String, Object> extensions) {
+        if (extensions != null) {
             extensions.forEach(this::putExtension);
         }
     }
 
+    @Override
+    public void putNoDefAnnotations(List<Annotation> annotations) {
+        if (annotations != null) {
+            extensions.put(Extensible.KEY_FOR_NO_DEF_ANNOTATIONS, annotations);
+        }
+    }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public Optional<List<Annotation>> getNoDefAnnotations() {
+        return Optional.of((List<Annotation>) extensions.get(Extensible.KEY_FOR_NO_DEF_ANNOTATIONS));
+    }
+
+    @Override
     public Optional<Object> getExtension(String key) {
         return Optional.ofNullable(extensions.get(key));
     }
 
+    @Override
     public Map<String, Object> getAllExtensions() {
         return Collections.unmodifiableMap(extensions);
     }

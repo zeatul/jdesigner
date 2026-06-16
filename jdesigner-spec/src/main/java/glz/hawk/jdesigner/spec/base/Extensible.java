@@ -16,8 +16,12 @@
 
 package glz.hawk.jdesigner.spec.base;
 
+import glz.hawk.jdesigner.spec.java.Annotation;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * This interface is responsible for providing extensions
@@ -26,11 +30,23 @@ import java.util.Optional;
  */
 public interface Extensible {
 
+    static String KEY_FOR_NO_DEF_ANNOTATIONS = "KEY_FOR_NO_DEF_ANNOTATIONS:" + UUID.randomUUID().toString();
+
     void putExtension(String key, Object value);
 
     Optional<Object> getExtension(String key);
 
+    <T> Optional<T> getExtension(String key, Class<T> tClass);
+
     Map<String, Object> getAllExtensions();
 
     void putExtensions(Map<String, Object> extensions);
+
+    /**
+     * Obtains the annotations which is not meta annotated with {@code Def}
+     */
+    @SuppressWarnings("unchecked")
+    default Optional<List<Annotation>> getNoDefAnnotations() {
+        return getExtension(KEY_FOR_NO_DEF_ANNOTATIONS).map(a -> (List<Annotation>) a);
+    }
 }

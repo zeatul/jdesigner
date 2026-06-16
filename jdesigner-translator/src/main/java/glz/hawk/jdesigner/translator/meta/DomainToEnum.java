@@ -16,19 +16,24 @@
 
 package glz.hawk.jdesigner.translator.meta;
 
+import glz.hawk.codepoet.java.*;
+import glz.hawk.codepoet.java.type.ClassName;
+import glz.hawk.codepoet.java.type.ParameterizedTypeName;
+import glz.hawk.codepoet.java.type.TypeName;
 import glz.hawk.jdesigner.spec.base.Model;
 import glz.hawk.jdesigner.spec.meta.domain.Domain;
 import glz.hawk.jdesigner.translator.Translator;
+import glz.hawkframework.core.helper.MapHelper;
 import glz.hawkframework.core.helper.ObjectHelper;
 import glz.hawkframework.core.helper.StringHelper;
-import glz.hawk.codepoet.java.ClassSpec;
-import glz.hawk.codepoet.java.ConstructorSpec;
-import glz.hawk.codepoet.java.EnumSpec;
-import glz.hawk.codepoet.java.JavaFile;
+import glz.hawkframework.core.support.ArgumentSupport;
+import glz.hawkframework.core.support.StateSupport;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 import java.util.Arrays;
+import java.util.Map;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 import static glz.hawkframework.core.support.ArgumentSupport.argument;
@@ -41,11 +46,19 @@ import static glz.hawkframework.core.support.ArgumentSupport.argument;
 public class DomainToEnum implements Translator<Domain, JavaFile> {
 
     private final Translator<Domain, String> enumNameTranslator;
+
     private final Translator<Model, String> packageTranslator;
 
-    public DomainToEnum(Translator<Model, String> packageTranslator, Translator<Domain, String> enumNameTranslator) {
+    private final Translator<Domain, TypeName> typeNameTranslator;
+
+    public DomainToEnum(Translator<Model, String> packageTranslator, Translator<Domain, String> enumNameTranslator, Translator<Domain, TypeName> typeNameTranslator) {
         this.packageTranslator = argNotNull(packageTranslator, "packageTranslator");
         this.enumNameTranslator = argNotNull(enumNameTranslator, "enumNameTranslator");
+        this.typeNameTranslator = argNotNull(typeNameTranslator, "typeNameTranslator");
+    }
+
+    public DomainToEnum(Translator<Model, String> packageTranslator, Translator<Domain, String> enumNameTranslator) {
+        this(packageTranslator, enumNameTranslator, domain -> ClassName.ofClass(String.class));
     }
 
     @Nonnull
@@ -55,15 +68,14 @@ public class DomainToEnum implements Translator<Domain, JavaFile> {
         argument(domain, Domain::isEnum, d -> String.format("The domain: %s is not an enum.", d.getName()));
         argument(domain, d -> ObjectHelper.isNotEmpty(d.getValues()), d -> String.format("The domain: %s has no value.", d.getName()));
 
-        String enumName = enumNameTranslator.translate(domain);
-        EnumSpec.Builder enumSpecBuilder = EnumSpec.builder(enumName, Modifier.PUBLIC)
-            .addField(String.class, "value", Modifier.FINAL, Modifier.PUBLIC)
+        EnumSpec.Builder enumSpecBuilder = EnumSpec.builder(enumName(domain), Modifier.PUBLIC)
+            .addField(valueType(domain), "value", Modifier.FINAL, Modifier.PUBLIC)
             .addConstructors(ConstructorSpec.builder()
                 .addParameter(String.class, "value")
                 .beginConstructorBody()
                 .addStatement("this.value = value").end().build());
         Arrays.stream(domain.getValues()).forEach(v -> {
-                String enumConstantName = v.getCode();
+                String enumConstantName = v.getCode().toUpperCase();
                 String displayName = v.getDisplay().getDisplayName();
                 enumSpecBuilder.addEnumConstant(enumConstantName, ClassSpec.anonymousBuilder("$S", v.getValue())
                     .setJavadoc(b -> {
@@ -74,6 +86,90 @@ public class DomainToEnum implements Translator<Domain, JavaFile> {
                     }).build());
             }
         );
+        // build valueMap filed
+        enumSpecBuilder.addField(buildValueMapField(domain));
+        // build nameMap field
+        enumSpecBuilder.addField(buildNameMapField(domain));
+        // build fromValue method
+        enumSpecBuilder.addMethod(MethodSpec.builder(domainTypeName(domain), "fromValue")
+            .addParameter(ParameterSpec.builder(valueType(domain), "value").addAnnotation(Nullable.class).build())
+            .addAnnotation(Nullable.class)
+            .beginMethodBody()
+            .addStatement("if (value == null) return null")
+            .addStatement("return valueMap.get(value)")
+            .end()
+            .build());
+        // build fromName method
+        enumSpecBuilder.addMethod(MethodSpec.builder(domainTypeName(domain), "fromName")
+            .addParameter(ParameterSpec.builder(String.class, "name").addAnnotation(Nullable.class).build())
+            .addAnnotation(Nullable.class)
+            .beginMethodBody()
+            .addStatement("if (name == null) return null")
+            .addStatement("return nameMap.get(name)")
+            .end()
+            .build());
+        // build parseByValue method
+        enumSpecBuilder.addMethod(MethodSpec.builder(domainTypeName(domain), "parseByValue")
+            .addParameter(ParameterSpec.builder(String.class, "value").addAnnotation(Nonnull.class).build())
+            .addAnnotation(Nonnull.class)
+            .beginMethodBody()
+            .addStatement("return stateNotNull(fromValue(argNotNull(value)), () -> String.format($S, value))", String.format("Found no %s with value %%s", enumName(domain)))
+            .end()
+            .build());
+        // build parseByName method
+        enumSpecBuilder.addMethod(MethodSpec.builder(domainTypeName(domain), "parseByName")
+            .addParameter(ParameterSpec.builder(String.class, "name").addAnnotation(Nonnull.class).build())
+            .addAnnotation(Nonnull.class)
+            .beginMethodBody()
+            .addStatement("return stateNotNull(fromName(argNotNull(name)), () -> String.format($S, name))", String.format("Found no %s named %%s", enumName(domain)))
+            .end()
+            .build());
+        enumSpecBuilder.addStaticImport(ArgumentSupport.class, "argNotNull");
+        enumSpecBuilder.addStaticImport(StateSupport.class, "stateNotNull");
         return JavaFile.builder(packageTranslator.translate(domain), enumSpecBuilder.build()).build();
+    }
+
+    protected TypeName valueType(Domain domain) {
+        return typeNameTranslator.translate(domain);
+    }
+
+    protected String enumName(Domain domain) {
+        return enumNameTranslator.translate(domain);
+    }
+
+    protected TypeName domainTypeName(Domain domain) {
+        return ClassName.of(packageTranslator.translate(domain), enumName(domain));
+    }
+
+    protected FieldSpec buildNameMapField(Domain domain) {
+
+        JavaCodeBlock.Builder valueMapInitializerBuilder = JavaCodeBlock.builder()
+            .add("$T.<String, $T>builder()", MapHelper.class, domainTypeName(domain))
+            .newLine()
+            .indent();
+        Arrays.stream(domain.getValues()).forEach(v -> {
+            valueMapInitializerBuilder.add(".put($L.name(), $L)", v.getCode().toUpperCase(), v.getCode().toUpperCase()).newLine();
+        });
+        valueMapInitializerBuilder.unindent()
+            .add(".buildHashMap()");
+        return FieldSpec.builder(ParameterizedTypeName.of(Map.class, valueType(domain), domainTypeName(domain)), "nameMap", Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
+            .setInitializer(valueMapInitializerBuilder.build())
+            .build();
+    }
+
+    protected FieldSpec buildValueMapField(Domain domain) {
+        ClassName domainTypeName = ClassName.of(packageTranslator.translate(domain), enumName(domain));
+        JavaCodeBlock.Builder valueMapInitializerBuilder = JavaCodeBlock.builder()
+            .add("$T.<$T, $T>builder()", MapHelper.class, typeNameTranslator.translate(domain), domainTypeName)
+            .newLine()
+            .indent();
+        Arrays.stream(domain.getValues()).forEach(v -> {
+            valueMapInitializerBuilder.add(".put($L.value, $L)", v.getCode().toUpperCase(), v.getCode().toUpperCase()).newLine();
+        });
+        valueMapInitializerBuilder.unindent()
+            .add(".buildHashMap()");
+        return FieldSpec.builder(ParameterizedTypeName.of(Map.class, valueType(domain), domainTypeName), "valueMap", Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
+            .setInitializer(valueMapInitializerBuilder.build())
+            .build();
     }
 }

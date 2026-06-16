@@ -65,4 +65,8 @@ public class SimpleColumn extends AbstractModelPart<Table, Column> implements Co
         return this.nullable;
     }
 
+    @Override
+    public Optional<Metadata> getMetadata() {
+        return Optional.ofNullable(metadata);
+    }
 }

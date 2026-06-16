@@ -17,17 +17,6 @@
 package glz.hawk.bookstore.persist.repository.config;
 
 import com.github.javafaker.Faker;
-import glz.hawkframework.core.id.snowflake.SnowflakeIdConfig;
-import glz.hawkframework.core.id.snowflake.SnowflakeIdGeneratorForBigInteger;
-import glz.hawkframework.dao.context.DefaultExceptionConverter;
-import glz.hawkframework.dao.process.InsertProcessor;
-import glz.hawkframework.core.helper.IpAddressHelper;
-import glz.hawk.j4sql.mybatis.batch.BatchExecutor;
-import glz.hawk.j4sql.mybatis.writer.MybatisBuilderContext;
-import glz.hawk.j4sql.mybatis.writer.MybatisSqlWriterImpl;
-import glz.hawk.j4sql.support.SqlBuilder;
-import glz.hawk.j4sql.support.impl.DefaultConfiguration;
-import glz.hawk.j4sql.support.impl.SqlBuilderImpl;
 import glz.hawk.bookstore.persist.ex.mapper.BookExMapper;
 import glz.hawk.bookstore.persist.ex.repository.impl.AuthorExRepositoryImpl;
 import glz.hawk.bookstore.persist.ex.repository.impl.BookExRepositoryImpl;
@@ -38,6 +27,18 @@ import glz.hawk.bookstore.persist.process.UpdateProcessorImpl;
 import glz.hawk.bookstore.persist.repository.data.AuthorGenerator;
 import glz.hawk.bookstore.persist.repository.impl.AuthorRepositoryImpl;
 import glz.hawk.bookstore.persist.sql.provider.AuthorSqlProvider;
+import glz.hawk.j4sql.mybatis.batch.BatchExecutor;
+import glz.hawk.j4sql.mybatis.writer.MybatisBuilderContext;
+import glz.hawk.j4sql.mybatis.writer.MybatisSqlWriterImpl;
+import glz.hawk.j4sql.support.SqlBuilder;
+import glz.hawk.j4sql.support.SqlDialect;
+import glz.hawk.j4sql.support.impl.DefaultConfiguration;
+import glz.hawk.j4sql.support.impl.SqlBuilderImpl;
+import glz.hawkframework.core.helper.IpAddressHelper;
+import glz.hawkframework.core.id.snowflake.SnowflakeIdConfig;
+import glz.hawkframework.core.id.snowflake.SnowflakeIdGeneratorForBigInteger;
+import glz.hawkframework.dao.context.DefaultExceptionConverter;
+import glz.hawkframework.dao.process.InsertProcessor;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -75,7 +76,7 @@ public class TestRepositoryConfig {
 
     @Bean
     public SqlBuilder<MybatisBuilderContext> sqlBuilder() {
-        return new SqlBuilderImpl<>(new DefaultConfiguration(), MybatisSqlWriterImpl::new);
+        return new SqlBuilderImpl<>(DefaultConfiguration.builder().setDialect(SqlDialect.MYSQL).build(), MybatisSqlWriterImpl::new);
     }
 
     @Bean
@@ -108,8 +109,8 @@ public class TestRepositoryConfig {
     }
 
     @Bean
-    public AuthorExRepositoryImpl authorExRepository(BatchExecutor batchExecutor, AuthorSqlProvider authorSqlProvider, InsertProcessor insertProcessor) {
-        return new AuthorExRepositoryImpl(batchExecutor, authorSqlProvider, insertProcessor);
+    public AuthorExRepositoryImpl authorExRepository(BatchExecutor batchExecutor,AuthorMapper authorMapper, AuthorSqlProvider authorSqlProvider, InsertProcessor insertProcessor) {
+        return new AuthorExRepositoryImpl(batchExecutor,authorMapper, authorSqlProvider, insertProcessor,updateProcessor());
     }
 
     @Bean

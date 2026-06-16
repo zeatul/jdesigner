@@ -16,9 +16,9 @@
 
 package glz.hawk.jdesigner.builder.factory.base.display;
 
-import glz.hawk.jdesigner.spec.base.Display;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
 import glz.hawk.jdesigner.builder.factory.common.AbstractCommonFactory;
+import glz.hawk.jdesigner.spec.base.Display;
 import glz.hawk.jdesigner.spec.impl.base.I18nDisplay;
 import glz.hawk.jdesigner.spec.impl.base.SimpleDisplay;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;

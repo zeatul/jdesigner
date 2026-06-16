@@ -16,12 +16,13 @@
 
 package glz.hawk.bookstore.designer.database;
 
+import glz.hawk.bookstore.designer.database.template.TRACE;
+import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
 import glz.hawk.jdesigner.annotation.common.ImportDef;
 import glz.hawk.jdesigner.annotation.database.*;
 import glz.hawk.jdesigner.annotation.meta.metadata.ReferencedMetadata;
-import glz.hawk.jdesigner.extension.column.RecordId;
-import glz.hawk.bookstore.designer.database.template.TRACE;
-import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
+import glz.hawkframework.dao.column.annotation.RecordId;
+import glz.hawkframework.dao.table.annotation.ColumnCount;
 
 import static glz.hawk.bookstore.designer.database.PUBLISHER.PUBLISHER_CODE;
 import static glz.hawk.bookstore.designer.database.PUBLISHER.PUBLISHER_ID;
@@ -34,6 +35,7 @@ import static glz.hawk.bookstore.designer.database.PUBLISHER.PUBLISHER_ID;
 @PrimaryKeyDef(@IndexColumnDef(PUBLISHER_ID))
 @IndexDef(name = "I_PUBLISHER_CODE", isUnique = true, indexColumns = @IndexColumnDef(PUBLISHER_CODE))
 @ImportDef(TRACE.class)
+@ColumnCount(100)
 @TableDef
 public interface PUBLISHER {
     @ReferencedMetadata(BookstoreMetadataLibrary.class)

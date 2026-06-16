@@ -16,10 +16,10 @@
 
 package glz.hawk.jdesigner.builder.factory.common;
 
-import glz.hawk.jdesigner.spec.base.Display;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
 import glz.hawk.jdesigner.builder.factory.meta.metadata.ReferencedMetadataContext;
 import glz.hawk.jdesigner.builder.factory.meta.metadata.ReferencedMetadataContextAble;
+import glz.hawk.jdesigner.spec.base.Display;
 import glz.hawk.jdesigner.spec.impl.base.EmptyDisplay;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 import glz.hawk.jdesigner.spec.meta.metadata.Metadata;

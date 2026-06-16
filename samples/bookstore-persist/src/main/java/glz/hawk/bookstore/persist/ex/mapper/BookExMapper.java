@@ -16,9 +16,9 @@
 
 package glz.hawk.bookstore.persist.ex.mapper;
 
+import glz.hawk.bookstore.persist.ex.po.BookCategoryPo;
 import glz.hawk.j4sql.mybatis.sql.provider.SqlProviderAdapter;
 import glz.hawk.j4sql.mybatis.statement.GeneralStatementProvider;
-import glz.hawk.bookstore.persist.ex.po.BookCategoryPo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.SelectProvider;
 

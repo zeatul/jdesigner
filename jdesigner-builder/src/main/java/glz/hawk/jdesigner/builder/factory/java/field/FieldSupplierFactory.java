@@ -19,15 +19,19 @@ package glz.hawk.jdesigner.builder.factory.java.field;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
 import glz.hawk.jdesigner.builder.factory.common.AbstractModelFactory;
 import glz.hawk.jdesigner.builder.factory.java.type.TypeFactory;
+import glz.hawk.jdesigner.spec.base.Display;
+import glz.hawk.jdesigner.spec.impl.base.EmptyDisplay;
 import glz.hawk.jdesigner.spec.impl.java.SimpleFieldSupplier;
 import glz.hawk.jdesigner.spec.java.Annotation;
 import glz.hawk.jdesigner.spec.java.Field;
 import glz.hawk.jdesigner.spec.java.Statement;
 import glz.hawk.jdesigner.spec.java.type.UniversalType;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
+import glz.hawk.jdesigner.spec.meta.metadata.Metadata;
 
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -38,16 +42,33 @@ import java.util.Set;
  */
 public class FieldSupplierFactory extends AbstractModelFactory<SimpleFieldSupplier, FieldFactoryContext> {
 
-    private final List<Annotation> annotations;
-
-    public FieldSupplierFactory(ModelWarehouse modelWarehouse, ClasspathBuilderContext builderContext, FieldFactoryContext factoryContext, List<Annotation> annotations) {
+    public FieldSupplierFactory(ModelWarehouse modelWarehouse, ClasspathBuilderContext builderContext, FieldFactoryContext factoryContext) {
         super(modelWarehouse, builderContext, factoryContext);
-        this.annotations = annotations;
     }
 
     @Override
     protected SimpleFieldSupplier executeBuild() {
-        return new SimpleFieldSupplier(getName(), getLocation(), getDisplay(), getModifiers(), getType(), annotations, getDefaultValue(),factoryContext.getAllExtensions());
+        return new SimpleFieldSupplier(getName(), getLocation(), getDisplay(), getModifiers(), getType(), getAnnotations(), getDefaultValue(), factoryContext.getAllExtensions());
+    }
+
+    protected Display getDisplay() {
+        Display display = super.getDisplay();
+        if (factoryContext.getReferencedMetadataContext() != null) {
+            Metadata metadata = loadMetadata();
+            if (display == null || display instanceof EmptyDisplay) {
+                display = metadata.getDisplay();
+            }
+        }
+        return display;
+    }
+
+    /**
+     * Provides the annotations for the field.
+     *
+     * @return a list of annotations, never {@code null}.
+     */
+    protected List<Annotation> getAnnotations() {
+        return factoryContext.getNoDefAnnotations().orElse(Collections.emptyList());
     }
 
     @Nonnull

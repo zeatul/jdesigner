@@ -91,7 +91,7 @@ public class ResourcePathIndexesWarehouseBuilder extends AbstractResourceModelWa
 
     protected boolean isLegal(String resourcePath) {
         for (String scanPackage : scanPackages) {
-            if (resourcePath.startsWith(scanPackage)) {
+            if (resourcePath.startsWith(scanPackage + ".")) {
                 return true;
             }
         }

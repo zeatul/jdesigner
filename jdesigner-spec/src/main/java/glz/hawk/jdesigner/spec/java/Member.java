@@ -25,6 +25,6 @@ import javax.lang.model.element.Modifier;
  *
  * @author Hawk
  */
-public interface Member<T> extends ModelPart<T>, Annotateable {
+public interface Member<T> extends ModelPart<T>, Annotatable {
     Modifier[] getModifiers();
 }

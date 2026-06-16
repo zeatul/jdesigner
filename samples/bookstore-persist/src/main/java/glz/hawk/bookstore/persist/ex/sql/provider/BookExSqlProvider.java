@@ -16,26 +16,26 @@
 
 package glz.hawk.bookstore.persist.ex.sql.provider;
 
-import glz.hawkframework.dao.pagination.OffsetAndLimit;
-import glz.hawkframework.dao.pagination.Page;
-import glz.hawk.j4sql.mybatis.writer.MybatisBuilderContext;
+import glz.hawk.j4sql.dsl.select.Select;
 import glz.hawk.j4sql.mybatis.sql.MybatisParam;
 import glz.hawk.j4sql.mybatis.sql.provider.AbstractSqlProvider;
 import glz.hawk.j4sql.mybatis.statement.GeneralStatementProvider;
 import glz.hawk.j4sql.mybatis.statement.impl.GeneralStatementProviderImpl;
-import glz.hawk.j4sql.dsl.select.Select;
+import glz.hawk.j4sql.mybatis.writer.MybatisBuilderContext;
 import glz.hawk.j4sql.support.SelectColumn;
 import glz.hawk.j4sql.support.SqlBuilder;
+import glz.hawkframework.dao.pagination.OffsetAndLimit;
+import glz.hawkframework.dao.pagination.Page;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
+import static glz.hawk.bookstore.persist.support.BookSupport.*;
 import static glz.hawk.j4sql.mybatis.writer.MybatisBuilderContextImpl.DUMMY_INSTANCE;
 import static glz.hawk.j4sql.support.impl.DSL.*;
 import static glz.hawkframework.core.support.ArgumentSupport.*;
-import static glz.hawk.bookstore.persist.support.BookSupport.*;
 
 /**
  * This class is responsible for

@@ -24,6 +24,7 @@ import glz.hawk.jdesigner.spec.impl.base.ModelPartSupplier;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This class is a simple implementation of {@link Index}.
@@ -34,14 +35,22 @@ public class SimpleIndex extends AbstractIndexSupport<Index> implements Index {
 
     private final boolean isUnique;
 
-    public SimpleIndex(String name, String location, Display display, Table owner, boolean isUnique,
+    private final String shortName;
+
+    public SimpleIndex(String name, String location, Display display, Table owner, boolean isUnique, String shortName,
                        List<ModelPartSupplier<Index, IndexColumn<Index>>> indexColumnSuppliers, Map<String, Object> extensions) {
         super(name, location, display, owner, indexColumnSuppliers, extensions);
         this.isUnique = isUnique;
+        this.shortName = shortName;
     }
 
     @Override
     public boolean isUnique() {
         return this.isUnique;
+    }
+
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.ofNullable(shortName);
     }
 }

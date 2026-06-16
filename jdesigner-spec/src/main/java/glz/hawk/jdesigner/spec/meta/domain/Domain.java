@@ -17,8 +17,8 @@
 package glz.hawk.jdesigner.spec.meta.domain;
 
 import glz.hawk.jdesigner.spec.base.Model;
-import glz.hawk.jdesigner.spec.meta.domain.value.Value;
 import glz.hawk.jdesigner.spec.meta.domain.type.DataType;
+import glz.hawk.jdesigner.spec.meta.domain.value.Value;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -16,12 +16,11 @@
 
 package glz.hawk.jdesigner.translator.database;
 
-import glz.hawk.jdesigner.spec.database.Column;
-import glz.hawk.jdesigner.translator.Translator;
 import glz.hawk.codepoet.java.MethodSpec;
-import glz.hawk.codepoet.java.javadoc.HtmlTag;
 import glz.hawk.codepoet.java.javadoc.MethodJavadoc;
 import glz.hawk.codepoet.java.type.TypeName;
+import glz.hawk.jdesigner.spec.database.Column;
+import glz.hawk.jdesigner.translator.Translator;
 
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
@@ -34,40 +33,34 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
  * @author Hawk
  */
 public class ColumnToGetter implements Translator<Column, MethodSpec> {
-    private final Translator<Column, String> methodNameTranslator;
-    private final Translator<Column, String> fieldNameTranslator;
-    private final Translator<Column, TypeName> typeNameTranslator;
+    protected final Translator<Column, String> fieldNameTranslator;
+    protected final Translator<Column, TypeName> fieldTypeNameTranslator;
+    protected final Translator<Column, String> methodNameTranslator;
+    protected final Translator<Column, MethodJavadoc> methodJavadocTranslator;
 
-    public ColumnToGetter(Translator<Column, String> methodNameTranslator, Translator<Column, String> fieldNameTranslator, Translator<Column, TypeName> typeNameTranslator) {
-        this.methodNameTranslator = argNotNull(methodNameTranslator, "methodNameTranslator");
+    public ColumnToGetter(
+        Translator<Column, String> fieldNameTranslator,
+        Translator<Column, TypeName> fieldTypeNameTranslator,
+        Translator<Column, String> methodNameTranslator,
+        Translator<Column, MethodJavadoc> methodJavadocTranslator
+    ) {
         this.fieldNameTranslator = argNotNull(fieldNameTranslator, "fieldNameTranslator");
-        this.typeNameTranslator = argNotNull(typeNameTranslator, "typeNameTranslator");
+        this.fieldTypeNameTranslator = argNotNull(fieldTypeNameTranslator, "fieldTypeNameTranslator");
+        this.methodNameTranslator = argNotNull(methodNameTranslator, "methodNameTranslator");
+        this.methodJavadocTranslator = argNotNull(methodJavadocTranslator, "methodJavadocTranslator");
     }
 
     @Nonnull
     @Override
     public MethodSpec translate(@Nonnull Column column) {
         argNotNull(column, "column");
-        String fieldName = fieldNameTranslator.translate(column);
-        String methodName = methodNameTranslator.translate(column);
-        TypeName typeName = typeNameTranslator.translate(column);
-        return MethodSpec.builder(typeName, methodName, Modifier.PUBLIC)
-            .setJavadoc(buildJavadoc(column))
+        return MethodSpec.builder(fieldTypeNameTranslator.translate(column), methodNameTranslator.translate(column), Modifier.PUBLIC)
+            .setJavadoc(methodJavadocTranslator.translate(column))
             .beginMethodBody()
-            .addStatement("return $L", fieldName)
+            .addStatement("return $L", fieldNameTranslator.translate(column))
             .end()
             .build();
     }
 
-    protected MethodJavadoc buildJavadoc(Column column) {
-        MethodJavadoc.Builder javadocBuilder = MethodJavadoc.builder();
-        if (column.getComment().isPresent()) {
-            javadocBuilder.beginJavadoc().addDocument("Gets $L", column.getComment().get());
-            javadocBuilder.beginJavadoc().addInlineHtml(HtmlTag.P, "Map to column: $L", column.getName());
-        } else {
-            javadocBuilder.beginJavadoc().addDocument("Map to column: $L", column.getName());
-        }
-        return javadocBuilder.build();
-    }
 
 }

@@ -16,6 +16,9 @@
 
 package glz.hawk.jdesigner.spec.java.type;
 
+import glz.hawk.jdesigner.spec.java.Annotatable;
+import glz.hawk.jdesigner.spec.java.Annotation;
+
 import javax.annotation.Nonnull;
 import java.util.stream.Stream;
 
@@ -24,7 +27,7 @@ import java.util.stream.Stream;
  *
  * @author Hawk
  */
-public interface UniversalType {
+public interface UniversalType extends Annotatable {
 
     /**
      * The value of this method determines how to translate the {@link UniversalType} instance to  {@code JavaType}.
@@ -75,6 +78,12 @@ public interface UniversalType {
      * The value of this method works while the {@link #getTypeKind() typeKind} is {@link TypeKind#PARAMETERIZED_TYPE PARAMETERIZED_TYPE}
      */
     UniversalType[] getTypeArguments();
+
+    /**
+     * The {@code TYPE_USE} annotations for this type.
+     */
+    @Nonnull
+    Annotation[] getAnnotations();
 
     /**
      * This method has the same function of {@link Class#getCanonicalName()}.

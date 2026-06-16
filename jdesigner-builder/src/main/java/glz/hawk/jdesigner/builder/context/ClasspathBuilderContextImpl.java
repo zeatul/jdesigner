@@ -34,11 +34,14 @@ import glz.hawk.jdesigner.annotation.meta.metadata.MetadataDefContainer;
 import glz.hawk.jdesigner.annotation.meta.metadata.ReferencedMetadata;
 import glz.hawk.jdesigner.annotation.name.DefaultNameConverter;
 import glz.hawk.jdesigner.annotation.name.NameConverter;
+import glz.hawk.jdesigner.annotation.name.ToLowerCamelNameConverter;
 import glz.hawk.jdesigner.builder.factory.base.display.DisplayDefAnnotationParser;
 import glz.hawk.jdesigner.builder.factory.base.display.DisplayDefListAnnotationParser;
 import glz.hawk.jdesigner.builder.factory.common.AnnotationParser;
+import glz.hawk.jdesigner.builder.factory.common.DefaultAnnotationParser;
 import glz.hawk.jdesigner.builder.factory.database.column.ColumnDefAnnotationParser;
 import glz.hawk.jdesigner.builder.factory.database.index.IndexDefAnnotationParser;
+import glz.hawk.jdesigner.builder.factory.database.index.IndexDefListAnnotationParser;
 import glz.hawk.jdesigner.builder.factory.database.index.PrimaryKeyDefAnnotationParser;
 import glz.hawk.jdesigner.builder.factory.database.table.TableDefAnnotationParser;
 import glz.hawk.jdesigner.builder.factory.java.clazz.ClassDefAnnotationParser;
@@ -48,6 +51,7 @@ import glz.hawk.jdesigner.builder.factory.java.executable.ThrowableDefAnnotation
 import glz.hawk.jdesigner.builder.factory.java.field.FieldDefAnnotationParser;
 import glz.hawk.jdesigner.builder.factory.java.method.MethodDefAnnotationParser;
 import glz.hawk.jdesigner.builder.factory.java.type.ArrayWrapperAnnotationParser;
+import glz.hawk.jdesigner.builder.factory.java.type.TypeFactorySupport;
 import glz.hawk.jdesigner.builder.factory.java.type.TypeWrapperAnnotationParser;
 import glz.hawk.jdesigner.builder.factory.meta.domain.DomainDefAnnotationParser;
 import glz.hawk.jdesigner.builder.factory.meta.domain.ReferencedDomainAnnotationParser;
@@ -60,6 +64,7 @@ import glz.hawk.jdesigner.builder.factory.meta.metadata.MetadataDefAnnotationPar
 import glz.hawk.jdesigner.builder.factory.meta.metadata.ReferencedMetadataAnnotationParser;
 import glz.hawk.jdesigner.builder.handler.factory.ResourceHandlerBuilder;
 import glz.hawk.jdesigner.builder.handler.factory.impl.ResourceHandlerBuilderImpl;
+import glz.hawk.jdesigner.spec.java.Field;
 import glz.hawkframework.core.support.StateSupport;
 
 import javax.annotation.Nonnull;
@@ -81,13 +86,17 @@ public class ClasspathBuilderContextImpl implements ClasspathBuilderContext {
     private final Map<Class<? extends NameConverter>, NameConverter> converterClassNameConverterMap = new HashMap<>();
     private final Map<Class<?>, NameConverter> modelClassNameConverterMap = new HashMap<>();
     private final Map<String, NameConverter> modelClassAndNamespaceNameConverterMap = new HashMap<>();
-    private ResourceHandlerBuilder resourceHandlerBuilder = new ResourceHandlerBuilderImpl();
+    private ResourceHandlerBuilder resourceHandlerBuilder = ResourceHandlerBuilderImpl.builder().build();
     private NameConverter defaultNameConverter = DefaultNameConverter.INSTANCE;
     private List<Class<? extends Annotation>> resourceAnnotationClasses;
     private DataTypeBuilder dataTypeBuilder = new DataTypeBuilderImpl();
     private PackageGenerator packageGenerator;
+    private TypeFactorySupport typeFactorySupport = new TypeFactorySupport();
 
     public ClasspathBuilderContextImpl() {
+        // Name Converter
+        modelClassNameConverterMap.put(Field.class,new ToLowerCamelNameConverter());
+
         // for base
         annotationParserMap.put(DisplayDef.class, new DisplayDefAnnotationParser());
         annotationParserMap.put(DisplayDef.List.class, new DisplayDefListAnnotationParser());
@@ -111,6 +120,7 @@ public class ClasspathBuilderContextImpl implements ClasspathBuilderContext {
         annotationParserMap.put(TableDef.class, new TableDefAnnotationParser());
         annotationParserMap.put(ColumnDef.class, new ColumnDefAnnotationParser());
         annotationParserMap.put(IndexDef.class, new IndexDefAnnotationParser());
+        annotationParserMap.put(IndexDef.List.class,new IndexDefListAnnotationParser());
         annotationParserMap.put(PrimaryKeyDef.class, new PrimaryKeyDefAnnotationParser());
         annotationParserMap.put(ReferencedDomain.class, new ReferencedDomainAnnotationParser());
         annotationParserMap.put(ReferencedMetadata.class, new ReferencedMetadataAnnotationParser());
@@ -122,21 +132,12 @@ public class ClasspathBuilderContextImpl implements ClasspathBuilderContext {
         annotationParserMap.put(Setter.class, new SetterAnnotationParser());
         annotationParserMap.put(MethodDef.class, new MethodDefAnnotationParser());
         annotationParserMap.put(ThrowableDef.class, new ThrowableDefAnnotationParser());
-
+        annotationParserMap.put(CancelAnnotations.class,new DefaultAnnotationParser());
 
 //        // for java type
         annotationParserMap.put(ArrayWrapper.class, new ArrayWrapperAnnotationParser());
 //        annotationParserMap.put(ClassTypeDef.class, new ClassTypeDefAnnotationParser());
-//        annotationParserMap.put(ParameterizedTypeDef.class, new ParameterizedTypeDefAnnotationParser());
-//        annotationParserMap.put(PrimitiveTypeDef.class, new PrimitiveTypeDefAnnotationParser());
         annotationParserMap.put(TypeWrapper.class, new TypeWrapperAnnotationParser());
-//        annotationParserMap.put(UniversalTypeDef.class, new UniversalTypeDefAnnotationParser());
-//        annotationParserMap.put(TypeVariableNameDef.class, new TypeVariableNameDefAnnotationParser());
-//        // fot type variable
-//        annotationParserMap.put(TypeVariableDef.class, new TypeVariableDefAnnotationParser());
-//        annotationParserMap.put(TypeVariableDef.List.class, new TypeVariableDefListAnnotationParser());
-//        annotationParserMap.put(UniversalTypeVariableDef.class, new UniversalTypeVariableDefAnnotationParser());
-//        annotationParserMap.put(UniversalTypeVariableDef.List.class, new UniversalTypeVariableDefListAnnotationParser());
 
         resourceAnnotationClasses = Arrays.asList(DomainDefContainer.class, MetadataDefContainer.class, TableDef.class, ClassDef.class);
     }
@@ -249,9 +250,18 @@ public class ClasspathBuilderContextImpl implements ClasspathBuilderContext {
         return StateSupport.stateNotNull(this.packageGenerator, () -> "The field: packageGenerator is null.");
     }
 
+    @Override
     public void setPackageGenerator(PackageGenerator packageGenerator) {
         this.packageGenerator = argNotNull(packageGenerator, "packageGenerator");
     }
 
+    @Nonnull
+    @Override
+    public TypeFactorySupport getTypeFactorySupport() {
+        return typeFactorySupport;
+    }
 
+    public void setTypeFactorySupport(TypeFactorySupport typeFactorySupport) {
+        this.typeFactorySupport = typeFactorySupport;
+    }
 }

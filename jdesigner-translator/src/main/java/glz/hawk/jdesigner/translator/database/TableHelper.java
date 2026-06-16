@@ -18,9 +18,8 @@ package glz.hawk.jdesigner.translator.database;
 
 import glz.hawk.jdesigner.spec.database.Column;
 import glz.hawk.jdesigner.spec.database.Table;
-import glz.hawk.jdesigner.extension.column.ColumnFunctionConstant;
-import glz.hawk.jdesigner.extension.column.RecordVersion;
 
+import java.lang.annotation.Annotation;
 import java.util.Optional;
 
 /**
@@ -30,16 +29,26 @@ import java.util.Optional;
  */
 public abstract class TableHelper {
 
-    public static Optional<Column> findRecordVersionColumn(Table table){
-        for (int i=0; i<table.getColumns().length; i++){
+    /**
+     * Find the column annotated with the specific annotation
+     *
+     * @param table           the table to search
+     * @param annotationClass the class of annotation
+     * @return the required column
+     */
+    public static Optional<Column> findColumn(Table table, Class<? extends Annotation> annotationClass) {
+        for (int i = 0; i < table.getColumns().length; i++) {
             Column column = table.getColumns()[i];
             boolean[] flag = new boolean[]{false};
-            column.getExtension(ColumnFunctionConstant.class.getCanonicalName()).ifPresent(extension->{
-                if (extension instanceof RecordVersion){
-                    flag[0]=true;
+            column.getNoDefAnnotations().ifPresent(list -> {
+                for (glz.hawk.jdesigner.spec.java.Annotation annotation : list) {
+                    if (annotation.getType().canonicalName().equals(annotationClass.getCanonicalName())) {
+                        flag[0] = true;
+                        return;
+                    }
                 }
             });
-            if (flag[0]){
+            if (flag[0]) {
                 return Optional.of(column);
             }
         }

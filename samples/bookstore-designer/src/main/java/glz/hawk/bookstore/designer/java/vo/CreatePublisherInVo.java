@@ -16,13 +16,12 @@
 
 package glz.hawk.bookstore.designer.java.vo;
 
-import glz.hawk.jdesigner.annotation.java.ClassDef;
-import glz.hawk.jdesigner.annotation.java.FieldDef;
-import glz.hawk.jdesigner.annotation.java.Getter;
-import glz.hawk.jdesigner.annotation.java.Setter;
+import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
+import glz.hawk.jdesigner.annotation.java.*;
 import glz.hawk.jdesigner.annotation.meta.metadata.ReferencedMetadata;
 import glz.hawk.jdesigner.annotation.name.UpperUnderscoreToLowerCamelNameConverter;
-import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
+
+import javax.validation.constraints.NotBlank;
 
 /**
  * This class is responsible for
@@ -33,10 +32,13 @@ import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
 @Getter
 @Setter
 public interface CreatePublisherInVo {
+
+    @CancelAnnotations(NotBlank.class)
     @ReferencedMetadata(BookstoreMetadataLibrary.class)
     @FieldDef(converterClass = UpperUnderscoreToLowerCamelNameConverter.class)
     String PUBLISHER_NAME = "";
 
+    @NotBlank
     @ReferencedMetadata(BookstoreMetadataLibrary.class)
     @FieldDef(converterClass = UpperUnderscoreToLowerCamelNameConverter.class)
     String ADDRESS = "";

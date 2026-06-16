@@ -16,12 +16,7 @@
 
 package glz.hawk.jdesigner.builder.factory.java.type;
 
-import glz.hawk.jdesigner.annotation.java.type.ClassTypeDef;
-import glz.hawk.jdesigner.annotation.java.type.JavaTypeDef;
-import glz.hawk.jdesigner.spec.java.type.TypeKind;
 import org.springframework.core.annotation.MergedAnnotation;
-
-import java.util.stream.Stream;
 
 /**
  * This class is responsible for
@@ -37,33 +32,5 @@ public abstract class TypeFactoryContextHelper {
         factoryContext.setName(mergedAnnotation.getString("name"));
         factoryContext.setEnclosingClassTypeNames(mergedAnnotation.getStringArray("enclosingClassTypeNames"));
         return factoryContext;
-    }
-
-    public static JavaTypeFactoryContext buildJavaTypeFactoryContext(MergedAnnotation<JavaTypeDef> mergedAnnotation){
-        JavaTypeFactoryContext factoryContext = new JavaTypeFactoryContext();
-        factoryContext.setTypeKind(mergedAnnotation.getEnum("typeKind", TypeKind.class));
-        factoryContext.setTypeClass(mergedAnnotation.getClass("typeClass"));
-        factoryContext.setPackageName(mergedAnnotation.getString("packageName"));
-        factoryContext.setName(mergedAnnotation.getString("name"));
-        factoryContext.setEnclosingClassTypeNames(mergedAnnotation.getStringArray("enclosingClassTypeNames"));
-
-        Stream.of(mergedAnnotation.getAnnotationArray("bounds",ClassTypeDef.class))
-                .map(TypeFactoryContextHelper::buildClassTypeFactoryContext)
-                .forEach(factoryContext::addBound);
-
-        Stream.of(mergedAnnotation.getAnnotationArray("typeArguments",ClassTypeDef.class))
-                .map(TypeFactoryContextHelper::buildClassTypeFactoryContext)
-                .forEach(factoryContext::addTypeArgument);
-
-        Stream.of(mergedAnnotation.getAnnotationArray("upperBounds",ClassTypeDef.class))
-                .map(TypeFactoryContextHelper::buildClassTypeFactoryContext)
-                .forEach(factoryContext::addUpperBound);
-
-        Stream.of(mergedAnnotation.getAnnotationArray("lowerBounds",ClassTypeDef.class))
-                .map(TypeFactoryContextHelper::buildClassTypeFactoryContext)
-                .forEach(factoryContext::addLowerBound);
-
-        return factoryContext;
-
     }
 }

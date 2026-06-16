@@ -5,21 +5,9 @@ plugins {
 description = 'Generate codes for the bookstore.'
 
 dependencies {
-    implementation 'io.github.zeatul:hawk-core'
-    implementation 'io.github.zeatul:hawk-dao-base'
-    implementation 'io.github.zeatul:j4sql:j4sql'
-    implementation 'io.github.zeatul:j4sql-mybatis'
-    implementation 'io.github.zeatul:j4sql-mybatis-translator'
-
+    implementation 'io.github.zeatul:j4sql-mybatis-generator'
+    implementation project(':jdesigner-generator')
     implementation project(':samples:bookstore-designer')
-
-    implementation project(':jdesigner-builder')
-    implementation project(':jdesigner-spec')
-    implementation project(':jdesigner-extensions')
-    implementation project(':jdesigner-translator')
-
-    implementation 'io.github.zeatul:javapoet-pro'
-    implementation 'io.github.zeatul:ddlpoet'
     implementation 'io.github.zeatul:project-tools'
 }
 

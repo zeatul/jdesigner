@@ -9,23 +9,27 @@ buildscript {
     }
     dependencies {
         classpath 'io.github.zeatul:jdesigner-defaults:1.0.0-SNAPSHOT'
+        classpath 'net.bytebuddy:byte-buddy-gradle-plugin:1.18.2'
     }
 }
 
 plugins {
     id 'buildlogic.java-library-conventions'
-    id 'net.bytebuddy.byte-buddy-gradle-plugin'
 }
 
+// The plugin ID comes from the filename in the META-INF/gradle-plugins/ directory inside the byte-buddy-gradle-plugin.jar file.
+apply plugin: 'net.bytebuddy.byte-buddy'
 
 description = 'Define models for the bookstore.'
 
 dependencies {
-    implementation project(':jdesigner-spec')
-    implementation project(':jdesigner-annotations')
-    implementation project(':jdesigner-extensions')
-    implementation project(':jdesigner-builder')
-    implementation project(':samples:bookstore-annotations')
+    api project(':jdesigner-builder')
+    api project(':samples:bookstore-annotations')
+    api 'io.github.zeatul:hawk-dao-base'
+    api 'io.github.zeatul:hawk-validator'
+    api 'com.fasterxml.jackson.core:jackson-annotations'
+    api 'io.github.zeatul:j4sql-mybatis-generator'
+
     annotationProcessor project(':jdesigner-indexer')
 }
 
@@ -38,6 +42,30 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << '-parameters'
     options.compilerArgs += processorOptions.collect { key, value ->
         "-A${key}=${value}"
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    doFirst {
+        println "Compiling with arguments: $options.compilerArgs"
+    }
+}
+
+def gradleVersionStr = gradle.gradleVersion
+def gradleHomeStr = gradle.gradleHomeDir.toString()
+tasks.register('checkJavaVersion') {
+    group = 'verification' // 或任意字符串，如 ‘help’, ‘build’
+    description = 'Print Java and Gradle environment info'
+    doLast {
+        // 检查编译使用的 JDK
+        println "Gradle version: ${gradleVersionStr}"
+        println "Gradle home: ${gradleHomeStr}"
+        println "Gradle JVM (The JVM for run Gradle):"
+        println "java.home = ${System.getProperty('java.home')}"
+        println "java.version = ${System.getProperty('java.version')}"
+        println "java.vm.name = ${System.getProperty('java.vm.name')}"
+        println "java.vm.vendor = ${System.getProperty('java.vm.vendor')}"
+        println "OS: ${System.getProperty('os.name')} ${System.getProperty('os.version')} ${System.getProperty('os.arch')}"
     }
 }
 

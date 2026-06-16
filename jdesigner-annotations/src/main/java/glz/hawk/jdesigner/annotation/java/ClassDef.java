@@ -16,8 +16,8 @@
 
 package glz.hawk.jdesigner.annotation.java;
 
-import glz.hawk.jdesigner.spec.java.Class;
 import glz.hawk.jdesigner.annotation.common.ModelOrSubModel;
+import glz.hawk.jdesigner.spec.java.Class;
 import glz.hawk.jdesigner.spec.java.ClassKind;
 import org.springframework.core.annotation.AliasFor;
 
@@ -48,5 +48,9 @@ public @interface ClassDef {
      */
     Modifier[] modifiers() default {Modifier.PUBLIC};
 
-
+    /**
+     * 唯一标识
+     * <p>导入功能用: 用来关联导入数据</p>
+     */
+    String classId() default "";
 }

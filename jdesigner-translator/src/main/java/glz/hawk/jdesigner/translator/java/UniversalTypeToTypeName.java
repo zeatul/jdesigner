@@ -16,16 +16,18 @@
 
 package glz.hawk.jdesigner.translator.java;
 
+import glz.hawk.codepoet.java.AnnotatedTypeName;
 import glz.hawk.codepoet.java.type.*;
 import glz.hawk.jdesigner.spec.java.type.UniversalType;
 import glz.hawk.jdesigner.translator.Translator;
+import glz.hawkframework.core.helper.ObjectHelper;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 import static glz.hawk.codepoet.java.type.VoidTypeName.VOID;
+import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
 /**
  * This class is responsible for translating a {@link UniversalType} instance to a {@link  TypeName} instance.
@@ -37,24 +39,40 @@ public class UniversalTypeToTypeName implements Translator<UniversalType, TypeNa
     @Override
     public TypeName translate(@Nonnull UniversalType universalType) {
         argNotNull(universalType, "universalType");
+        TypeName typeName;
         switch (universalType.getTypeKind()) {
             case CLASS_TYPE:
-                return convertToClassName(universalType);
+                typeName = convertToClassName(universalType);
+                break;
             case PRIMITIVE_TYPE:
-                return convertToPrimitiveTypeName(universalType);
+                typeName = convertToPrimitiveTypeName(universalType);
+                break;
             case TYPE_VARIABLE:
-                return convertToTypeVariableName(universalType);
+                typeName = convertToTypeVariableName(universalType);
+                break;
             case VOID_TYPE:
-                return VOID;
+                typeName = VOID;
+                break;
             case PARAMETERIZED_TYPE:
-                return convertToParameterizedTypeName(universalType);
+                typeName = convertToParameterizedTypeName(universalType);
+                break;
             case WILDCARD_TYPE:
-                return convertToWildcardTypeName(universalType);
+                typeName = convertToWildcardTypeName(universalType);
+                break;
             case ARRAY_TYPE:
-                return convertToArrayTypeName(universalType);
+                typeName = convertToArrayTypeName(universalType);
+                break;
             default:
                 throw new IllegalArgumentException(String.format("Unsupported TypeKind: %s", universalType.getTypeKind()));
         }
+
+        if (ObjectHelper.isNotEmpty(universalType.getAnnotations())) {
+            typeName = AnnotatedTypeName.of(
+                typeName,
+                Arrays.stream(universalType.getAnnotations()).map(a -> AnnotationUtils.annotationInstanceSpec(a, this)).collect(Collectors.toList())
+            );
+        }
+        return typeName;
     }
 
     protected ClassName convertToClassName(UniversalType universalType) {

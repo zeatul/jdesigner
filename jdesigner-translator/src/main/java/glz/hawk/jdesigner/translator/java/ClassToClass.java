@@ -16,19 +16,23 @@
 
 package glz.hawk.jdesigner.translator.java;
 
-import glz.hawk.jdesigner.spec.java.*;
 import glz.hawk.codepoet.java.*;
-import glz.hawk.jdesigner.spec.base.Model;
-import glz.hawk.jdesigner.spec.java.Class;
-import glz.hawk.jdesigner.spec.java.type.UniversalType;
-import glz.hawk.jdesigner.translator.Translator;
 import glz.hawk.codepoet.java.javacode.ComplexJavaCodeBlockBuilder;
+import glz.hawk.codepoet.java.javadoc.FieldJavadoc;
+import glz.hawk.codepoet.java.javadoc.MethodJavadoc;
+import glz.hawk.codepoet.java.javadoc.TypeJavadoc;
 import glz.hawk.codepoet.java.type.ClassName;
 import glz.hawk.codepoet.java.type.TypeName;
 import glz.hawk.codepoet.java.type.TypeVariableName;
+import glz.hawk.jdesigner.spec.base.Display;
+import glz.hawk.jdesigner.spec.base.Model;
+import glz.hawk.jdesigner.spec.java.*;
+import glz.hawk.jdesigner.spec.java.Class;
+import glz.hawk.jdesigner.spec.java.type.UniversalType;
+import glz.hawk.jdesigner.translator.Translator;
+import glz.hawkframework.core.helper.StringHelper;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,93 +58,107 @@ public class ClassToClass implements Translator<Class, JavaFile> {
     }
 
     @Nonnull
-    public JavaFile translate(@Nonnull Class classm) {
-        argNotNull(classm, "classm");
-        argNotNull(classm.getClassKind(), "classKind of classm");
+    public JavaFile translate(@Nonnull Class aClass) {
+        argNotNull(aClass, "aClass");
+        argNotNull(aClass.getClassKind(), "classKind of aClass");
         TypeSpec typeSpec;
-        if (ClassKind.CLASS == classm.getClassKind()) {
-            typeSpec = toClassSpec(classm);
-        } else if (ClassKind.INTERFACE == classm.getClassKind()) {
-            typeSpec = toInterfaceSpec(classm);
+        if (ClassKind.CLASS == aClass.getClassKind()) {
+            typeSpec = toClassSpec(aClass);
+        } else if (ClassKind.INTERFACE == aClass.getClassKind()) {
+            typeSpec = toInterfaceSpec(aClass);
         } else {
             throw new UnsupportedOperationException("Only supports class or interface now.");
         }
-        return JavaFile.builder(packageTranslator.translate(classm), typeSpec).build();
+        return JavaFile.builder(packageTranslator.translate(aClass), typeSpec).build();
     }
 
-    protected InterfaceSpec toInterfaceSpec(Class classm) {
-        InterfaceSpec.Builder builder = InterfaceSpec.builder(classm.getName(), classm.getModifiers());
-        builder.addTypeVariables(typeVariables(classm));
-        builder.addFields(fields(classm));
-        builder.addMethods(methods(classm));
-        builder.addAnnotations(annotations(classm));
-        Arrays.stream(classm.getSuperInterfaces()).map(typeNameTranslator::translate).forEach(builder::addSuperInterface);
+    protected InterfaceSpec toInterfaceSpec(Class aClass) {
+        InterfaceSpec.Builder builder = InterfaceSpec.builder(aClass.getName(), aClass.getModifiers());
+        builder.addTypeVariables(typeVariables(aClass));
+        builder.addFields(fields(aClass));
+        builder.addMethods(methods(aClass));
+        builder.addAnnotations(annotations(aClass));
+        TypeJavadoc typeJavadoc = typeJavadoc(aClass);
+        if (typeJavadoc != null) builder.setJavadoc(typeJavadoc);
+        Arrays.stream(aClass.getSuperInterfaces()).map(typeNameTranslator::translate).forEach(builder::addSuperInterface);
         return builder.build();
     }
 
-    protected ClassSpec toClassSpec(Class classm) {
-        ClassSpec.Builder builder = ClassSpec.builder(classm.getName(), classm.getModifiers());
-        builder.addTypeVariables(typeVariables(classm));
-        builder.addFields(fields(classm));
-        builder.addMethods(methods(classm));
-        builder.addAnnotations(annotations(classm));
-        consumeIfNotNull(classm.getSuperClass(), s -> builder.setSuperClass(typeNameTranslator.translate(s)));
-        Arrays.stream(classm.getSuperInterfaces()).map(typeNameTranslator::translate).forEach(builder::addSuperInterface);
+    protected ClassSpec toClassSpec(Class aClass) {
+        ClassSpec.Builder builder = ClassSpec.builder(aClass.getName(), aClass.getModifiers());
+        builder.addTypeVariables(typeVariables(aClass));
+        builder.addFields(fields(aClass));
+        builder.addMethods(methods(aClass));
+        builder.addAnnotations(annotations(aClass));
+        TypeJavadoc typeJavadoc = typeJavadoc(aClass);
+        if (typeJavadoc != null) builder.setJavadoc(typeJavadoc);
+        consumeIfNotNull(aClass.getSuperClass(), s -> builder.setSuperClass(typeNameTranslator.translate(s)));
+        Arrays.stream(aClass.getSuperInterfaces()).map(typeNameTranslator::translate).forEach(builder::addSuperInterface);
         return builder.build();
     }
 
-
-    protected List<FieldSpec> fields(Class classm) {
-        return Arrays.stream(classm.getFields())
-            .map(f -> FieldSpec.builder(typeNameTranslator.translate(f.getType()), f.getName(), f.getModifiers()).addAnnotations(annotations(f)).build())
-            .collect(Collectors.toList());
+    protected List<FieldSpec> fields(Class aClass) {
+        return Arrays.stream(aClass.getFields()).map(this::fieldSpec).collect(Collectors.toList());
     }
 
-    protected List<AnnotationInstanceSpec> annotations(Annotateable annotateable) {
+    protected FieldSpec fieldSpec(Field f) {
+        FieldSpec.Builder builder = FieldSpec.builder(typeNameTranslator.translate(f.getType()), f.getName(), f.getModifiers());
+        builder.addAnnotations(annotations(f)).build();
+        FieldJavadoc fieldJavadoc = fieldJavadoc(f);
+        if (fieldJavadoc != null) builder.setJavadoc(fieldJavadoc);
+        return builder.build();
+    }
+
+    protected TypeJavadoc typeJavadoc(Class aClass) {
+        Display display = aClass.getDisplay();
+        String displayName = display.getDisplayName();
+        List<String> remark = display.getRemark();
+        if (StringHelper.isNotBlank(displayName)) {
+            TypeJavadoc.Builder docBuilder = TypeJavadoc.builder();
+            docBuilder.beginJavadoc().addDocument(displayName);
+            for (String str : remark) {
+                docBuilder.beginJavadoc().addDocument(str);
+            }
+            return docBuilder.build();
+        }
+        return null;
+    }
+
+    protected FieldJavadoc fieldJavadoc(Field f) {
+        Display display = f.getDisplay();
+        String displayName = display.getDisplayName();
+        List<String> remark = display.getRemark();
+        if (StringHelper.isNotBlank(displayName)) {
+            FieldJavadoc.Builder docBuilder = FieldJavadoc.builder();
+            docBuilder.beginJavadoc().addDocument(displayName);
+            for (String str : remark) {
+                docBuilder.beginJavadoc().addDocument(str);
+            }
+            return docBuilder.build();
+        }
+        return null;
+    }
+
+
+    protected List<AnnotationInstanceSpec> annotations(Annotatable annotatable) {
         List<AnnotationInstanceSpec> annotationInstanceSpecs = new ArrayList<>();
-        Arrays.stream(annotateable.getAnnotations()).map(this::annotationInstanceSpec).forEach(annotationInstanceSpecs::add);
+        Arrays.stream(annotatable.getAnnotations()).map(a -> AnnotationUtils.annotationInstanceSpec(a, typeNameTranslator)).forEach(annotationInstanceSpecs::add);
         return annotationInstanceSpecs;
     }
 
-    private AnnotationInstanceSpec annotationInstanceSpec(Annotation annotation) {
-        AnnotationInstanceSpec.Builder builder = AnnotationInstanceSpec.builder((ClassName) typeNameTranslator.translate(annotation.getType()));
-        Arrays.stream(annotation.getAttributes()).forEach(a -> {
-            if (a.getValue().getClass().isArray() && Annotation.class.isAssignableFrom(a.getValue().getClass().getComponentType())) {
-                int length = Array.getLength(a.getValue());
-                for (int i = 0; i < length; i++) {
-                    builder.addMember(a.getName(), annotationInstanceSpec((Annotation) (Array.get(a.getValue(), i))));
-                }
-            } else if (a.getValue() instanceof Iterable) {
-                ((Iterable<?>) a.getValue()).forEach(o -> {
-                    if (o instanceof Annotation) {
-                        builder.addMember(a.getName(), annotationInstanceSpec((Annotation) o));
-                    } else {
-                        builder.addMember(a.getName(), o);
-                    }
-                });
-            } else if (a.getValue() instanceof Annotation) {
-                builder.addMember(a.getName(), annotationInstanceSpec((Annotation) a.getValue()));
-            } else {
-                builder.addMember(a.getName(), a.getValue());
-            }
-        });
-        return builder.build();
-    }
-
-    protected List<MethodSpec> methods(Class classm) {
-        return Arrays.stream(classm.getMethods()).map(m -> {
+    protected List<MethodSpec> methods(Class aClass) {
+        return Arrays.stream(aClass.getMethods()).map(m -> {
             // params
             List<ParameterSpec> params = new ArrayList<>();
-            Stream.of(m.getParameters()).map(p -> ParameterSpec.builder(typeNameTranslator.translate(p.getType()), p.getName(), p.getModifiers()).addAnnotations(annotations(p)).build())
-                .forEach(params::add);
+            Stream.of(m.getParameters()).map(p -> ParameterSpec.builder(typeNameTranslator.translate(p.getType()), p.getName(), p.getModifiers()).addAnnotations(annotations(p)).build()).forEach(params::add);
             // throwables
             List<TypeName> throwables = new ArrayList<>();
             Arrays.stream(m.getThrowables()).map(t -> (ClassName) typeNameTranslator.translate(t.getType())).forEach(throwables::add);
             // method builder
-            MethodSpec.Builder methodBuilder = MethodSpec.builder(typeNameTranslator.translate(m.getReturnType()), m.getName(), m.getModifiers())
-                .addParameters(params)
-                .addThrowables(throwables)
-                .addAnnotations(annotations(m));
+            MethodSpec.Builder methodBuilder = MethodSpec.builder(typeNameTranslator.translate(m.getReturnType()), m.getName(), m.getModifiers()).addParameters(params).addThrowables(throwables).addAnnotations(annotations(m));
+            // javadoc
+            MethodJavadoc methodJavadoc = methodJavadoc(m);
+            if (methodJavadoc != null) methodBuilder.setJavadoc(methodJavadoc);
             // statements
             fillStatements(methodBuilder.beginMethodBody(), m.getStatements());
             // build
@@ -148,8 +166,24 @@ public class ClassToClass implements Translator<Class, JavaFile> {
         }).collect(Collectors.toList());
     }
 
-    protected List<TypeVariableName> typeVariables(Class classm) {
-        return Arrays.stream(classm.getGenericTypes()).map(g -> {
+    protected MethodJavadoc methodJavadoc(Method method) {
+        Display display = method.getDisplay();
+        String displayName = display.getDisplayName();
+        List<String> remark = display.getRemark();
+        if (StringHelper.isNotBlank(displayName)) {
+            MethodJavadoc.Builder docBuilder = MethodJavadoc.builder();
+            docBuilder.beginJavadoc().addDocument(displayName);
+            for (String str : remark) {
+                docBuilder.beginJavadoc().addDocument(str);
+            }
+            return docBuilder.build();
+        }
+        return null;
+    }
+
+
+    protected List<TypeVariableName> typeVariables(Class aClass) {
+        return Arrays.stream(aClass.getGenericTypes()).map(g -> {
             TypeName t = typeNameTranslator.translate(g);
             if (t instanceof TypeVariableName) {
                 return (TypeVariableName) t;

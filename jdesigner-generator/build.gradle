@@ -1,0 +1,10 @@
+plugins {
+    id 'buildlogic.java-library-conventions'
+}
+
+description = 'Used to Support Code Generation, for example: Annotation Processor'
+
+dependencies {
+    api project(':jdesigner-builder')
+    api project(':jdesigner-translator')
+}

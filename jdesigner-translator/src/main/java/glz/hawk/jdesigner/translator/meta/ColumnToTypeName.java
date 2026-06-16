@@ -16,9 +16,9 @@
 
 package glz.hawk.jdesigner.translator.meta;
 
+import glz.hawk.codepoet.java.type.TypeName;
 import glz.hawk.jdesigner.spec.database.Column;
 import glz.hawk.jdesigner.translator.Translator;
-import glz.hawk.codepoet.java.type.TypeName;
 
 import javax.annotation.Nonnull;
 

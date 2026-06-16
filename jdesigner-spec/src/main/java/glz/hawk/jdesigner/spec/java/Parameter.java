@@ -27,7 +27,7 @@ import javax.lang.model.element.Modifier;
  *
  * @author Hawk
  */
-public interface Parameter<T extends Executable<T>> extends ModelPart<T>, Nameable, Annotateable {
+public interface Parameter<T extends Executable<T>> extends ModelPart<T>, Nameable, Annotatable {
     UniversalType getType();
 
     Modifier[] getModifiers();

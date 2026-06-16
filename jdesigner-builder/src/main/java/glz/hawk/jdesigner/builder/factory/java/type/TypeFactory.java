@@ -19,7 +19,7 @@ package glz.hawk.jdesigner.builder.factory.java.type;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
 import glz.hawk.jdesigner.builder.factory.common.AbstractCommonFactory;
 import glz.hawk.jdesigner.spec.impl.java.type.SimpleUniversalType;
-import glz.hawk.jdesigner.spec.impl.java.type.SimpleUniversalTypeHelper;
+import glz.hawk.jdesigner.spec.java.Annotation;
 import glz.hawk.jdesigner.spec.java.type.TypeKind;
 import glz.hawk.jdesigner.spec.java.type.UniversalType;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
@@ -43,25 +43,31 @@ public class TypeFactory extends AbstractCommonFactory<UniversalType, TypeFactor
 
     @Override
     public UniversalType build() {
-        SimpleUniversalType u ;
+        SimpleUniversalType u;
         if (factoryContext.getReferencedMetadataContext() != null) {
             Metadata metadata = loadMetadata();
-            u = TypeFactorySupport.convert(metadata);
+            u = builderContext.getTypeFactorySupport().convert(metadata);
         } else {
             AnnotatedElement annotatedElement = factoryContext.getAnnotatedElement();
             if (annotatedElement instanceof Field) {
-                u = SimpleUniversalTypeHelper.build(((Field) annotatedElement).getGenericType());
+                u = SimpleUniversalTypeHelper.build(((Field) annotatedElement).getAnnotatedType());
+                // 第一层的注解是来自于Field本身的注解，必须清除
+                u.setAnnotations(new Annotation[0]);
             } else if (annotatedElement instanceof Method) {
-                u = SimpleUniversalTypeHelper.build(((Method) annotatedElement).getGenericReturnType());
+                u = SimpleUniversalTypeHelper.build(((Method) annotatedElement).getAnnotatedReturnType());
+                // 第一层的注解是来自于Method本身的注解，必须清除
+                u.setAnnotations(new Annotation[0]);
             } else if (annotatedElement instanceof Parameter) {
-                u = SimpleUniversalTypeHelper.build(((Parameter) annotatedElement).getParameterizedType());
+                u = SimpleUniversalTypeHelper.build(((Parameter) annotatedElement).getAnnotatedType());
+                // 第一层的注解是来自于Parameter本身的注解，必须清除
+                u.setAnnotations(new Annotation[0]);
             } else {
                 throw new UnsupportedOperationException(String.format("The annotatedElement: %s is unsupported now.", annotatedElement.getClass().getName()));
             }
         }
 
         // translate the type defined by designer to the real type if the {@code universalType} comes from designer model.
-        TypeFactorySupport.translatePackage(u, builderContext);
+        builderContext.getTypeFactorySupport().translatePackage(u, builderContext);
 
         // TypeWrapper and ArrayWrapper can't work together
         if (factoryContext.getArrayWrapperFactoryContext() != null && factoryContext.getTypeWrapperFactoryContext() != null) {
@@ -77,13 +83,13 @@ public class TypeFactory extends AbstractCommonFactory<UniversalType, TypeFactor
             SimpleUniversalType s = new SimpleUniversalType();
             s.setComponentType(u);
             s.setTypeKind(TypeKind.ARRAY_TYPE);
-            TypeFactorySupport.translatePackage(s, builderContext);
+            builderContext.getTypeFactorySupport().translatePackage(s, builderContext);
             return s;
         } else if (factoryContext.getTypeWrapperFactoryContext() != null) {
-            SimpleUniversalType s = TypeFactorySupport.convertFrom(factoryContext.getTypeWrapperFactoryContext());
+            SimpleUniversalType s = builderContext.getTypeFactorySupport().convertFrom(factoryContext.getTypeWrapperFactoryContext());
             s.setTypeKind(TypeKind.PARAMETERIZED_TYPE);
             s.setTypeArguments(new SimpleUniversalType[]{u});
-            TypeFactorySupport.translatePackage(s, builderContext);
+            builderContext.getTypeFactorySupport().translatePackage(s, builderContext);
             return s;
         } else {
             return u;

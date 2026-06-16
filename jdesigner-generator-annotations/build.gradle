@@ -1,0 +1,9 @@
+plugins {
+    id 'buildlogic.java-library-conventions'
+}
+
+description = 'Used to define the configuration information required for jdesigner-translator execution, including model sources, package name conversion, etc.'
+
+dependencies {
+    compileOnlyApi project(':jdesigner-generator')
+}

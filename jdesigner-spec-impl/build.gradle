@@ -5,6 +5,8 @@ plugins {
 description = 'Provides a base implementation for model definitions.'
 
 dependencies {
-    implementation 'io.github.zeatul:hawk-core'
-    implementation project(':jdesigner-spec')
+    api 'io.github.zeatul:hawk-core'
+    api project(':jdesigner-spec')
+
+    testImplementation('com.fasterxml.jackson.dataformat:jackson-dataformat-xml')
 }

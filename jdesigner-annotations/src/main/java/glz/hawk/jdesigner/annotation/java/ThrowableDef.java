@@ -41,4 +41,10 @@ public @interface ThrowableDef {
      * This attribute represents the type of {@code Throwable}
      */
     ClassTypeDef value();
+
+    /**
+     * 唯一标识
+     * <p>导入功能用: 用来关联导入数据</p>
+     */
+    String throwableId() default "";
 }

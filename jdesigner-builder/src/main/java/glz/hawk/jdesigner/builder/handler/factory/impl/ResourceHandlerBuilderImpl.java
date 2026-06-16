@@ -44,22 +44,48 @@ public class ResourceHandlerBuilderImpl implements ResourceHandlerBuilder {
 
     private final Map<Class<? extends Annotation>, ResourceHandlerFactory> map = new HashMap<>();
 
-    public ResourceHandlerBuilderImpl() {
-        put(DomainDefContainer.class, new DomainResourceHandlerFactory());
-        put(MetadataDefContainer.class, new MetadataResourceHandlerFactory());
-        put(TableDef.class, new TableResourceHandlerFactory());
-        put(ClassDef.class,new ClassResourceHandlerFactory());
+    //    public ResourceHandlerBuilderImpl(Class<? extends FieldSupplierFactory> fieldSupplierFactoryClass) {
+//        put(DomainDefContainer.class, new DomainResourceHandlerFactory());
+//        put(MetadataDefContainer.class, new MetadataResourceHandlerFactory());
+//        put(TableDef.class, new TableResourceHandlerFactory());
+//        put(ClassDef.class, new ClassResourceHandlerFactory(fieldSupplierFactoryClass));
+//    }
+    private ResourceHandlerBuilderImpl(Builder builder) {
+        this.map.putAll(builder.map);
+    }
+
+    public static Builder builder(){
+        return new Builder();
     }
 
     @Nonnull
     @Override
     public ResourceHandler build(@Nonnull Class<? extends Annotation> annotationClass, @Nonnull MetadataReader metadataReader, @Nonnull ClasspathBuilderContext builderContext, @Nonnull ModelWarehouse modelWarehouse) {
-        return Optional.ofNullable(map.get(annotationClass)).orElseThrow(() -> new IllegalStateException(String.format("No ResourceHandlerFactory matches %s", annotationClass.getName())))
-                .produce(argNotNull(modelWarehouse), argNotNull(metadataReader), argNotNull(builderContext));
+        return Optional.ofNullable(map.get(annotationClass)).orElseThrow(() -> new IllegalStateException(String.format("No ResourceHandlerFactory matches %s", annotationClass.getName()))).produce(argNotNull(modelWarehouse), argNotNull(metadataReader), argNotNull(builderContext));
     }
 
     public void put(Class<? extends Annotation> annotationClass, ResourceHandlerFactory resourceHandlerFactory) {
         map.put(annotationClass, resourceHandlerFactory);
+    }
+
+    public static class Builder {
+        private final Map<Class<? extends Annotation>, ResourceHandlerFactory> map = new HashMap<>();
+
+        private Builder() {
+            put(DomainDefContainer.class, new DomainResourceHandlerFactory());
+            put(MetadataDefContainer.class, new MetadataResourceHandlerFactory());
+            put(TableDef.class, new TableResourceHandlerFactory());
+            put(ClassDef.class, new ClassResourceHandlerFactory());
+        }
+
+        public Builder put(Class<? extends Annotation> annotationClass, ResourceHandlerFactory resourceHandlerFactory) {
+            map.put(argNotNull(annotationClass, "annotationClass"), argNotNull(resourceHandlerFactory, "resourceHandlerFactory"));
+            return this;
+        }
+
+        public ResourceHandlerBuilderImpl build() {
+            return new ResourceHandlerBuilderImpl(this);
+        }
     }
 
 }

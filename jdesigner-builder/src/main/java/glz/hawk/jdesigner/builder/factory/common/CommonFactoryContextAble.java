@@ -16,7 +16,13 @@
 
 package glz.hawk.jdesigner.builder.factory.common;
 
+import glz.hawk.jdesigner.annotation.common.Def;
+import glz.hawk.jdesigner.spec.java.Annotation;
+
 import java.lang.reflect.AnnotatedElement;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * This interface is responsible for
@@ -24,7 +30,27 @@ import java.lang.reflect.AnnotatedElement;
  * @author Hawk
  */
 public interface CommonFactoryContextAble {
+
+
     AnnotatedElement getAnnotatedElement();
 
     void setAnnotatedElement(AnnotatedElement annotatedElement);
+
+    void putExtension(String key, Object value);
+
+    void putExtensions(Map<String, Object> extensions);
+
+    Optional<Object> getExtension(String key);
+
+    public Map<String, Object> getAllExtensions();
+
+    /**
+     * put annotations which is not annotated {@link Def}
+     */
+    void putNoDefAnnotations(List<Annotation> annotations);
+
+    /**
+     * Obtains annotations which is not annotated {@link Def}
+     */
+    Optional<List<Annotation>> getNoDefAnnotations();
 }

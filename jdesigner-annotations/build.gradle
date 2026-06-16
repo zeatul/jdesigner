@@ -5,7 +5,9 @@ plugins {
 description = 'Define models with annotations.'
 
 dependencies {
-    implementation project(':jdesigner-spec')
-    implementation 'org.springframework:spring-context'
-    implementation 'com.google.guava:guava'
+    compileOnlyApi project(':jdesigner-spec')
+    compileOnlyApi 'org.springframework:spring-core'
+    compileOnlyApi 'com.google.guava:guava'
+
+    testImplementation 'com.google.guava:guava'
 }

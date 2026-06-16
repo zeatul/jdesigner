@@ -16,12 +16,14 @@
 
 package glz.hawk.jdesigner.spec.java;
 
+import glz.hawk.jdesigner.spec.base.Displayable;
+
 /**
  * This interface is responsible for
  *
  * @author Hawk
  */
-public interface Executable<T extends Executable<T>> extends Member<Class> {
+public interface Executable<T extends Executable<T>> extends Member<Class> , Displayable {
     Parameter<T>[] getParameters();
 
     Throwable<T>[] getThrowables();

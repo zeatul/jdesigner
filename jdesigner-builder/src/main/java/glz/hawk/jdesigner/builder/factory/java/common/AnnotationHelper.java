@@ -17,9 +17,9 @@
 package glz.hawk.jdesigner.builder.factory.java.common;
 
 import glz.hawk.jdesigner.annotation.common.Def;
+import glz.hawk.jdesigner.builder.factory.java.type.SimpleUniversalTypeHelper;
 import glz.hawk.jdesigner.spec.impl.java.SimpleAnnotation;
 import glz.hawk.jdesigner.spec.impl.java.SimpleAnnotationAttribute;
-import glz.hawk.jdesigner.spec.impl.java.type.SimpleUniversalTypeHelper;
 import glz.hawk.jdesigner.spec.java.AnnotationAttribute;
 import glz.hawk.jdesigner.spec.java.type.UniversalType;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -52,7 +52,7 @@ public abstract class AnnotationHelper {
         return annotationList;
     }
 
-    private static SimpleAnnotation convert(Annotation annotation) {
+    public static SimpleAnnotation convert(Annotation annotation) {
         List<AnnotationAttribute> attributeList = new ArrayList<>();
         AnnotationAttributes annotationAttributes = AnnotationUtils.getAnnotationAttributes(annotation, false, false);
         for (String attributeName : annotationAttributes.keySet()) {

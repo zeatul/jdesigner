@@ -22,7 +22,6 @@ import glz.hawk.jdesigner.spec.meta.domain.Domain;
 import glz.hawk.jdesigner.spec.meta.metadata.Metadata;
 
 import javax.annotation.Nonnull;
-
 import java.util.Map;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;

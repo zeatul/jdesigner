@@ -16,7 +16,6 @@
 
 package glz.hawk.jdesigner.builder.factory.java.clazz;
 
-import glz.hawk.jdesigner.spec.java.Class;
 import glz.hawk.jdesigner.builder.factory.common.AbstractModelFactoryContext;
 import glz.hawk.jdesigner.builder.factory.java.common.GetterContext;
 import glz.hawk.jdesigner.builder.factory.java.common.GetterContextAble;
@@ -24,6 +23,7 @@ import glz.hawk.jdesigner.builder.factory.java.common.SetterContext;
 import glz.hawk.jdesigner.builder.factory.java.common.SetterContextAble;
 import glz.hawk.jdesigner.builder.factory.java.type.TypeFactoryContext;
 import glz.hawk.jdesigner.builder.factory.java.type.TypeFactoryContextAble;
+import glz.hawk.jdesigner.spec.java.Class;
 import glz.hawk.jdesigner.spec.java.ClassKind;
 import glz.hawkframework.core.support.LogicSupport;
 

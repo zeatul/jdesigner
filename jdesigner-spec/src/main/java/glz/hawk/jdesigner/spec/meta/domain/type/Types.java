@@ -85,7 +85,6 @@ public interface Types {
      */
     int CLOB = java.sql.Types.CLOB;
 
-
     /**
      * Whether type is in the constants of {@code Types}
      *

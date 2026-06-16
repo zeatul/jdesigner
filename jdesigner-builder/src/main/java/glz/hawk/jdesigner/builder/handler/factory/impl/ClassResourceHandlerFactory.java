@@ -29,6 +29,7 @@ import org.springframework.core.type.classreading.MetadataReader;
  * @author Hawk
  */
 public class ClassResourceHandlerFactory implements ResourceHandlerFactory {
+
     @Override
     public ResourceHandler produce(ModelWarehouse modelWarehouse, MetadataReader metadataReader, ClasspathBuilderContext builderContext) {
         return new ClassMetadataReaderResourceHandler(modelWarehouse, metadataReader, builderContext);

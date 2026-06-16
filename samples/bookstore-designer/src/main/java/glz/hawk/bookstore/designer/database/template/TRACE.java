@@ -16,11 +16,11 @@
 
 package glz.hawk.bookstore.designer.database.template;
 
+import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
 import glz.hawk.jdesigner.annotation.common.DeclaringOrder;
 import glz.hawk.jdesigner.annotation.database.ColumnDef;
 import glz.hawk.jdesigner.annotation.meta.metadata.ReferencedMetadata;
-import glz.hawk.jdesigner.extension.column.*;
-import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
+import glz.hawkframework.dao.column.annotation.*;
 
 /**
  * This interface provides trace information of record.

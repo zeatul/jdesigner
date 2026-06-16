@@ -16,8 +16,6 @@
 
 package glz.hawk.bookstore.persist.repository.data;
 
-import org.springframework.stereotype.Component;
-
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 

@@ -17,16 +17,14 @@
 package glz.hawk.jdesigner.builder.factory.common;
 
 import glz.hawk.jdesigner.annotation.name.NameConverter;
-import glz.hawk.jdesigner.spec.base.Display;
-import glz.hawk.jdesigner.spec.base.Model;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
 import glz.hawk.jdesigner.builder.factory.base.display.DisplayFactory;
+import glz.hawk.jdesigner.spec.base.Display;
+import glz.hawk.jdesigner.spec.base.Model;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 import glz.hawkframework.core.helper.StringHelper;
 
 import javax.annotation.Nonnull;
-
-import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
 /**
  * This class provides a skeletal implementation of the {@link ModelFactory} interface to
@@ -45,6 +43,7 @@ public abstract class AbstractModelFactory<M, C extends AbstractModelFactoryCont
         try {
             M m = executeBuild();
             if (m instanceof Model) {
+//                ((Model)m).putExtensions(factoryContext.getAllExtensions());
                 modelWarehouse.add((Model) m);
             }
             return m;

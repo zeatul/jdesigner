@@ -43,17 +43,21 @@ public class IndexSupplierFactory extends AbstractCommonFactory<ModelPartSupplie
     public IndexSupplierFactory(ModelWarehouse modelWarehouse, ClasspathBuilderContext builderContext, IndexFactoryContext factoryContext, Map<String, Column> fieldNameColumnMap) {
         super(modelWarehouse, builderContext, factoryContext);
         factoryContext.getIndexColumnFactoryContextList().stream()
-            .map(i -> new SimpleIndexColumnSupplier<Index>(new FieldNameIndexedColumnSupplier(fieldNameColumnMap, i.getFieldName()), i.getSortType(),i.getAllExtensions()))
+            .map(i -> new SimpleIndexColumnSupplier<Index>(new FieldNameIndexedColumnSupplier(fieldNameColumnMap, i.getFieldName()), i.getSortType(), i.getAllExtensions()))
             .forEach(indexColumnSuppliers::add);
     }
 
     @Override
     public ModelPartSupplier<Table, Index> build() {
-        return new SimpleIndexSupplier(getName(), getLocation(), getDisplay(), isUnique(), indexColumnSuppliers, factoryContext.getAllExtensions());
+        return new SimpleIndexSupplier(getName(), getLocation(), getDisplay(), isUnique(), getShortName(), indexColumnSuppliers, factoryContext.getAllExtensions());
     }
 
     protected boolean isUnique() {
         return factoryContext.isUnique();
+    }
+
+    protected String getShortName() {
+        return factoryContext.getShortName();
     }
 
     protected String getName() {

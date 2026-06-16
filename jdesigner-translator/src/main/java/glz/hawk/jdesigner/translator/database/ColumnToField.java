@@ -16,16 +16,16 @@
 
 package glz.hawk.jdesigner.translator.database;
 
+import glz.hawk.codepoet.java.AnnotationInstanceSpec;
+import glz.hawk.codepoet.java.FieldSpec;
+import glz.hawk.codepoet.java.javadoc.FieldJavadoc;
+import glz.hawk.codepoet.java.type.TypeName;
 import glz.hawk.jdesigner.spec.database.Column;
 import glz.hawk.jdesigner.translator.Translator;
-import glz.hawk.codepoet.java.FieldSpec;
-import glz.hawk.codepoet.java.FieldSpec.Builder;
-import glz.hawk.codepoet.java.javadoc.FieldJavadoc;
-import glz.hawk.codepoet.java.javadoc.HtmlTag;
-import glz.hawk.codepoet.java.type.TypeName;
 
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
+import java.util.List;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
@@ -36,32 +36,30 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
  */
 public class ColumnToField implements Translator<Column, FieldSpec> {
 
-    private final Translator<Column, String> fieldNameTranslator;
-    private final Translator<Column, TypeName> typeNameTranslator;
+    protected final Translator<Column, String> fieldNameTranslator;
+    protected final Translator<Column, TypeName> fieldTypeNameTranslator;
+    protected final Translator<Column, FieldJavadoc> fieldJavadocTranslator;
+    protected final Translator<Column, List<AnnotationInstanceSpec>> fieldAnnotationsTranslator;
 
-    public ColumnToField(Translator<Column, String> fieldNameTranslator, Translator<Column, TypeName> typeNameTranslator) {
+    public ColumnToField(
+        Translator<Column, String> fieldNameTranslator,
+        Translator<Column, TypeName> fieldTypeNameTranslator,
+        Translator<Column, FieldJavadoc> fieldJavadocTranslator,
+        Translator<Column, List<AnnotationInstanceSpec>> fieldAnnotationsTranslator
+    ) {
         this.fieldNameTranslator = argNotNull(fieldNameTranslator, "fieldNameTranslator");
-        this.typeNameTranslator = argNotNull(typeNameTranslator, "typeNameTranslator");
+        this.fieldTypeNameTranslator = argNotNull(fieldTypeNameTranslator, "fieldTypeNameTranslator");
+        this.fieldJavadocTranslator = argNotNull(fieldJavadocTranslator, "fieldJavadocTranslator");
+        this.fieldAnnotationsTranslator = argNotNull(fieldAnnotationsTranslator, "fieldAnnotationsTranslator");
     }
 
     @Nonnull
     public FieldSpec translate(@Nonnull Column column) {
         argNotNull(column, "column");
-        TypeName typeName = typeNameTranslator.translate(column);
-        String fieldName = fieldNameTranslator.translate(column);
-        Builder builder = FieldSpec.builder(typeName, fieldName, Modifier.PRIVATE);
-        builder.setJavadoc(buildJavaDoc(column));
-        return builder.build();
+        return FieldSpec.builder(fieldTypeNameTranslator.translate(column), fieldNameTranslator.translate(column), Modifier.PRIVATE)
+            .addAnnotations(fieldAnnotationsTranslator.translate(column))
+            .setJavadoc(fieldJavadocTranslator.translate(column))
+            .build();
     }
 
-    protected FieldJavadoc buildJavaDoc(Column column) {
-        FieldJavadoc.Builder javadocBuilder = FieldJavadoc.builder();
-        if (column.getComment().isPresent()) {
-            javadocBuilder.beginJavadoc().addDocument(column.getComment().get());
-            javadocBuilder.beginJavadoc().addInlineHtml(HtmlTag.P, "Map to column: $L", column.getName());
-        } else {
-            javadocBuilder.beginJavadoc().addDocument("Map to column: $L", column.getName());
-        }
-        return javadocBuilder.build();
-    }
 }

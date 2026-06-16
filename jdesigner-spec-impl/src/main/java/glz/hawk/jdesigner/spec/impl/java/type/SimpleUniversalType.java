@@ -16,10 +16,13 @@
 
 package glz.hawk.jdesigner.spec.impl.java.type;
 
+import glz.hawk.jdesigner.spec.java.Annotation;
 import glz.hawk.jdesigner.spec.java.type.TypeKind;
 import glz.hawk.jdesigner.spec.java.type.UniversalType;
 
 import javax.annotation.Nonnull;
+
+import static glz.hawkframework.core.helper.ObjectHelper.nullSafeEquals;
 
 /**
  * This class implements the interface {@link UniversalType}
@@ -36,6 +39,7 @@ public class SimpleUniversalType implements UniversalType {
     private SimpleUniversalType[] upperBounds;
     private SimpleUniversalType[] lowerBounds;
     private SimpleUniversalType[] typeArguments;
+    private Annotation[] annotations;
 
     @Nonnull
     @Override
@@ -117,5 +121,32 @@ public class SimpleUniversalType implements UniversalType {
 
     public void setTypeArguments(SimpleUniversalType[] typeArguments) {
         this.typeArguments = typeArguments;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof UniversalType)) {
+            return false;
+        }
+        UniversalType that = (UniversalType) obj;
+        return nullSafeEquals(this.typeKind, that.getTypeKind())
+            && nullSafeEquals(this.packageName, that.getPackageName())
+            && nullSafeEquals(this.name, that.getName())
+            && nullSafeEquals(this.enclosingClassTypeNames, that.getEnclosingClassTypeNames())
+            && nullSafeEquals(this.componentType, that.getComponentType())
+            && nullSafeEquals(this.bounds, that.getBounds())
+            && nullSafeEquals(this.upperBounds, that.getUpperBounds())
+            && nullSafeEquals(this.lowerBounds, that.getLowerBounds())
+            && nullSafeEquals(this.typeArguments, that.getTypeArguments());
+    }
+
+    @Nonnull
+    @Override
+    public Annotation[] getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Annotation[] annotations) {
+        this.annotations = annotations;
     }
 }

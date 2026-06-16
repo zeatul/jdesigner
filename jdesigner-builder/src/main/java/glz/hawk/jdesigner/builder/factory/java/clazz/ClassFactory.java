@@ -16,17 +16,15 @@
 
 package glz.hawk.jdesigner.builder.factory.java.clazz;
 
-import glz.hawk.jdesigner.spec.java.*;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
 import glz.hawk.jdesigner.builder.factory.common.AbstractModelFactory;
-import glz.hawk.jdesigner.builder.factory.java.type.TypeVariableFactory;
+import glz.hawk.jdesigner.builder.factory.java.type.SimpleUniversalTypeHelper;
 import glz.hawk.jdesigner.spec.impl.base.ModelPartSupplier;
 import glz.hawk.jdesigner.spec.impl.java.SimpleClass;
-import glz.hawk.jdesigner.spec.impl.java.type.SimpleUniversalTypeHelper;
+import glz.hawk.jdesigner.spec.java.*;
 import glz.hawk.jdesigner.spec.java.Class;
 import glz.hawk.jdesigner.spec.java.type.UniversalType;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
-import glz.hawkframework.core.helper.ObjectHelper;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -76,13 +74,7 @@ public class ClassFactory extends AbstractModelFactory<Class, ClassFactoryContex
     }
 
     protected List<UniversalType> getGenericTypes() {
-        // first parse annotation
-        List<UniversalType> list = new TypeVariableFactory(modelWarehouse, builderContext, factoryContext.getTypeFactoryContext()).build();
-        if (ObjectHelper.isNotEmpty(list)) {
-            return list;
-        }
-        // second parse type
-        java.lang.Class<?> classType = (java.lang.Class<?>) factoryContext.getAnnotatedElement();
+                java.lang.Class<?> classType = (java.lang.Class<?>) factoryContext.getAnnotatedElement();
         return Arrays.stream(classType.getTypeParameters()).map(SimpleUniversalTypeHelper::build).collect(Collectors.toList());
     }
 }

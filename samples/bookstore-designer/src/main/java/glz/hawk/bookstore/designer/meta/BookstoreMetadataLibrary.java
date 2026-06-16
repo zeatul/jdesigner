@@ -20,6 +20,9 @@ import glz.hawk.jdesigner.annotation.base.DisplayDef;
 import glz.hawk.jdesigner.annotation.meta.domain.ReferencedDomain;
 import glz.hawk.jdesigner.annotation.meta.metadata.MetadataDef;
 import glz.hawk.jdesigner.annotation.meta.metadata.MetadataDefContainer;
+import glz.hawkframework.validator.constraints.EnumValue;
+
+import javax.validation.constraints.NotBlank;
 
 import static glz.hawk.bookstore.designer.meta.BookstoreDomainLibrary.*;
 
@@ -35,6 +38,7 @@ public interface BookstoreMetadataLibrary {
     @MetadataDef
     String BOOK_ID = "BOOK_ID";
 
+    @NotBlank
     @ReferencedDomain(lib = BookstoreDomainLibrary.class, index = VARCHAR20)
     @MetadataDef
     @DisplayDef("ISBN")
@@ -53,8 +57,10 @@ public interface BookstoreMetadataLibrary {
     @ReferencedDomain(lib = BookstoreDomainLibrary.class, index = DATE)
     @MetadataDef
     @DisplayDef("书出版日期")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     String PUBLISH_DATE = "PUBLISH_DATE";
 
+    @EnumValue(enumClassName="glz.hawk.bookstore.pub.enums.BookCategory")
     @ReferencedDomain(lib = BookstoreDomainLibrary.class, index = BookstoreDomainLibrary.BOOK_CATEGORY)
     @MetadataDef
     String BOOK_CATEGORY = "BOOK_CATEGORY";
@@ -80,6 +86,7 @@ public interface BookstoreMetadataLibrary {
     @MetadataDef
     String PUBLISHER_CODE = "PUBLISHER_CODE";
 
+    @NotBlank
     @ReferencedDomain(lib = BookstoreDomainLibrary.class, index = VARCHAR100)
     @MetadataDef
     String PUBLISHER_NAME = "PUBLISHER_NAME";

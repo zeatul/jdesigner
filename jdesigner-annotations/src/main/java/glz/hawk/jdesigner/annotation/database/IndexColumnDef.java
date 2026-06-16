@@ -51,4 +51,16 @@ public @interface IndexColumnDef {
      * This attribute represents the sort type of index column.
      */
     SortType sortType() default SortType.DEFAULT;
+
+    /**
+     * This attribute represents the class which holds the {@link #fieldName() fieldName}.
+     * <p>If the value of this attribute is {@code Object.class}, use the class annotated by the {@link IndexDef} or {@link PrimaryKeyDef}</p>
+     */
+    Class<?> fieldNameContainer() default Object.class;
+
+    /**
+     * 唯一标识
+     * <p>导入功能用: 用来关联导入数据</p>
+     */
+    String indexColumnId() default "";
 }

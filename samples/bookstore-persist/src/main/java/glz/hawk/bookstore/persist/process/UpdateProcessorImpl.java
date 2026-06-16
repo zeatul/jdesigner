@@ -16,17 +16,20 @@
 
 package glz.hawk.bookstore.persist.process;
 
-import glz.hawkframework.dao.function.IRecord;
-import glz.hawkframework.dao.function.RecordUpdateDateTimeFunction;
-import glz.hawkframework.dao.function.RecordVersionFunction;
-import glz.hawkframework.dao.process.UpdateProcessor;
-import glz.hawk.j4sql.support.SqlColumn;
-import glz.hawk.j4sql.support.impl.DefaultNamedColumn;
 import glz.hawk.j4sql.support.impl.DefaultValueColumn;
+import glz.hawkframework.dao.column.FieldDescriptor;
+import glz.hawkframework.dao.column.PojoFieldParser;
+import glz.hawkframework.dao.column.annotation.RecordUpdateDateTime;
+import glz.hawkframework.dao.column.annotation.RecordVersion;
+import glz.hawkframework.dao.process.UpdateParameter;
+import glz.hawkframework.dao.process.UpdateProcessor;
 
+import java.lang.annotation.Annotation;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
@@ -37,45 +40,62 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
  */
 @SuppressWarnings("unchecked")
 public class UpdateProcessorImpl implements UpdateProcessor {
+    private final ConcurrentHashMap<Class<?>, Map<Class<? extends Annotation>, List<FieldDescriptor<Object, Object, Annotation>>>> map = new ConcurrentHashMap<>();
+
+    private final Map<Class<? extends Annotation>, List<FieldDescriptor<Object, Object, Annotation>>> EMPTY = Collections.emptyMap();
 
     @Override
-    public void beforeUpdate(Map<String, Object> params) {
-        Object updateByField = params.get(UpdateProcessor.UPDATE_BY_FIELD_OBJECT);
-        if (updateByField != null) {
-            if (updateByField instanceof IRecord) {
-                IRecord iRecord = (IRecord) updateByField;
-                iRecord.findColumnDescriptor(RecordVersionFunction.class).ifPresent(d -> {
-                    if (!d.getColumnUpdatedSupplier().get()) {
-                        Long currentRecordVersion = (Long) params.get(UpdateProcessor.RECORD_VERSION);
-                        argNotNull(currentRecordVersion, String.format("The value of key: %s in params must not be null.", UpdateProcessor.RECORD_VERSION));
+    public void beforeUpdate(UpdateParameter updateParameter) {
+        apply(updateParameter);
+    }
+
+    private Map<Class<? extends Annotation>, List<FieldDescriptor<Object, Object, Annotation>>> prepare(Object object) {
+        Map<Class<? extends Annotation>, List<FieldDescriptor<Object, Object, Annotation>>> m1 = map.get(object.getClass());
+        if (m1 == null) {
+            PojoFieldParser<Object> pojoParser = new PojoFieldParser<>((Class<Object>) object.getClass());
+            m1 = pojoParser.parse();
+            if (m1.isEmpty()) m1 = EMPTY;
+            map.put(object.getClass(), m1);
+        }
+        return m1;
+    }
+
+    protected void apply(UpdateParameter updateParameter) {
+        final Object object = updateParameter.fieldUpdateObject != null ? updateParameter.fieldUpdateObject : updateParameter.columnUpdateObject;
+        if (object == null) return;
+
+        Map<Class<? extends Annotation>, List<FieldDescriptor<Object, Object, Annotation>>> m1 = updateParameter.fieldUpdateObject != null ? prepare(updateParameter.fieldUpdateObject) : prepare(updateParameter.columnUpdateObject);
+        if (m1 == null) return;
+
+        List<FieldDescriptor<Object, Object, Annotation>> fieldDescriptors = m1.get(RecordVersion.class);
+        if (fieldDescriptors != null) {
+            fieldDescriptors.forEach(fieldDescriptor -> {
+                if (!fieldDescriptor.getFieldUpdatedSupplier().apply(object)) {
+                    if (updateParameter.fieldUpdateObject != null) {
+                        Long currentRecordVersion = (Long) updateParameter.recordVersion;
+                        argNotNull(currentRecordVersion, "recordVersion");
                         Long newRecordVersion = currentRecordVersion < Math.pow(10, 18) ? currentRecordVersion + 1 : 0;
-                        ((Consumer<Long>) d.getColumnModifier()).accept(newRecordVersion);
+                        fieldDescriptor.getFieldModifier().accept(object, newRecordVersion);
+                    } else{
+                        throw new UnsupportedOperationException("columnUpdateObject注解里分析不出字段名称");
                     }
-                });
-
-                iRecord.findColumnDescriptor(RecordUpdateDateTimeFunction.class).ifPresent(d -> {
-                    if (!d.getColumnUpdatedSupplier().get()) {
-                        ((Consumer<LocalDateTime>) d.getColumnModifier()).accept(LocalDateTime.now());
-                    }
-                });
-            }
+                }
+            });
         }
 
-        Object updateByColumn = params.get(UpdateProcessor.UPDATE_BY_COLUMN_OBJECT);
-        if (updateByColumn != null) {
-            if (updateByColumn instanceof IRecord) {
-                IRecord iRecord = (IRecord) updateByColumn;
-                iRecord.findColumnDescriptor(RecordVersionFunction.class).ifPresent(d -> {
-                    if (!d.getColumnUpdatedSupplier().get()) {
-                        ((Consumer<SqlColumn>) d.getColumnModifier()).accept(new DefaultNamedColumn(d.getColumnName()).plus(1));
+        fieldDescriptors = m1.get(RecordUpdateDateTime.class);
+        if (fieldDescriptors != null) {
+            fieldDescriptors.forEach(fieldDescriptor -> {
+                if (!fieldDescriptor.getFieldUpdatedSupplier().apply(object)) {
+                    if (updateParameter.fieldUpdateObject != null) {
+                        fieldDescriptor.getFieldModifier().accept(object, LocalDateTime.now());
+                    } else  {
+                        fieldDescriptor.getFieldModifier().accept(object, new DefaultValueColumn(LocalDateTime.now()));
                     }
-                });
-                iRecord.findColumnDescriptor(RecordUpdateDateTimeFunction.class).ifPresent(d -> {
-                    if (!d.getColumnUpdatedSupplier().get()) {
-                        ((Consumer<SqlColumn>) d.getColumnModifier()).accept(new DefaultValueColumn(LocalDateTime.now()));
-                    }
-                });
-            }
+                }
+            });
         }
+
+
     }
 }

@@ -16,16 +16,16 @@
 
 package glz.hawk.bookstore.designer.database;
 
+import glz.hawk.bookstore.designer.database.template.TRACE;
+import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
 import glz.hawk.jdesigner.annotation.common.ImportDef;
 import glz.hawk.jdesigner.annotation.database.*;
 import glz.hawk.jdesigner.annotation.meta.metadata.ReferencedMetadata;
-import glz.hawk.jdesigner.extension.column.RecordId;
-import glz.hawk.bookstore.designer.database.template.TRACE;
-import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
+import glz.hawkframework.dao.column.annotation.RecordId;
+import glz.hawkframework.dao.table.annotation.ColumnCount;
 
+import static glz.hawk.bookstore.designer.database.BOOK.*;
 import static glz.hawk.jdesigner.spec.database.SortType.ASCEND;
-import static glz.hawk.bookstore.designer.database.BOOK.BOOK_ID;
-import static glz.hawk.bookstore.designer.database.BOOK.ISBN;
 
 /**
  * This interface defines {@code Book} table.
@@ -33,8 +33,10 @@ import static glz.hawk.bookstore.designer.database.BOOK.ISBN;
  * @author Hawk
  */
 @PrimaryKeyDef(@IndexColumnDef(BOOK_ID))
-@IndexDef(name = "UI_BOOK_ISBN", isUnique = true, indexColumns = @IndexColumnDef(fieldName = ISBN,sortType = ASCEND))
+@IndexDef(name = "UI_BOOK_ISBN", shortName = "ISBN", isUnique = true, indexColumns = @IndexColumnDef(fieldName = ISBN, sortType = ASCEND))
+@IndexDef(name = "UI_BOOK_ISBN2", shortName = "ISBN2", isUnique = true, indexColumns = {@IndexColumnDef(ISBN), @IndexColumnDef(TITLE)})
 @ImportDef(TRACE.class)
+@ColumnCount(100)
 @TableDef
 public interface BOOK {
 

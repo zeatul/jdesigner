@@ -16,7 +16,6 @@
 package glz.hawk.jdesigner.spec.base;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * This interface requires its implementation must provide the location of {@code Model} definition or {@code Model}'s sub elements.

@@ -16,39 +16,30 @@
 
 package glz.hawk.bookstore.persist.repository.impl;
 
-import glz.hawkframework.dao.exception.ConcurrentModifyException;
-import glz.hawkframework.dao.exception.MultipleRecordsFoundException;
-import glz.hawkframework.dao.exception.RecordNotFoundException;
-import glz.hawkframework.dao.exception.UniqueViolationException;
-import glz.hawk.j4sql.support.SqlColumn;
-import glz.hawk.j4sql.util.ConditionBuilder;
-import glz.hawk.j4sql.util.QueryWrapper;
+import glz.hawk.bookstore.persist.ex.repository.AuthorExRepository;
 import glz.hawk.bookstore.persist.po.AuthorPo;
 import glz.hawk.bookstore.persist.repository.AuthorRepository;
 import glz.hawk.bookstore.persist.repository.config.TestRepositoryConfig;
 import glz.hawk.bookstore.persist.repository.data.AuthorGenerator;
-import glz.hawk.bookstore.persist.update.AuthorColumnUpdate;
 import glz.hawk.bookstore.persist.update.AuthorUpdate;
+import glz.hawkframework.dao.exception.ConcurrentModifyException;
+import glz.hawkframework.dao.exception.RecordNotFoundException;
+import glz.hawkframework.dao.exception.UniqueViolationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static glz.hawk.bookstore.persist.support.AuthorSupport.AUTHOR_NAME;
-import static glz.hawk.bookstore.persist.support.BookAuthorMapSupport.AUTHOR_ID;
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -61,6 +52,9 @@ public class AuthorRepositoryImplTest {
 
     @Autowired
     private AuthorRepository authorRepository;
+
+    @Autowired
+    private AuthorExRepository authorExRepository;
 
     @Autowired
     private AuthorGenerator authorGenerator;
@@ -105,11 +99,7 @@ public class AuthorRepositoryImplTest {
         authorPoList.sort(Comparator.comparing(AuthorPo::getAuthorId));
 
         List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-        QueryWrapper queryWrapper = QueryWrapper.builder()
-            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authodIdList)).build())
-            .setOrderColumns(AUTHOR_ID.asc())
-            .build();
-        List<AuthorPo> authorPoListInDb = authorRepository.queryMany(queryWrapper);
+        List<AuthorPo> authorPoListInDb = authorExRepository.queryByIds(authodIdList);
         assertThat(authorPoListInDb).hasSize(authodIdList.size());
         assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
         assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 1).getAuthorId());
@@ -126,11 +116,7 @@ public class AuthorRepositoryImplTest {
         int batchSize = 88;
         authorRepository.insertMultiple(authorPoList, batchSize);
         authorPoList.sort(Comparator.comparing(AuthorPo::getAuthorId));
-        QueryWrapper queryWrapper = QueryWrapper.builder()
-            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authodIdList)).build())
-            .setOrderColumns(AUTHOR_ID.asc())
-            .build();
-        List<AuthorPo> authorPoListInDb = authorRepository.queryMany(queryWrapper);
+        List<AuthorPo> authorPoListInDb = authorExRepository.queryByIds(authodIdList);
         assertThat(authorPoListInDb).hasSize(authodIdList.size());
         assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
         assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 1).getAuthorId());
@@ -140,11 +126,7 @@ public class AuthorRepositoryImplTest {
         batchSize = 88;
         authorRepository.insertMultiple(authorPoList, batchSize);
         authorPoList.sort(Comparator.comparing(AuthorPo::getAuthorId));
-        queryWrapper = QueryWrapper.builder()
-            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authodIdList)).build())
-            .setOrderColumns(AUTHOR_ID.asc())
-            .build();
-        authorPoListInDb = authorRepository.queryMany(queryWrapper);
+        authorPoListInDb = authorExRepository.queryByIds(authodIdList);
         assertThat(authorPoListInDb).hasSize(authodIdList.size());
         assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
         assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 1).getAuthorId());
@@ -154,11 +136,7 @@ public class AuthorRepositoryImplTest {
         batchSize = 88;
         authorRepository.insertMultiple(authorPoList, batchSize);
         authorPoList.sort(Comparator.comparing(AuthorPo::getAuthorId));
-        queryWrapper = QueryWrapper.builder()
-            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authodIdList)).build())
-            .setOrderColumns(AUTHOR_ID.asc())
-            .build();
-        authorPoListInDb = authorRepository.queryMany(queryWrapper);
+        authorPoListInDb = authorExRepository.queryByIds(authodIdList);
         assertThat(authorPoListInDb).hasSize(authodIdList.size());
         assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
         assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 1).getAuthorId());
@@ -168,11 +146,7 @@ public class AuthorRepositoryImplTest {
         batchSize = 88;
         authorRepository.insertMultiple(authorPoList, batchSize);
         authorPoList.sort(Comparator.comparing(AuthorPo::getAuthorId));
-        queryWrapper = QueryWrapper.builder()
-            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authodIdList)).build())
-            .setOrderColumns(AUTHOR_ID.asc())
-            .build();
-        authorPoListInDb = authorRepository.queryMany(queryWrapper);
+        authorPoListInDb = authorExRepository.queryByIds(authodIdList);
         assertThat(authorPoListInDb).hasSize(authodIdList.size());
         assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
         assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 1).getAuthorId());
@@ -262,293 +236,297 @@ public class AuthorRepositoryImplTest {
             .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
-    public void query_one_test() {
-        AuthorPo authorPo = authorGenerator.generate();
-        authorRepository.insert(authorPo);
-        assertThat(
-            authorRepository.queryOne(
-                QueryWrapper.builder()
-                    .setCondition(
-                        ConditionBuilder.builder(AUTHOR_ID.eq(authorPo.getAuthorId())).build()
-                    ).build()
-            )
-        ).isPresent()
-            .get()
-            .returns(authorPo.getAuthorId(), AuthorPo::getAuthorId);
-
-        assertThat(
-            authorRepository.queryOne(
-                QueryWrapper.builder()
-                    .setCondition(
-                        ConditionBuilder.builder(AUTHOR_ID.eq(BigInteger.ZERO)).build()
-                    ).build()
-            )
-        ).isNotPresent();
-    }
-
-    @Test
-    public void query_many_test() {
-        List<AuthorPo> authorPoList = authorGenerator.generate(100);
-        authorRepository.insertMultiple(authorPoList);
-
-        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-        QueryWrapper queryWrapper = QueryWrapper.builder()
-            .setColumns(AUTHOR_ID, AUTHOR_NAME)
-            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authodIdList)).build())
-            .setOrderColumns(AUTHOR_ID.asc())
-            .setOffsetAndLimit(0L, 99L)
-            .build();
-        List<AuthorPo> authorPoListInDb = authorRepository.queryMany(queryWrapper);
-        assertThat(authorPoListInDb).hasSize(99);
-        assertThat(authorPoListInDb).allSatisfy(p -> {
-            assertThat(p.getAuthorId()).isNotNull();
-            assertThat(p.getAuthorName()).isNotNull();
-            assertThat(p.getCreateDateTime()).isNull();
-            assertThat(p.getNationality()).isNull();
-        });
-        assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
-        assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 2).getAuthorId());
-    }
-
-    @Transactional
-    @Test
-    public void cursor_test() {
-        List<AuthorPo> authorPoList = authorGenerator.generate(100);
-        authorRepository.insertMultiple(authorPoList);
-        List<BigInteger> authorIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-        QueryWrapper queryWrapper = QueryWrapper.builder()
-            .setColumns(AUTHOR_ID, AUTHOR_NAME)
-            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authorIdList)).build())
-            .setOrderColumns(AUTHOR_ID.asc())
-            .setOffsetAndLimit(0L, 99L)
-            .build();
-        List<BigInteger> authorIdListInDB = new ArrayList<>();
-        authorRepository.cursor(queryWrapper, authorPo -> authorIdListInDB.add(authorPo.getAuthorId()));
-        assertThat(authorIdListInDB).hasSize(99);
-    }
-
-    @Test
-    public void load_one_test() {
-        AuthorPo authorPo = authorGenerator.generate();
-        authorRepository.insert(authorPo);
-        assertThat(
-            authorRepository.loadOne(
-                QueryWrapper.builder()
-                    .setCondition(
-                        ConditionBuilder.builder(AUTHOR_ID.eq(authorPo.getAuthorId())).build()
-                    ).build()
-            )
-        ).returns(authorPo.getAuthorId(), AuthorPo::getAuthorId);
-
-        assertThatThrownBy(() -> authorRepository.loadOne(
-            QueryWrapper.builder()
-                .setCondition(
-                    ConditionBuilder.builder(AUTHOR_ID.eq(BigInteger.ZERO)).build()
-                ).build()
-        )).isExactlyInstanceOf(RecordNotFoundException.class)
-            .hasMessage(RecordNotFoundException.DEFAULT_ERROR_MESSAGE);
-    }
-
-    @Test
-    public void load_one_with_throw_test() {
-        AuthorPo authorPo = authorGenerator.generate();
-        authorRepository.insert(authorPo);
-        assertThat(
-            authorRepository.loadOne(
-                QueryWrapper.builder()
-                    .setCondition(
-                        ConditionBuilder.builder(AUTHOR_ID.eq(authorPo.getAuthorId())).build()
-                    ).build(),
-                IllegalArgumentException::new
-            )
-        ).returns(authorPo.getAuthorId(), AuthorPo::getAuthorId);
-
-        assertThatThrownBy(() -> authorRepository.loadOne(
-            QueryWrapper.builder()
-                .setCondition(
-                    ConditionBuilder.builder(AUTHOR_ID.eq(BigInteger.ZERO)).build()
-                ).build(),
-            IllegalArgumentException::new
-        )).isExactlyInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    public void count_test() {
-        List<AuthorPo> authorPoList = authorGenerator.generate(110);
-        authorRepository.insertMultiple(authorPoList);
-        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-        assertThat(
-            authorRepository.count(
-                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build()
-            )
-        ).isEqualTo(110);
-
-        authorRepository.deleteByPrimaryKey(authorPoList.get(0).getAuthorId(), authorPoList.get(0).getRecordVersion());
-        authorRepository.deleteByPrimaryKey(authorPoList.get(1).getAuthorId(), authorPoList.get(1).getRecordVersion());
-
-        assertThat(
-            authorRepository.count(
-                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build()
-            )
-        ).isEqualTo(108);
-
-        assertThat(
-            authorRepository.count(
-                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build()
-            )
-        ).isEqualTo(0);
-    }
-
-    @Test
-    public void exist_test() {
-        List<AuthorPo> authorPoList = authorGenerator.generate(11);
-        authorRepository.insertMultiple(authorPoList);
-        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-        assertThat(
-            authorRepository.exist(
-                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build()
-            )
-        ).isTrue();
-        assertThat(
-            authorRepository.exist(
-                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build()
-            )
-        ).isFalse();
-    }
-
-    @Test
-    public void assert_exist_test() {
-        List<AuthorPo> authorPoList = authorGenerator.generate(12);
-        authorRepository.insertMultiple(authorPoList);
-        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-
-        assertThatNoException().isThrownBy(() -> authorRepository.assertExist(
-            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build())
-        );
-
-        assertThatThrownBy(() -> authorRepository.assertExist(
-            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build())
-        ).isExactlyInstanceOf(RecordNotFoundException.class)
-            .hasMessage(RecordNotFoundException.DEFAULT_ERROR_MESSAGE);
-    }
-
-    @Test
-    public void assert_exist_with_throw_test() {
-        List<AuthorPo> authorPoList = authorGenerator.generate(12);
-        authorRepository.insertMultiple(authorPoList);
-        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-
-        assertThatNoException().isThrownBy(() -> authorRepository.assertExist(
-            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build(),
-            IllegalArgumentException::new
-        ));
-
-        assertThatThrownBy(() -> authorRepository.assertExist(
-            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build(),
-            IllegalArgumentException::new
-        )).isExactlyInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    public void exist_one_test() {
-        List<AuthorPo> authorPoList = authorGenerator.generate(12);
-        authorRepository.insertMultiple(authorPoList);
-        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-
-        assertThat(
-            authorRepository.existOne(
-                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build()
-            )
-        ).isFalse();
-
-        assertThat(
-            authorRepository.existOne(
-                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build()
-            )
-        ).isFalse();
-
-        assertThat(
-            authorRepository.existOne(
-                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.eq(authodIdList.get(0))).build()
-            )
-        ).isTrue();
-    }
-
-    @Test
-    public void assert_exist_one_test() {
-        List<AuthorPo> authorPoList = authorGenerator.generate(12);
-        authorRepository.insertMultiple(authorPoList);
-        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-
-        assertThatNoException().isThrownBy(() -> authorRepository.assertExistOne(
-            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.eq(authodIdList.get(0))).build()
-        ));
-
-        assertThatThrownBy(() -> authorRepository.assertExistOne(
-            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build()
-        )).isExactlyInstanceOf(MultipleRecordsFoundException.class)
-            .hasMessage(MultipleRecordsFoundException.DEFAULT_ERROR_MESSAGE);
-
-        assertThatThrownBy(() -> authorRepository.assertExistOne(
-            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build()
-        )).isExactlyInstanceOf(RecordNotFoundException.class)
-            .hasMessage(RecordNotFoundException.DEFAULT_ERROR_MESSAGE);
-
-    }
-
-    @Test
-    public void assert_exist_one_with_throw_test() {
-        List<AuthorPo> authorPoList = authorGenerator.generate(12);
-        authorRepository.insertMultiple(authorPoList);
-        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-
-        assertThatThrownBy(() -> authorRepository.assertExistOne(
-            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build(),
-            IllegalArgumentException::new, IllegalArgumentException::new
-        )).isExactlyInstanceOf(IllegalArgumentException.class);
-
-        assertThatThrownBy(() -> authorRepository.assertExistOne(
-            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build(),
-            IllegalArgumentException::new, IllegalArgumentException::new
-        )).isExactlyInstanceOf(IllegalArgumentException.class);
-
-        assertThatNoException().isThrownBy(() -> authorRepository.assertExistOne(
-            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.eq(authodIdList.get(0))).build(),
-            IllegalArgumentException::new, IllegalArgumentException::new
-        ));
-    }
-
-    @Test
-    public void delete_test() {
-        List<AuthorPo> authorPoList = authorGenerator.generate(12);
-        authorRepository.insertMultiple(authorPoList);
-        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-
-        assertThat(authorRepository.delete(AUTHOR_ID.isNull())).isEqualTo(0);
-        assertThat(authorRepository.delete(AUTHOR_ID.in(authodIdList))).isEqualTo(12);
-    }
-
-    @Test
-    public void update_test() {
-        List<AuthorPo> authorPoList = authorGenerator.generate(12);
-        authorRepository.insertMultiple(authorPoList);
-        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
-
-        AuthorColumnUpdate authorColumnUpdate = new AuthorColumnUpdate();
-        authorColumnUpdate.setContact((SqlColumn) null);
-        authorColumnUpdate.setDeleteDateTime(LocalDateTime.now());
-
-        assertThat(authorRepository.update(authorColumnUpdate, AUTHOR_ID.isNull())).isEqualTo(0);
-        assertThat(authorRepository.update(authorColumnUpdate, AUTHOR_ID.in(authodIdList))).isEqualTo(12);
-
-        assertThat(authorRepository.queryMany(QueryWrapper.builder().setCondition(AUTHOR_ID.in(authodIdList)).build()))
-            .hasSize(12)
-            .allSatisfy(p -> {
-                assertThat(p.getContact()).isNull();
-                assertThat(p.getDeleteDateTime()).isNotNull();
-                assertThat(p.getRecordVersion()).isEqualTo(2);
-            });
-
-    }
+    // TODO: 删除代码
+    // TODO: 测试根据唯一索引生成的代码
+//
+//    @Test
+//    public void query_one_test() {
+//        AuthorPo authorPo = authorGenerator.generate();
+//        authorRepository.insert(authorPo);
+//        assertThat(
+//            authorRepository.queryOne(
+//                QueryWrapper.builder()
+//                    .setCondition(
+//                        ConditionBuilder.builder(AUTHOR_ID.eq(authorPo.getAuthorId())).build()
+//                    ).build()
+//            )
+//        ).isPresent()
+//            .get()
+//            .returns(authorPo.getAuthorId(), AuthorPo::getAuthorId);
+//
+//        assertThat(
+//            authorRepository.queryOne(
+//                QueryWrapper.builder()
+//                    .setCondition(
+//                        ConditionBuilder.builder(AUTHOR_ID.eq(BigInteger.ZERO)).build()
+//                    ).build()
+//            )
+//        ).isNotPresent();
+//    }
+//
+//    @Test
+//    public void query_many_test() {
+//        List<AuthorPo> authorPoList = authorGenerator.generate(100);
+//        authorRepository.insertMultiple(authorPoList);
+//
+//        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
+//        QueryWrapper queryWrapper = QueryWrapper.builder()
+//            .setColumns(AUTHOR_ID, AUTHOR_NAME)
+//            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authodIdList)).build())
+//            .setOrderColumns(AUTHOR_ID.asc())
+//            .setOffsetAndLimit(0L, 99L)
+//            .build();
+//        List<AuthorPo> authorPoListInDb = authorRepository.queryMany(queryWrapper);
+//        assertThat(authorPoListInDb).hasSize(99);
+//        assertThat(authorPoListInDb).allSatisfy(p -> {
+//            assertThat(p.getAuthorId()).isNotNull();
+//            assertThat(p.getAuthorName()).isNotNull();
+//            assertThat(p.getCreateDateTime()).isNull();
+//            assertThat(p.getNationality()).isNull();
+//        });
+//        assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
+//        assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 2).getAuthorId());
+//    }
+//
+//    @Transactional
+//    @Test
+//    public void cursor_test() {
+//        List<AuthorPo> authorPoList = authorGenerator.generate(100);
+//        authorRepository.insertMultiple(authorPoList);
+//        List<BigInteger> authorIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
+//        QueryWrapper queryWrapper = QueryWrapper.builder()
+//            .setColumns(AUTHOR_ID, AUTHOR_NAME)
+//            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authorIdList)).build())
+//            .setOrderColumns(AUTHOR_ID.asc())
+//            .setOffsetAndLimit(0L, 99L)
+//            .build();
+//        List<BigInteger> authorIdListInDB = new ArrayList<>();
+//        authorRepository.cursor(queryWrapper, authorPo -> authorIdListInDB.add(authorPo.getAuthorId()));
+//        assertThat(authorIdListInDB).hasSize(99);
+//    }
+//
+//    @Test
+//    public void load_one_test() {
+//        AuthorPo authorPo = authorGenerator.generate();
+//        authorRepository.insert(authorPo);
+//        assertThat(
+//            authorRepository.loadOne(
+//                QueryWrapper.builder()
+//                    .setCondition(
+//                        ConditionBuilder.builder(AUTHOR_ID.eq(authorPo.getAuthorId())).build()
+//                    ).build()
+//            )
+//        ).returns(authorPo.getAuthorId(), AuthorPo::getAuthorId);
+//
+//        assertThatThrownBy(() -> authorRepository.loadOne(
+//            QueryWrapper.builder()
+//                .setCondition(
+//                    ConditionBuilder.builder(AUTHOR_ID.eq(BigInteger.ZERO)).build()
+//                ).build()
+//        )).isExactlyInstanceOf(RecordNotFoundException.class)
+//            .hasMessage(RecordNotFoundException.DEFAULT_ERROR_MESSAGE);
+//    }
+//
+//    @Test
+//    public void load_one_with_throw_test() {
+//        AuthorPo authorPo = authorGenerator.generate();
+//        authorRepository.insert(authorPo);
+//        assertThat(
+//            authorRepository.loadOne(
+//                QueryWrapper.builder()
+//                    .setCondition(
+//                        ConditionBuilder.builder(AUTHOR_ID.eq(authorPo.getAuthorId())).build()
+//                    ).build(),
+//                IllegalArgumentException::new
+//            )
+//        ).returns(authorPo.getAuthorId(), AuthorPo::getAuthorId);
+//
+//        assertThatThrownBy(() -> authorRepository.loadOne(
+//            QueryWrapper.builder()
+//                .setCondition(
+//                    ConditionBuilder.builder(AUTHOR_ID.eq(BigInteger.ZERO)).build()
+//                ).build(),
+//            IllegalArgumentException::new
+//        )).isExactlyInstanceOf(IllegalArgumentException.class);
+//    }
+//
+//    @Test
+//    public void count_test() {
+//        List<AuthorPo> authorPoList = authorGenerator.generate(110);
+//        authorRepository.insertMultiple(authorPoList);
+//        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
+//        assertThat(
+//            authorRepository.count(
+//                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build()
+//            )
+//        ).isEqualTo(110);
+//
+//        authorRepository.deleteByPrimaryKey(authorPoList.get(0).getAuthorId(), authorPoList.get(0).getRecordVersion());
+//        authorRepository.deleteByPrimaryKey(authorPoList.get(1).getAuthorId(), authorPoList.get(1).getRecordVersion());
+//
+//        assertThat(
+//            authorRepository.count(
+//                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build()
+//            )
+//        ).isEqualTo(108);
+//
+//        assertThat(
+//            authorRepository.count(
+//                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build()
+//            )
+//        ).isEqualTo(0);
+//    }
+//
+//    @Test
+//    public void exist_test() {
+//        List<AuthorPo> authorPoList = authorGenerator.generate(11);
+//        authorRepository.insertMultiple(authorPoList);
+//        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
+//        assertThat(
+//            authorRepository.exist(
+//                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build()
+//            )
+//        ).isTrue();
+//        assertThat(
+//            authorRepository.exist(
+//                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build()
+//            )
+//        ).isFalse();
+//    }
+//
+//    @Test
+//    public void assert_exist_test() {
+//        List<AuthorPo> authorPoList = authorGenerator.generate(12);
+//        authorRepository.insertMultiple(authorPoList);
+//        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
+//
+//        assertThatNoException().isThrownBy(() -> authorRepository.assertExist(
+//            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build())
+//        );
+//
+//        assertThatThrownBy(() -> authorRepository.assertExist(
+//            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build())
+//        ).isExactlyInstanceOf(RecordNotFoundException.class)
+//            .hasMessage(RecordNotFoundException.DEFAULT_ERROR_MESSAGE);
+//    }
+//
+//    @Test
+//    public void assert_exist_with_throw_test() {
+//        List<AuthorPo> authorPoList = authorGenerator.generate(12);
+//        authorRepository.insertMultiple(authorPoList);
+//        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
+//
+//        assertThatNoException().isThrownBy(() -> authorRepository.assertExist(
+//            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build(),
+//            IllegalArgumentException::new
+//        ));
+//
+//        assertThatThrownBy(() -> authorRepository.assertExist(
+//            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build(),
+//            IllegalArgumentException::new
+//        )).isExactlyInstanceOf(IllegalArgumentException.class);
+//    }
+//
+//    @Test
+//    public void exist_one_test() {
+//        List<AuthorPo> authorPoList = authorGenerator.generate(12);
+//        authorRepository.insertMultiple(authorPoList);
+//        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
+//
+//        assertThat(
+//            authorRepository.existOne(
+//                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build()
+//            )
+//        ).isFalse();
+//
+//        assertThat(
+//            authorRepository.existOne(
+//                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build()
+//            )
+//        ).isFalse();
+//
+//        assertThat(
+//            authorRepository.existOne(
+//                QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.eq(authodIdList.get(0))).build()
+//            )
+//        ).isTrue();
+//    }
+//
+//    @Test
+//    public void assert_exist_one_test() {
+//        List<AuthorPo> authorPoList = authorGenerator.generate(12);
+//        authorRepository.insertMultiple(authorPoList);
+//        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
+//
+//        assertThatNoException().isThrownBy(() -> authorRepository.assertExistOne(
+//            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.eq(authodIdList.get(0))).build()
+//        ));
+//
+//        assertThatThrownBy(() -> authorRepository.assertExistOne(
+//            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build()
+//        )).isExactlyInstanceOf(MultipleRecordsFoundException.class)
+//            .hasMessage(MultipleRecordsFoundException.DEFAULT_ERROR_MESSAGE);
+//
+//        assertThatThrownBy(() -> authorRepository.assertExistOne(
+//            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build()
+//        )).isExactlyInstanceOf(RecordNotFoundException.class)
+//            .hasMessage(RecordNotFoundException.DEFAULT_ERROR_MESSAGE);
+//
+//    }
+//
+//    @Test
+//    public void assert_exist_one_with_throw_test() {
+//        List<AuthorPo> authorPoList = authorGenerator.generate(12);
+//        authorRepository.insertMultiple(authorPoList);
+//        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
+//
+//        assertThatThrownBy(() -> authorRepository.assertExistOne(
+//            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.in(authodIdList)).build(),
+//            IllegalArgumentException::new, IllegalArgumentException::new
+//        )).isExactlyInstanceOf(IllegalArgumentException.class);
+//
+//        assertThatThrownBy(() -> authorRepository.assertExistOne(
+//            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.isNull()).build(),
+//            IllegalArgumentException::new, IllegalArgumentException::new
+//        )).isExactlyInstanceOf(IllegalArgumentException.class);
+//
+//        assertThatNoException().isThrownBy(() -> authorRepository.assertExistOne(
+//            QueryWrapper.builder().setCount(true).setCondition(AUTHOR_ID.eq(authodIdList.get(0))).build(),
+//            IllegalArgumentException::new, IllegalArgumentException::new
+//        ));
+//    }
+//
+//    @Test
+//    public void delete_test() {
+//        List<AuthorPo> authorPoList = authorGenerator.generate(12);
+//        authorRepository.insertMultiple(authorPoList);
+//        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
+//
+//        assertThat(authorRepository.delete(AUTHOR_ID.isNull())).isEqualTo(0);
+//        assertThat(authorRepository.delete(AUTHOR_ID.in(authodIdList))).isEqualTo(12);
+//    }
+//
+//    @Test
+//    public void update_test() {
+//        List<AuthorPo> authorPoList = authorGenerator.generate(12);
+//        authorRepository.insertMultiple(authorPoList);
+//        List<BigInteger> authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
+//
+//        AuthorColumnUpdate authorColumnUpdate = new AuthorColumnUpdate();
+//        authorColumnUpdate.setContact((SqlColumn) null);
+//        authorColumnUpdate.setRecordVersion(RECORD_VERSION.plus(1));
+//        authorColumnUpdate.setDeleteDateTime(LocalDateTime.now());
+//
+//        assertThat(authorRepository.update(authorColumnUpdate, AUTHOR_ID.isNull())).isEqualTo(0);
+//        assertThat(authorRepository.update(authorColumnUpdate, AUTHOR_ID.in(authodIdList))).isEqualTo(12);
+//
+//        assertThat(authorRepository.queryMany(QueryWrapper.builder().setCondition(AUTHOR_ID.in(authodIdList)).build()))
+//            .hasSize(12)
+//            .allSatisfy(p -> {
+//                assertThat(p.getContact()).isNull();
+//                assertThat(p.getDeleteDateTime()).isNotNull();
+//                assertThat(p.getRecordVersion()).isEqualTo(2);
+//            });
+//
+//    }
 }

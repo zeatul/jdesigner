@@ -19,6 +19,7 @@ package glz.hawk.jdesigner.builder.handler;
 import glz.hawk.jdesigner.annotation.meta.domain.DomainDef;
 import glz.hawk.jdesigner.annotation.meta.domain.DomainDefContainer;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
+import glz.hawk.jdesigner.builder.factory.java.common.AnnotationHelper;
 import glz.hawk.jdesigner.builder.factory.meta.domain.DomainFactory;
 import glz.hawk.jdesigner.builder.factory.meta.domain.DomainFactoryContext;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
@@ -45,16 +46,21 @@ public class DomainMetadataReaderResourceHandler extends AbstractMetadataReaderR
     @Override
     protected void handleField(Field field) {
         DomainFactoryContext factoryContext = initFactoryContext(field);
-        if (!beforeHandle(field, DomainDef.class, factoryContext)){
-            return ;
+        if (!beforeHandle(field, DomainDef.class, factoryContext)) {
+            return;
         }
-        new DomainFactory(modelWarehouse, builderContext, factoryContext).build();
+        buildDomainFactory(factoryContext).build();
     }
 
     protected DomainFactoryContext initFactoryContext(Field definingField) {
-        DomainFactoryContext context = new DomainFactoryContext();
-        context.setAnnotatedElement(definingField);
-        return context;
+        DomainFactoryContext factoryContext = new DomainFactoryContext();
+        factoryContext.setAnnotatedElement(definingField);
+        factoryContext.putNoDefAnnotations(AnnotationHelper.parse(definingField));
+        return factoryContext;
+    }
+
+    protected DomainFactory buildDomainFactory(DomainFactoryContext factoryContext) {
+        return new DomainFactory(modelWarehouse, builderContext, factoryContext);
     }
 
 }

@@ -19,12 +19,11 @@ package glz.hawk.jdesigner.spec.impl.meta.domain;
 import glz.hawk.jdesigner.spec.base.Display;
 import glz.hawk.jdesigner.spec.impl.base.AbstractModel;
 import glz.hawk.jdesigner.spec.meta.domain.Domain;
-import glz.hawk.jdesigner.spec.meta.domain.value.Value;
 import glz.hawk.jdesigner.spec.meta.domain.type.DataType;
+import glz.hawk.jdesigner.spec.meta.domain.value.Value;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import java.util.Map;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;

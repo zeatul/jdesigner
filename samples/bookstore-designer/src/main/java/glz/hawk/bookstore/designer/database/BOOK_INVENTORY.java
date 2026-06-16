@@ -16,12 +16,13 @@
 
 package glz.hawk.bookstore.designer.database;
 
+import glz.hawk.bookstore.designer.database.template.TRACE;
+import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
 import glz.hawk.jdesigner.annotation.common.ImportDef;
 import glz.hawk.jdesigner.annotation.database.*;
 import glz.hawk.jdesigner.annotation.meta.metadata.ReferencedMetadata;
-import glz.hawk.jdesigner.extension.column.RecordId;
-import glz.hawk.bookstore.designer.database.template.TRACE;
-import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
+import glz.hawkframework.dao.column.annotation.RecordId;
+import glz.hawkframework.dao.table.annotation.ColumnCount;
 
 import static glz.hawk.bookstore.designer.database.BOOK.BOOK_ID;
 import static glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary.BOOK_INVENTORY_ID;
@@ -33,8 +34,9 @@ import static glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary.LOCATION
  * @author Zhang Peng
  */
 @PrimaryKeyDef(@IndexColumnDef(BOOK_INVENTORY_ID))
-@IndexDef(name = "UI_INVENTORY_BOOK_ID_AND_LOCATION", isUnique = true, indexColumns = {@IndexColumnDef(BOOK_ID), @IndexColumnDef(LOCATION_CODE)})
+@IndexDef(name = "UI_INVENTORY_BOOK_ID_AND_LOCATION",shortName = "BOOK_ID_AND_LOCATION", isUnique = true, indexColumns = {@IndexColumnDef(BOOK_ID), @IndexColumnDef(LOCATION_CODE)})
 @ImportDef(TRACE.class)
+@ColumnCount(100)
 @TableDef
 public class BOOK_INVENTORY {
 

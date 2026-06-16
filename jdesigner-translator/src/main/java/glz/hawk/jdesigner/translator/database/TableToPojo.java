@@ -16,22 +16,16 @@
 
 package glz.hawk.jdesigner.translator.database;
 
-import glz.hawk.jdesigner.spec.base.Model;
+import glz.hawk.codepoet.java.*;
+import glz.hawk.codepoet.java.ClassSpec.Builder;
+import glz.hawk.codepoet.java.javadoc.TypeJavadoc;
 import glz.hawk.jdesigner.spec.database.Column;
 import glz.hawk.jdesigner.spec.database.Table;
 import glz.hawk.jdesigner.translator.Translator;
-import glz.hawk.codepoet.java.ClassSpec;
-import glz.hawk.codepoet.java.ClassSpec.Builder;
-import glz.hawk.codepoet.java.FieldSpec;
-import glz.hawk.codepoet.java.JavaFile;
-import glz.hawk.codepoet.java.MethodSpec;
-import glz.hawk.codepoet.java.javadoc.HtmlTag;
-import glz.hawk.codepoet.java.javadoc.TypeJavadoc;
 
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -46,28 +40,40 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
  * @author Hawk
  */
 public class TableToPojo implements Translator<Table, JavaFile> {
-    private final Translator<Table, String> pojoClassNameTranslator;
-    private final List<Translator<Column, FieldSpec>> fieldTranslators = new ArrayList<>();
-    private final List<Translator<Column, MethodSpec>> methodTranslators = new ArrayList<>();
-    private final Translator<Model, String> pojoPackageTranslator;
-    private final List<BiConsumer<Builder, Table>> customizers = new ArrayList<>();
+    protected final Translator<Table, String> pojoPackageTranslator;
 
-    public TableToPojo(Translator<Table, String> pojoClassNameTranslator, List<Translator<Column, FieldSpec>> fieldTranslators,
-                       List<Translator<Column, MethodSpec>> methodTranslators, Translator<Model, String> pojoPackageTranslator,
-                       List<BiConsumer<Builder, Table>> customizers) {
+    protected final Translator<Table, String> pojoClassNameTranslator;
+
+    protected final List<Translator<Column, FieldSpec>> fieldTranslators = new ArrayList<>();
+
+    protected final List<Translator<Column, MethodSpec>> methodTranslators = new ArrayList<>();
+
+    protected final Translator<Table, TypeJavadoc> pojoJavadocTranslator;
+
+    protected final Translator<Table, List<AnnotationInstanceSpec>> classAnnotationsTranslator;
+
+    protected final List<BiConsumer<Builder, Table>> customizers = new ArrayList<>();
+
+
+    public TableToPojo(
+        Translator<Table, String> pojoPackageTranslator,
+        Translator<Table, String> pojoClassNameTranslator,
+        List<Translator<Column, FieldSpec>> fieldTranslators,
+        List<Translator<Column, MethodSpec>> methodTranslators,
+        Translator<Table, TypeJavadoc> pojoJavadocTranslator,
+        Translator<Table, List<AnnotationInstanceSpec>> classAnnotationsTranslator,
+        List<BiConsumer<Builder, Table>> customizers
+    ) {
+        this.pojoPackageTranslator = argNotNull(pojoPackageTranslator, "pojoPackageTranslator");
         this.pojoClassNameTranslator = argNotNull(pojoClassNameTranslator, "pojoClassNameTranslator");
         this.fieldTranslators.addAll(argNoNullElement(fieldTranslators, "fieldTranslators"));
         this.methodTranslators.addAll(argNoNullElement(methodTranslators, "methodTranslators"));
-        this.pojoPackageTranslator = argNotNull(pojoPackageTranslator, "pojoPackageTranslator");
-        if (customizers != null) {
-            argNoNullElement(customizers, "customizers");
-            this.customizers.addAll(customizers);
-        }
-    }
+        this.pojoJavadocTranslator = argNotNull(pojoJavadocTranslator, "pojoJavadocTranslator");
+        this.classAnnotationsTranslator = argNotNull(classAnnotationsTranslator, "classAnnotationsTranslator");
 
-    public TableToPojo(Translator<Table, String> pojoClassNameTranslator, List<Translator<Column, FieldSpec>> fieldTranslators,
-                       List<Translator<Column, MethodSpec>> methodTranslators, Translator<Model, String> pojoPackageTranslator) {
-        this(pojoClassNameTranslator, fieldTranslators, methodTranslators, pojoPackageTranslator, Collections.emptyList());
+        if (customizers != null) {
+            this.customizers.addAll(argNoNullElement(customizers, "customizers"));
+        }
     }
 
     @Override
@@ -76,21 +82,13 @@ public class TableToPojo implements Translator<Table, JavaFile> {
         argNotNull(table, "table");
         String className = pojoClassNameTranslator.translate(table);
         Builder builder = ClassSpec.builder(className).addModifier(Modifier.PUBLIC);
+        builder.addAnnotations(classAnnotationsTranslator.translate(table));
         Stream.of(table.getColumns()).map(column -> fieldTranslators.stream().map(g -> g.translate(column)).collect(Collectors.toList())).forEach(builder::addFields);
         Stream.of(table.getColumns()).map(column -> methodTranslators.stream().map(g -> g.translate(column)).collect(Collectors.toList())).forEach(builder::addMethods);
-        builder.setJavadoc(buildJavaDoc(table));
+        builder.setJavadoc(pojoJavadocTranslator.translate(table));
         customizers.forEach(c -> c.accept(builder, table));
         return JavaFile.builder(pojoPackageTranslator.translate(table), builder.build()).build();
     }
 
-    protected TypeJavadoc buildJavaDoc(Table table) {
-        TypeJavadoc.Builder javadocBuilder = TypeJavadoc.builder();
-        if (table.getComment().isPresent()) {
-            javadocBuilder.beginJavadoc().addDocument(table.getComment().get());
-            javadocBuilder.beginJavadoc().addInlineHtml(HtmlTag.P, "Map to table: $L", table.getName());
-        } else {
-            javadocBuilder.beginJavadoc().addDocument("Map to table: $L", table.getName());
-        }
-        return javadocBuilder.build();
-    }
+
 }

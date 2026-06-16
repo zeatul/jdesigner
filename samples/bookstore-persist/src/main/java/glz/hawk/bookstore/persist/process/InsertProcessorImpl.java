@@ -17,12 +17,19 @@
 package glz.hawk.bookstore.persist.process;
 
 import glz.hawkframework.core.id.IdGenerator;
-import glz.hawkframework.dao.function.*;
+import glz.hawkframework.dao.column.FieldDescriptor;
+import glz.hawkframework.dao.column.PojoFieldParser;
+import glz.hawkframework.dao.column.annotation.*;
+import glz.hawkframework.dao.process.InsertParameter;
 import glz.hawkframework.dao.process.InsertProcessor;
 
+import java.lang.annotation.Annotation;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.function.Consumer;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
@@ -34,43 +41,82 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 @SuppressWarnings("unchecked")
 public class InsertProcessorImpl implements InsertProcessor {
 
+    private final ConcurrentHashMap<Class<?>, Map<Class<? extends Annotation>, List<FieldDescriptor<Object, Object, Annotation>>>> map = new ConcurrentHashMap<>();
     private final IdGenerator<BigInteger> idGenerator;
+    private final Map<Class<? extends Annotation>, List<FieldDescriptor<Object, Object, Annotation>>> EMPTY = Collections.emptyMap();
 
     public InsertProcessorImpl(IdGenerator<BigInteger> idGenerator) {
         this.idGenerator = argNotNull(idGenerator, "idGenerator");
     }
 
     @Override
-    public void beforeInsert(Object po) {
-        if (po == null) {
-            return;
+    public void beforeInsert(InsertParameter insertParameter) {
+        if (insertParameter == null) return ;
+
+        Object po = insertParameter.insertObject;
+        if (po == null) return ;
+
+        Map<Class<? extends Annotation>, List<FieldDescriptor<Object, Object, Annotation>>> m1 = map.get(po.getClass());
+        if (m1 == null) {
+            PojoFieldParser<Object> pojoParser = new PojoFieldParser<>((Class<Object>) po.getClass());
+            m1 = pojoParser.parse();
+            if (m1.isEmpty()) m1 = EMPTY;
+            map.put(po.getClass(), m1);
         }
 
-        if (po instanceof IRecord) {
-            IRecord iRecord = (IRecord) po;
+        if (m1 == EMPTY) return;
 
-            iRecord.findColumnDescriptor(RecordIdFunction.class).ifPresent(d -> {
-                if (d.getColumnSupplier().get() == null) {
-                    ((Consumer<BigInteger>) d.getColumnModifier()).accept(idGenerator.next());
+        List<FieldDescriptor<Object, Object, Annotation>> fieldDescriptors = m1.get(RecordId.class);
+        if (fieldDescriptors != null) {
+            fieldDescriptors.forEach(fieldDescriptor -> {
+                if (fieldDescriptor.getFieldSupplier().apply(po) == null) {
+                    fieldDescriptor.getFieldModifier().accept(po, idGenerator.next());
                 }
             });
+        }
 
-            iRecord.findColumnDescriptor(RecordVersionFunction.class).ifPresent(d -> {
-                if (d.getColumnSupplier().get() == null) {
-                    ((Consumer<Long>) d.getColumnModifier()).accept(1L);
+        fieldDescriptors = m1.get(RecordCreateUserId.class);
+        if (fieldDescriptors != null) {
+            fieldDescriptors.forEach(fieldDescriptor -> {
+                if (fieldDescriptor.getFieldSupplier().apply(po) == null) {
+                    fieldDescriptor.getFieldModifier().accept(po, "USER1001");
                 }
             });
+        }
 
-            LocalDateTime now = LocalDateTime.now();
-            iRecord.findColumnDescriptor(RecordCreateDateTimeFunction.class).ifPresent(d -> {
-                if (d.getColumnSupplier().get() == null) {
-                    ((Consumer<LocalDateTime>) d.getColumnModifier()).accept(now);
+        fieldDescriptors = m1.get(RecordUpdateUserId.class);
+        if (fieldDescriptors != null) {
+            fieldDescriptors.forEach(fieldDescriptor -> {
+                if (fieldDescriptor.getFieldSupplier().apply(po) == null) {
+                    fieldDescriptor.getFieldModifier().accept(po, "USER1001");
                 }
             });
+        }
 
-            iRecord.findColumnDescriptor(RecordUpdateDateTimeFunction.class).ifPresent(d -> {
-                if (d.getColumnSupplier().get() == null) {
-                    ((Consumer<LocalDateTime>) d.getColumnModifier()).accept(now);
+        LocalDateTime now = LocalDateTime.now();
+        fieldDescriptors = m1.get(RecordCreateDateTime.class);
+        if (fieldDescriptors != null) {
+            fieldDescriptors.forEach(fieldDescriptor -> {
+                if (fieldDescriptor.getFieldSupplier().apply(po) == null) {
+                    fieldDescriptor.getFieldModifier().accept(po, now);
+                }
+            });
+        }
+
+        fieldDescriptors = m1.get(RecordUpdateDateTime.class);
+        if (fieldDescriptors != null) {
+            fieldDescriptors.forEach(fieldDescriptor -> {
+                if (fieldDescriptor.getFieldSupplier().apply(po) == null) {
+                    fieldDescriptor.getFieldModifier().accept(po, now);
+                }
+            });
+        }
+
+        fieldDescriptors = m1.get(RecordVersion.class);
+        if (fieldDescriptors != null) {
+            fieldDescriptors.forEach(fieldDescriptor -> {
+                if (fieldDescriptor.getFieldSupplier().apply(po) == null) {
+                    fieldDescriptor.getFieldModifier().accept(po, 1L);
                 }
             });
         }

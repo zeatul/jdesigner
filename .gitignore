@@ -10,6 +10,12 @@ argfile*
 activemq-data/
 **/classes/
 
+# 忽略波浪号开头的临时文件
+~*
+
+# 忽略波浪号结尾的备份文件
+*~
+
 # Log files
 jxl.log
 jmx.log

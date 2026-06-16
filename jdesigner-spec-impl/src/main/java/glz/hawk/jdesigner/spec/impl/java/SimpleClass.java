@@ -18,9 +18,9 @@ package glz.hawk.jdesigner.spec.impl.java;
 
 import glz.hawk.jdesigner.spec.base.Display;
 import glz.hawk.jdesigner.spec.base.Model;
-import glz.hawk.jdesigner.spec.java.*;
 import glz.hawk.jdesigner.spec.impl.base.AbstractModel;
 import glz.hawk.jdesigner.spec.impl.base.ModelPartSupplier;
+import glz.hawk.jdesigner.spec.java.*;
 import glz.hawk.jdesigner.spec.java.Class;
 import glz.hawk.jdesigner.spec.java.type.UniversalType;
 

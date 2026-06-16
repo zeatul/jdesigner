@@ -16,18 +16,17 @@
 
 package glz.hawk.jdesigner.translator.database;
 
-import glz.hawk.jdesigner.spec.database.Column;
-import glz.hawk.jdesigner.translator.Translator;
 import glz.hawk.codepoet.java.MethodSpec;
-import glz.hawk.codepoet.java.javadoc.HtmlTag;
 import glz.hawk.codepoet.java.javadoc.MethodJavadoc;
 import glz.hawk.codepoet.java.type.TypeName;
+import glz.hawk.jdesigner.spec.database.Column;
+import glz.hawk.jdesigner.translator.Translator;
 
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 
-import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 import static glz.hawk.codepoet.java.type.VoidTypeName.VOID;
+import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
 /**
  * This class is responsible for translating s {@link Column} instance to a setter {@link MethodSpec} instance.
@@ -36,14 +35,21 @@ import static glz.hawk.codepoet.java.type.VoidTypeName.VOID;
  */
 public class ColumnToSetter implements Translator<Column, MethodSpec> {
 
-    private final Translator<Column, String> methodNameTranslator;
-    private final Translator<Column, String> fieldNameTranslator;
-    private final Translator<Column, TypeName> typeNameTranslator;
+    protected final Translator<Column, String> fieldNameTranslator;
+    protected final Translator<Column, TypeName> fieldTypeNameTranslator;
+    protected final Translator<Column, String> methodNameTranslator;
+    protected final Translator<Column, MethodJavadoc> methodJavadocTranslator;
 
-    public ColumnToSetter(Translator<Column, String> methodNameTranslator, Translator<Column, String> fieldNameTranslator, Translator<Column, TypeName> typeNameTranslator) {
-        this.methodNameTranslator = argNotNull(methodNameTranslator, "methodNameTranslator");
+    public ColumnToSetter(
+        Translator<Column, String> fieldNameTranslator,
+        Translator<Column, TypeName> fieldTypeNameTranslator,
+        Translator<Column, String> methodNameTranslator,
+        Translator<Column, MethodJavadoc> methodJavadocTranslator
+    ) {
         this.fieldNameTranslator = argNotNull(fieldNameTranslator, "fieldNameTranslator");
-        this.typeNameTranslator = argNotNull(typeNameTranslator, "typeNameTranslator");
+        this.fieldTypeNameTranslator = argNotNull(fieldTypeNameTranslator, "fieldTypeNameTranslator");
+        this.methodNameTranslator = argNotNull(methodNameTranslator, "methodNameTranslator");
+        this.methodJavadocTranslator = argNotNull(methodJavadocTranslator, "methodJavadocTranslator");
     }
 
     @Nonnull
@@ -51,25 +57,13 @@ public class ColumnToSetter implements Translator<Column, MethodSpec> {
     public MethodSpec translate(@Nonnull Column column) {
         argNotNull(column, "column");
         String fieldName = fieldNameTranslator.translate(column);
-        String methodName = methodNameTranslator.translate(column);
-        TypeName typeName = typeNameTranslator.translate(column);
-        return MethodSpec.builder(VOID, methodName, Modifier.PUBLIC)
-            .setJavadoc(buildJavadoc((column)))
-            .addParameter(typeName, fieldName)
+        return MethodSpec.builder(VOID, methodNameTranslator.translate(column), Modifier.PUBLIC)
+            .setJavadoc(methodJavadocTranslator.translate(column))
+            .addParameter(fieldTypeNameTranslator.translate(column), fieldName)
             .beginMethodBody()
             .addStatement("this.$L = $L", fieldName, fieldName)
             .end()
             .build();
     }
 
-    protected MethodJavadoc buildJavadoc(Column column) {
-        MethodJavadoc.Builder javadocBuilder = MethodJavadoc.builder();
-        if (column.getComment().isPresent()) {
-            javadocBuilder.beginJavadoc().addDocument("Sets $L", column.getComment().get());
-            javadocBuilder.beginJavadoc().addInlineHtml(HtmlTag.P, "Map to column: $L", column.getName());
-        } else {
-            javadocBuilder.beginJavadoc().addDocument("Map to column: $L", column.getName());
-        }
-        return javadocBuilder.build();
-    }
 }

@@ -16,8 +16,6 @@
 
 package glz.hawk.bookstore.persist.repository.ex.impl;
 
-import glz.hawk.j4sql.util.ConditionBuilder;
-import glz.hawk.j4sql.util.QueryWrapper;
 import glz.hawk.bookstore.persist.ex.repository.AuthorExRepository;
 import glz.hawk.bookstore.persist.po.AuthorPo;
 import glz.hawk.bookstore.persist.repository.AuthorRepository;
@@ -32,7 +30,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static glz.hawk.bookstore.persist.support.BookAuthorMapSupport.AUTHOR_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -57,11 +54,7 @@ public class AuthorExRepositoryImplTest {
         int batchSize = 1188;
         authorExRepository.insertBatch(authorPoList, batchSize);
         authorPoList.sort(Comparator.comparing(AuthorPo::getAuthorId));
-        QueryWrapper queryWrapper = QueryWrapper.builder()
-            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authodIdList)).build())
-            .setOrderColumns(AUTHOR_ID.asc())
-            .build();
-        List<AuthorPo> authorPoListInDb = authorRepository.queryMany(queryWrapper);
+        List<AuthorPo> authorPoListInDb = authorExRepository.queryByIds(authodIdList);
         assertThat(authorPoListInDb).hasSize(authodIdList.size());
         assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
         assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 1).getAuthorId());
@@ -70,12 +63,7 @@ public class AuthorExRepositoryImplTest {
         authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
         batchSize = 88;
         authorRepository.insertMultiple(authorPoList, batchSize);
-        authorPoList.sort(Comparator.comparing(AuthorPo::getAuthorId));
-        queryWrapper = QueryWrapper.builder()
-            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authodIdList)).build())
-            .setOrderColumns(AUTHOR_ID.asc())
-            .build();
-        authorPoListInDb = authorRepository.queryMany(queryWrapper);
+        authorPoListInDb = authorExRepository.queryByIds(authodIdList);
         assertThat(authorPoListInDb).hasSize(authodIdList.size());
         assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
         assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 1).getAuthorId());
@@ -84,12 +72,7 @@ public class AuthorExRepositoryImplTest {
         authodIdList = authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList());
         batchSize = 88;
         authorRepository.insertMultiple(authorPoList, batchSize);
-        authorPoList.sort(Comparator.comparing(AuthorPo::getAuthorId));
-        queryWrapper = QueryWrapper.builder()
-            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authodIdList)).build())
-            .setOrderColumns(AUTHOR_ID.asc())
-            .build();
-        authorPoListInDb = authorRepository.queryMany(queryWrapper);
+        authorPoListInDb = authorExRepository.queryByIds(authodIdList);
         assertThat(authorPoListInDb).hasSize(authodIdList.size());
         assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
         assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 1).getAuthorId());
@@ -99,11 +82,7 @@ public class AuthorExRepositoryImplTest {
         batchSize = 88;
         authorRepository.insertMultiple(authorPoList, batchSize);
         authorPoList.sort(Comparator.comparing(AuthorPo::getAuthorId));
-        queryWrapper = QueryWrapper.builder()
-            .setCondition(ConditionBuilder.builder(AUTHOR_ID.in(authodIdList)).build())
-            .setOrderColumns(AUTHOR_ID.asc())
-            .build();
-        authorPoListInDb = authorRepository.queryMany(queryWrapper);
+        authorPoListInDb = authorExRepository.queryByIds(authodIdList);
         assertThat(authorPoListInDb).hasSize(authodIdList.size());
         assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
         assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 1).getAuthorId());

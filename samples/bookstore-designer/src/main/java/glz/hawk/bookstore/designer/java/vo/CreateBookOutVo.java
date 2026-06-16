@@ -16,13 +16,13 @@
 
 package glz.hawk.bookstore.designer.java.vo;
 
+import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
 import glz.hawk.jdesigner.annotation.java.ClassDef;
 import glz.hawk.jdesigner.annotation.java.FieldDef;
 import glz.hawk.jdesigner.annotation.java.Getter;
 import glz.hawk.jdesigner.annotation.java.Setter;
 import glz.hawk.jdesigner.annotation.meta.metadata.ReferencedMetadata;
 import glz.hawk.jdesigner.annotation.name.UpperUnderscoreToLowerCamelNameConverter;
-import glz.hawk.bookstore.designer.meta.BookstoreMetadataLibrary;
 
 /**
  * This class is responsible for

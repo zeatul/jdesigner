@@ -63,12 +63,10 @@ public abstract class AbstractModelBase<M> extends AbstractNameable implements D
 
     @SuppressWarnings("unchecked")
     protected <P> void addIfSuppliersNotNull(List<ModelPartSupplier<M, P>> modelPartSuppliers, Consumer<P> consumer, String suppliersName) {
-        consumeIfNotNull(modelPartSuppliers, ms ->
-            argNoNullElement(ms, suppliersName).stream().map(s -> {
-                s.setOwner((M) this);
-                return s.get();
-            }).forEach(consumer)
-        );
+        consumeIfNotNull(modelPartSuppliers, ms -> argNoNullElement(ms, suppliersName).stream().map(s -> {
+            s.setOwner((M) this);
+            return s.get();
+        }).forEach(consumer));
     }
 
     @SuppressWarnings("unchecked")
@@ -89,6 +87,12 @@ public abstract class AbstractModelBase<M> extends AbstractNameable implements D
     @Override
     public Optional<Object> getExtension(String key) {
         return Optional.ofNullable(extensions.get(key));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> Optional<T> getExtension(String key, Class<T> tClass) {
+        return Optional.ofNullable((T) extensions.get(key));
     }
 
     @Override

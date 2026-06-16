@@ -21,10 +21,13 @@ package glz.hawk.jdesigner.builder.factory.database.index;
  *
  * @author Hawk
  */
-public class IndexFactoryContext extends IndexFactoryContextSupport{
+public class IndexFactoryContext extends IndexFactoryContextSupport {
 
     private String name;
+
     private boolean unique;
+
+    private String shortName;
 
     public String getName() {
         return name;
@@ -42,4 +45,11 @@ public class IndexFactoryContext extends IndexFactoryContextSupport{
         this.unique = unique;
     }
 
+    public String getShortName() {
+        return shortName;
+    }
+
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
 }

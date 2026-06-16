@@ -16,14 +16,14 @@
 
 package glz.hawk.jdesigner.indexer;
 
+import glz.hawk.codepoet.java.ClassSpec;
+import glz.hawk.codepoet.java.ConstructorSpec;
+import glz.hawk.codepoet.java.JavaFile;
 import glz.hawk.jdesigner.annotation.database.TableDef;
 import glz.hawk.jdesigner.annotation.java.ClassDef;
 import glz.hawk.jdesigner.annotation.meta.domain.DomainDefContainer;
 import glz.hawk.jdesigner.annotation.meta.metadata.MetadataDefContainer;
 import glz.hawk.jdesigner.builder.resource.AbstractResourcePathCollector;
-import glz.hawk.codepoet.java.ClassSpec;
-import glz.hawk.codepoet.java.ConstructorSpec;
-import glz.hawk.codepoet.java.JavaFile;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;

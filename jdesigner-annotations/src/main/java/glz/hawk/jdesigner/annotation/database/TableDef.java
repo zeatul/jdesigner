@@ -53,4 +53,10 @@ public @interface TableDef {
      * <p>Only the first value of this attribute will be taken.</p>
      */
     Class<? extends NameConverter>[] converterClass() default {};
+
+    /**
+     * 唯一标识
+     * <p>导入功能用: 用来关联导入数据</p>
+     */
+    String tableId() default "";
 }

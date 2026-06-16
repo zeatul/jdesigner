@@ -19,6 +19,7 @@ package glz.hawk.jdesigner.builder.handler;
 import glz.hawk.jdesigner.annotation.meta.metadata.MetadataDef;
 import glz.hawk.jdesigner.annotation.meta.metadata.MetadataDefContainer;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
+import glz.hawk.jdesigner.builder.factory.java.common.AnnotationHelper;
 import glz.hawk.jdesigner.builder.factory.meta.metadata.MetadataFactory;
 import glz.hawk.jdesigner.builder.factory.meta.metadata.MetadataFactoryContext;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
@@ -44,16 +45,21 @@ public class MetadataMetadataReaderResourceHandler extends AbstractMetadataReade
     @Override
     protected void handleField(Field field) {
         MetadataFactoryContext factoryContext = initFactoryContext(field);
-        if (!beforeHandle(field, MetadataDef.class, factoryContext)){
-            return ;
+        if (!beforeHandle(field, MetadataDef.class, factoryContext)) {
+            return;
         }
-        new MetadataFactory(modelWarehouse, builderContext, factoryContext).build();
+        buildMetadataFactory(factoryContext).build();
     }
 
     protected MetadataFactoryContext initFactoryContext(Field definingField) {
         MetadataFactoryContext factoryContext = new MetadataFactoryContext();
         factoryContext.setAnnotatedElement(definingField);
+        factoryContext.putNoDefAnnotations(AnnotationHelper.parse(definingField));
         return factoryContext;
+    }
+
+    protected MetadataFactory buildMetadataFactory(MetadataFactoryContext factoryContext) {
+        return new MetadataFactory(modelWarehouse, builderContext, factoryContext);
     }
 
 }

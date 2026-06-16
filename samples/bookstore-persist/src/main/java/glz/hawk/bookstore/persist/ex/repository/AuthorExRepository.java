@@ -17,7 +17,11 @@
 package glz.hawk.bookstore.persist.ex.repository;
 
 import glz.hawk.bookstore.persist.po.AuthorPo;
+import glz.hawk.bookstore.persist.update.AuthorUpdate;
+import glz.hawkframework.core.tuple.Tuple2;
+import glz.hawkframework.core.tuple.Tuple3;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -27,5 +31,11 @@ import java.util.List;
  */
 public interface AuthorExRepository {
 
-    void insertBatch(List<AuthorPo> authorPos,int batchSize);
+    void insertBatch(List<AuthorPo> authorPos, int batchSize);
+
+    void updateBatch(List<Tuple3<AuthorUpdate, BigInteger, Long>> authorUpdateWraps, int batchSize);
+
+    void deleteBatch(List<Tuple2<BigInteger, Long>> authorDeleteWraps, int batchSize);
+
+    List<AuthorPo> queryByIds(List<BigInteger> ids);
 }

@@ -19,8 +19,6 @@ package glz.hawk.jdesigner.builder.factory.java.executable;
 import glz.hawk.jdesigner.builder.factory.common.AbstractModelFactoryContext;
 import glz.hawk.jdesigner.builder.factory.java.type.ClassTypeFactoryContext;
 
-import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
-
 /**
  * This class is responsible for
  *

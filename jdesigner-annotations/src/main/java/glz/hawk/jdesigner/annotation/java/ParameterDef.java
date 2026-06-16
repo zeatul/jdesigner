@@ -16,8 +16,8 @@
 
 package glz.hawk.jdesigner.annotation.java;
 
-import glz.hawk.jdesigner.spec.java.Parameter;
 import glz.hawk.jdesigner.annotation.name.NameConverter;
+import glz.hawk.jdesigner.spec.java.Parameter;
 import org.springframework.core.annotation.AliasFor;
 
 /**
@@ -44,4 +44,10 @@ public @interface ParameterDef {
      * <p>Only the first value of this attribute will be taken.</p>
      */
     Class<? extends NameConverter>[] converterClass() default {};
+
+    /**
+     * 唯一标识
+     * <p>导入功能用: 用来关联导入数据</p>
+     */
+    String parameterId() default "";
 }

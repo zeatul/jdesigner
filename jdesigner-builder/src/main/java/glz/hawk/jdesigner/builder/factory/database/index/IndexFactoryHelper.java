@@ -20,6 +20,7 @@ import glz.hawk.jdesigner.annotation.database.IndexColumnDef;
 import glz.hawk.jdesigner.annotation.database.IndexDef;
 import glz.hawk.jdesigner.annotation.database.PrimaryKeyDef;
 import glz.hawk.jdesigner.spec.database.SortType;
+import glz.hawkframework.core.helper.StringHelper;
 import org.springframework.core.annotation.MergedAnnotation;
 
 import java.lang.reflect.AnnotatedElement;
@@ -48,6 +49,8 @@ abstract class IndexFactoryHelper {
         IndexFactoryContext indexFactoryContext = new IndexFactoryContext();
         indexFactoryContext.setName(argNotBlank(mergedAnnotation.getString("name"), () -> "The name of index must not be blank."));
         indexFactoryContext.setUnique(mergedAnnotation.getBoolean("isUnique"));
+        String shortName = mergedAnnotation.getString("shortName");
+        if (StringHelper.isNotEmpty(shortName)) indexFactoryContext.setShortName(mergedAnnotation.getString("shortName"));
         Stream.of(mergedAnnotation.getAnnotationArray("indexColumns", IndexColumnDef.class)).forEach(mergedIndexColumn -> {
             indexFactoryContext.add(buildIndexColumnFactoryContext(annotatedElement, mergedIndexColumn));
         });

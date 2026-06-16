@@ -16,10 +16,6 @@
 
 package glz.hawk.jdesigner.builder.handler;
 
-import glz.hawk.jdesigner.spec.database.Column;
-import glz.hawk.jdesigner.spec.database.Index;
-import glz.hawk.jdesigner.spec.database.PrimaryKey;
-import glz.hawk.jdesigner.spec.database.Table;
 import glz.hawk.jdesigner.annotation.database.ColumnDef;
 import glz.hawk.jdesigner.annotation.database.TableDef;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
@@ -29,6 +25,11 @@ import glz.hawk.jdesigner.builder.factory.database.index.IndexSupplierFactory;
 import glz.hawk.jdesigner.builder.factory.database.index.PrimaryKeySupplierFactory;
 import glz.hawk.jdesigner.builder.factory.database.table.TableFactory;
 import glz.hawk.jdesigner.builder.factory.database.table.TableFactoryContext;
+import glz.hawk.jdesigner.builder.factory.java.common.AnnotationHelper;
+import glz.hawk.jdesigner.spec.database.Column;
+import glz.hawk.jdesigner.spec.database.Index;
+import glz.hawk.jdesigner.spec.database.PrimaryKey;
+import glz.hawk.jdesigner.spec.database.Table;
 import glz.hawk.jdesigner.spec.impl.base.ModelPartSupplier;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 import org.springframework.core.type.classreading.MetadataReader;
@@ -82,11 +83,10 @@ public class TableMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         });
 
         // primary key
-        consumeIfNotNull(tableFactoryContext.getPrimaryKeyFactoryContext(),
-                primaryKeyFactoryContext -> this.primaryKeySupplier = new PrimaryKeySupplierFactory(modelWarehouse, builderContext, primaryKeyFactoryContext, fieldNameColumnMap).build());
+        consumeIfNotNull(tableFactoryContext.getPrimaryKeyFactoryContext(), primaryKeyFactoryContext -> this.primaryKeySupplier = new PrimaryKeySupplierFactory(modelWarehouse, builderContext, primaryKeyFactoryContext, fieldNameColumnMap).build());
 
         // table
-        new TableFactory(modelWarehouse, builderContext, tableFactoryContext, columnSuppliers, indexSuppliers, primaryKeySupplier).build();
+        buildTableFactory(tableFactoryContext).build();
     }
 
     @Override
@@ -95,20 +95,25 @@ public class TableMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         if (!beforeHandle(field, ColumnDef.class, factoryContext)) {
             return;
         }
-        ModelPartSupplier<Table, Column> columnSupplier = new ColumnSupplierFactory(modelWarehouse, builderContext, factoryContext,fieldNameColumnMap).build();
+        ModelPartSupplier<Table, Column> columnSupplier = new ColumnSupplierFactory(modelWarehouse, builderContext, factoryContext, fieldNameColumnMap).build();
         columnSuppliers.add(columnSupplier);
     }
 
     protected TableFactoryContext initTableFactoryContext() {
         TableFactoryContext factoryContext = new TableFactoryContext();
         factoryContext.setAnnotatedElement(classOfMetadataReader);
+        factoryContext.putNoDefAnnotations(AnnotationHelper.parse(classOfMetadataReader));
         return factoryContext;
     }
 
     protected ColumnFactoryContext initColumnFactoryContext(Field field) {
         ColumnFactoryContext factoryContext = new ColumnFactoryContext();
         factoryContext.setAnnotatedElement(field);
+        factoryContext.putNoDefAnnotations(AnnotationHelper.parse(field));
         return factoryContext;
     }
 
+    protected TableFactory buildTableFactory(TableFactoryContext tableFactoryContext) {
+        return new TableFactory(modelWarehouse, builderContext, tableFactoryContext, columnSuppliers, indexSuppliers, primaryKeySupplier);
+    }
 }

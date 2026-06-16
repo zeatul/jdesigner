@@ -35,12 +35,12 @@ public class PackageGeneratorImpl implements PackageGenerator {
 
     private final Map<String, String> namespaceMap = new HashMap<>();
     private final Map<String, String> namespaceModelClassMap = new HashMap<>();
-    private final Map<String, String> fullNameMap = new HashMap<>();
+    private final Map<String, String> qualifiedNameMap = new HashMap<>();
 
-    private PackageGeneratorImpl(Map<String, String> namespaceMap, Map<String, String> namespaceModelClassMap, Map<String, String> fullNameMap) {
+    private PackageGeneratorImpl(Map<String, String> namespaceMap, Map<String, String> namespaceModelClassMap, Map<String, String> qualifiedNameMap) {
         this.namespaceMap.putAll(namespaceMap);
         this.namespaceModelClassMap.putAll(namespaceModelClassMap);
-        this.fullNameMap.putAll(fullNameMap);
+        this.qualifiedNameMap.putAll(qualifiedNameMap);
     }
 
     private static String getFullNameKey(Model model) {
@@ -65,7 +65,7 @@ public class PackageGeneratorImpl implements PackageGenerator {
 
     @Override
     public String getPackage(Model model) {
-        String packageName = fullNameMap.get(getFullNameKey(model));
+        String packageName = qualifiedNameMap.get(getFullNameKey(model));
         if (StringHelper.isBlank(packageName)) {
             packageName = namespaceModelClassMap.get(getModelKey(model));
         }
@@ -78,7 +78,7 @@ public class PackageGeneratorImpl implements PackageGenerator {
     public static class Builder {
         private final Map<String, String> namespaceMap = new HashMap<>();
         private final Map<String, String> namespaceModelClassMap = new HashMap<>();
-        private final Map<String, String> fullNameMap = new HashMap<>();
+        private final Map<String, String> qualifiedNameMap = new HashMap<>();
 
         public Builder add(String namespace, String packageName) {
             namespaceMap.put(argNotBlank(namespace, "namespace"), argNotBlank(packageName, "packageName"));
@@ -91,7 +91,7 @@ public class PackageGeneratorImpl implements PackageGenerator {
         }
 
         public Builder add(String namespace, String modelName, String packageName) {
-            fullNameMap.put(getFullNameKey(argNotBlank(namespace, "namespace"), argNotBlank(modelName, "modelName")), argNotBlank(packageName));
+            qualifiedNameMap.put(getFullNameKey(argNotBlank(namespace, "namespace"), argNotBlank(modelName, "modelName")), argNotBlank(packageName));
             return this;
         }
 
@@ -101,7 +101,7 @@ public class PackageGeneratorImpl implements PackageGenerator {
         }
 
         public PackageGeneratorImpl build() {
-            return new PackageGeneratorImpl(namespaceMap, namespaceModelClassMap, fullNameMap);
+            return new PackageGeneratorImpl(namespaceMap, namespaceModelClassMap, qualifiedNameMap);
         }
     }
 

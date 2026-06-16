@@ -19,7 +19,7 @@ package glz.hawk.jdesigner.annotation.common;
 import java.lang.annotation.*;
 
 /**
- * This annotation is responsible for
+ * An annotation defined with {@link Def} as a meta-annotation is a defining annotation and is not auto-propagated.
  *
  * @author Hawk
  */

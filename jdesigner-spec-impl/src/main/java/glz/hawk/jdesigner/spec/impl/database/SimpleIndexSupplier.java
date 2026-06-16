@@ -36,21 +36,23 @@ public class SimpleIndexSupplier extends AbstractModelPartSupplier<Table, Index>
     private final String location;
     private final Display display;
     private final boolean isUnique;
+    private final String shortName;
     private final List<ModelPartSupplier<Index, IndexColumn<Index>>> indexColumnSuppliers;
 
-    public SimpleIndexSupplier(String name, String location, Display display, boolean isUnique,
+    public SimpleIndexSupplier(String name, String location, Display display, boolean isUnique,String shortName,
                                List<ModelPartSupplier<Index, IndexColumn<Index>>> indexColumnSuppliers,
                                Map<String, Object> extensions) {
         this.name = name;
         this.location = location;
         this.display = display;
         this.isUnique = isUnique;
+        this.shortName = shortName;
         this.indexColumnSuppliers = indexColumnSuppliers;
         putExtensions(extensions);
     }
 
     @Override
     public Index get() {
-        return new SimpleIndex(name, location, display, getOwner(), isUnique, indexColumnSuppliers, getAllExtensions());
+        return new SimpleIndex(name, location, display, getOwner(), isUnique,shortName, indexColumnSuppliers, getAllExtensions());
     }
 }

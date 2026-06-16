@@ -16,9 +16,9 @@
 
 package glz.hawk.jdesigner.builder;
 
-import glz.hawk.jdesigner.spec.base.Model;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
 import glz.hawk.jdesigner.builder.resource.ClasspathResourceScanner;
+import glz.hawk.jdesigner.spec.base.Model;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

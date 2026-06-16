@@ -16,13 +16,13 @@
 
 package glz.hawk.jdesigner.translator.meta;
 
+import glz.hawk.codepoet.java.type.ArrayTypeName;
+import glz.hawk.codepoet.java.type.ClassName;
+import glz.hawk.codepoet.java.type.TypeName;
 import glz.hawk.jdesigner.spec.meta.domain.type.DataType;
 import glz.hawk.jdesigner.spec.meta.domain.type.Types;
 import glz.hawk.jdesigner.spec.meta.domain.type.detail.PrecisionAndScaleDetail;
 import glz.hawk.jdesigner.translator.Translator;
-import glz.hawk.codepoet.java.type.ArrayTypeName;
-import glz.hawk.codepoet.java.type.ClassName;
-import glz.hawk.codepoet.java.type.TypeName;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -31,8 +31,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 import static glz.hawk.codepoet.java.type.PrimitiveTypeName.BYTE;
+import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
 /**
  * This class is responsible for translating a {@link DataType} instance to a {@link TypeName} instance.

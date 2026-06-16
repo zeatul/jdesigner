@@ -20,11 +20,6 @@ import glz.hawk.jdesigner.builder.factory.common.AbstractCommonFactoryContext;
 import glz.hawk.jdesigner.builder.factory.meta.metadata.ReferencedMetadataContext;
 import glz.hawk.jdesigner.builder.factory.meta.metadata.ReferencedMetadataContextAble;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
-
 /**
  * This class is responsible for
  *
@@ -34,17 +29,9 @@ public class TypeFactoryContext extends AbstractCommonFactoryContext implements 
 
     // for type
     private ClassTypeFactoryContext classTypeFactoryContext;
-    private PrimitiveTypeFactoryContext primitiveTypeFactoryContext;
-    private ParameterizedTypeFactoryContext parameterizedTypeFactoryContext;
     private ArrayWrapperFactoryContext arrayWrapperFactoryContext;
     private TypeWrapperFactoryContext typeWrapperFactoryContext;
-    private UniversalTypeFactoryContext universalTypeFactoryContext;
-    private TypeVariableNameFactoryContext typeVariableNameFactoryContext;
     private ReferencedMetadataContext referencedMetadataContext;
-
-    // For type variable
-    private final List<UniversalTypeVariableFactoryContext> universalTypeVariableFactoryContextList = new ArrayList<>();
-    private final List<TypeVariableFactoryContext> typeVariableFactoryContextList = new ArrayList<>();
 
     public ClassTypeFactoryContext getClassTypeFactoryContext() {
         return classTypeFactoryContext;
@@ -52,14 +39,6 @@ public class TypeFactoryContext extends AbstractCommonFactoryContext implements 
 
     public void setClassTypeFactoryContext(ClassTypeFactoryContext classTypeFactoryContext) {
         this.classTypeFactoryContext = classTypeFactoryContext;
-    }
-
-    public PrimitiveTypeFactoryContext getPrimitiveTypeFactoryContext() {
-        return primitiveTypeFactoryContext;
-    }
-
-    public void setPrimitiveTypeFactoryContext(PrimitiveTypeFactoryContext primitiveTypeFactoryContext) {
-        this.primitiveTypeFactoryContext = primitiveTypeFactoryContext;
     }
 
     public ArrayWrapperFactoryContext getArrayWrapperFactoryContext() {
@@ -70,36 +49,12 @@ public class TypeFactoryContext extends AbstractCommonFactoryContext implements 
         this.arrayWrapperFactoryContext = arrayWrapperFactoryContext;
     }
 
-    public ParameterizedTypeFactoryContext getParameterizedTypeFactoryContext() {
-        return parameterizedTypeFactoryContext;
-    }
-
-    public void setParameterizedTypeFactoryContext(ParameterizedTypeFactoryContext parameterizedTypeFactoryContext) {
-        this.parameterizedTypeFactoryContext = parameterizedTypeFactoryContext;
-    }
-
     public TypeWrapperFactoryContext getTypeWrapperFactoryContext() {
         return typeWrapperFactoryContext;
     }
 
     public void setTypeWrapperFactoryContext(TypeWrapperFactoryContext typeWrapperFactoryContext) {
         this.typeWrapperFactoryContext = typeWrapperFactoryContext;
-    }
-
-    public UniversalTypeFactoryContext getUniversalTypeFactoryContext() {
-        return universalTypeFactoryContext;
-    }
-
-    public void setUniversalTypeFactoryContext(UniversalTypeFactoryContext universalTypeFactoryContext) {
-        this.universalTypeFactoryContext = universalTypeFactoryContext;
-    }
-
-    public TypeVariableNameFactoryContext getTypeVariableNameFactoryContext() {
-        return typeVariableNameFactoryContext;
-    }
-
-    public void setTypeVariableNameFactoryContext(TypeVariableNameFactoryContext typeVariableNameFactoryContext) {
-        this.typeVariableNameFactoryContext = typeVariableNameFactoryContext;
     }
 
     @Override
@@ -112,19 +67,4 @@ public class TypeFactoryContext extends AbstractCommonFactoryContext implements 
         this.referencedMetadataContext = referencedMetadataContext;
     }
 
-    public List<TypeVariableFactoryContext> getTypeVariableFactoryContextList() {
-        return typeVariableFactoryContextList;
-    }
-
-    public void addTypeVariableFactoryContext(TypeVariableFactoryContext typeVariableFactoryContext){
-        this.typeVariableFactoryContextList.add(argNotNull(typeVariableFactoryContext,"typeVariableFactoryContext"));
-    }
-
-    public List<UniversalTypeVariableFactoryContext> getUniversalTypeVariableFactoryContextList() {
-        return universalTypeVariableFactoryContextList;
-    }
-
-    public void addUniversalTypeVariableFactoryContext(UniversalTypeVariableFactoryContext universalTypeVariableFactoryContext){
-        this.universalTypeVariableFactoryContextList.add(argNotNull(universalTypeVariableFactoryContext,"universalTypeVariableFactoryContext"));
-    }
 }

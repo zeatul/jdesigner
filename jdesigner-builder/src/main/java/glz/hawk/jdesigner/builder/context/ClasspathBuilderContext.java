@@ -18,6 +18,7 @@ package glz.hawk.jdesigner.builder.context;
 
 import glz.hawk.jdesigner.builder.ClasspathModelWarehouseBuilder;
 import glz.hawk.jdesigner.builder.factory.common.AnnotationParser;
+import glz.hawk.jdesigner.builder.factory.java.type.TypeFactorySupport;
 import glz.hawk.jdesigner.builder.handler.ResourceHandler;
 import glz.hawk.jdesigner.builder.handler.factory.ResourceHandlerBuilder;
 import glz.hawk.jdesigner.spec.meta.domain.Domain;
@@ -61,4 +62,9 @@ public interface ClasspathBuilderContext extends BuilderContext {
 
     @Nonnull
     AnnotationParser<?, ? extends Annotation> getAnnotationParserFromAnnotationClass(Class<? extends Annotation> annotationClass);
+
+    @Nonnull
+    TypeFactorySupport getTypeFactorySupport();
+
+    void setPackageGenerator(PackageGenerator packageGenerator);
 }

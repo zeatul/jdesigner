@@ -28,7 +28,7 @@ import javax.lang.model.element.Modifier;
  *
  * @author Hawk
  */
-public interface Class extends Model, Annotateable {
+public interface Class extends Model, Annotatable {
 
     @Nonnull
     Modifier[] getModifiers();

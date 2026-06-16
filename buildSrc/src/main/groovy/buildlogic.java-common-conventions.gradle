@@ -18,10 +18,10 @@ java {
 }
 
 dependencies {
-    implementation(platform("io.github.zeatul:hawk-bom:1.0.0-SNAPSHOT"))
+    implementation(platform("io.github.zeatul:hawk-bom:1.0.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core")
-    testImplementation("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.named('test') {
@@ -33,7 +33,7 @@ tasks.withType(Javadoc).configureEach {
     options.encoding = 'utf-8'
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << "-Xlint:-options"
     // options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
     // sourceCompatibility = "${JavaVersion.VERSION_1_8}"
@@ -57,7 +57,7 @@ publishing {
                     }
                     developers {
                         developer {
-                            name = 'Hawk'
+                            name = 'Zhang Peng'
                             email = 'zeatul@qq.com'
                         }
                     }

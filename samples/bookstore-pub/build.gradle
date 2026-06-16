@@ -5,7 +5,21 @@ plugins {
 description = 'The pub layer for the bookstore.'
 
 dependencies {
-    implementation project(':samples:bookstore-annotations')
+    api project(':samples:bookstore-annotations')
+    compileOnly project(':jdesigner-generator-annotations')
+    api 'com.fasterxml.jackson.core:jackson-annotations'
+    api 'io.github.zeatul:hawk-validator'
+
+    annotationProcessor project(':jdesigner-generator-processor')
+    annotationProcessor project(':samples:bookstore-designer')
+}
+
+compileJava {
+//    enable remote debug
+//    options.fork = true
+//    options.forkOptions.jvmArgs += ['-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=9000']
+//    options.debug = true
+//    options.incremental = false
 }
 
 sourceSets {

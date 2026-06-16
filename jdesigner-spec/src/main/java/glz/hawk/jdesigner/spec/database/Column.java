@@ -21,9 +21,9 @@ import glz.hawk.jdesigner.spec.base.Locatable;
 import glz.hawk.jdesigner.spec.base.ModelPart;
 import glz.hawk.jdesigner.spec.base.Nameable;
 import glz.hawk.jdesigner.spec.meta.domain.type.DataType;
+import glz.hawk.jdesigner.spec.meta.metadata.Metadata;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -57,7 +57,6 @@ public interface Column extends Nameable, Locatable, Displayable, ModelPart<Tabl
      * @param locale the required Locale. Use the default {@code Locale} in current context if input {@code locale} is {@code null}.
      * @return the localized comment of column.
      */
-    @Nullable
     Optional<String> getComment(Locale locale);
 
     /**
@@ -66,4 +65,8 @@ public interface Column extends Nameable, Locatable, Displayable, ModelPart<Tabl
      * @return {@code true} if this {@code Column}'s value could be null
      */
     boolean isNullable();
+
+    default Optional<Metadata> getMetadata() {
+        return Optional.empty();
+    }
 }
