@@ -38,4 +38,8 @@ public interface AuthorExRepository {
     void deleteBatch(List<Tuple2<BigInteger, Long>> authorDeleteWraps, int batchSize);
 
     List<AuthorPo> queryByIds(List<BigInteger> ids);
+
+    List<AuthorPo> pagedQuery(BigInteger maxId, long pageSize, String contact);
+
+    void delete(List<BigInteger> authorIds);
 }

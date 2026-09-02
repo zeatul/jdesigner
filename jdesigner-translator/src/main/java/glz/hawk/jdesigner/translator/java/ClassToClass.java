@@ -33,9 +33,7 @@ import glz.hawk.jdesigner.translator.Translator;
 import glz.hawkframework.core.helper.StringHelper;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,8 +49,10 @@ public class ClassToClass implements Translator<Class, JavaFile> {
 
     private final Translator<UniversalType, TypeName> typeNameTranslator;
     private final Translator<Model, String> packageTranslator;
+    private final Locale defaultLocale;
 
-    public ClassToClass(Translator<UniversalType, TypeName> typeNameTranslator, Translator<Model, String> packageTranslator) {
+    public ClassToClass(Locale defaultLocale,Translator<UniversalType, TypeName> typeNameTranslator, Translator<Model, String> packageTranslator) {
+        this.defaultLocale = defaultLocale;
         this.typeNameTranslator = argNotNull(typeNameTranslator, "typeNameTranslator");
         this.packageTranslator = argNotNull(packageTranslator, "packageTranslator");
     }
@@ -111,8 +111,8 @@ public class ClassToClass implements Translator<Class, JavaFile> {
 
     protected TypeJavadoc typeJavadoc(Class aClass) {
         Display display = aClass.getDisplay();
-        String displayName = display.getDisplayName();
-        List<String> remark = display.getRemark();
+        String displayName = display.getDisplayName(defaultLocale).orElse(null);
+        List<String> remark = display.getRemark(defaultLocale).orElse(Collections.emptyList());
         if (StringHelper.isNotBlank(displayName)) {
             TypeJavadoc.Builder docBuilder = TypeJavadoc.builder();
             docBuilder.beginJavadoc().addDocument(displayName);
@@ -126,8 +126,8 @@ public class ClassToClass implements Translator<Class, JavaFile> {
 
     protected FieldJavadoc fieldJavadoc(Field f) {
         Display display = f.getDisplay();
-        String displayName = display.getDisplayName();
-        List<String> remark = display.getRemark();
+        String displayName = display.getDisplayName(defaultLocale).orElse(null);
+        List<String> remark = display.getRemark(defaultLocale).orElse(Collections.emptyList());
         if (StringHelper.isNotBlank(displayName)) {
             FieldJavadoc.Builder docBuilder = FieldJavadoc.builder();
             docBuilder.beginJavadoc().addDocument(displayName);
@@ -168,8 +168,8 @@ public class ClassToClass implements Translator<Class, JavaFile> {
 
     protected MethodJavadoc methodJavadoc(Method method) {
         Display display = method.getDisplay();
-        String displayName = display.getDisplayName();
-        List<String> remark = display.getRemark();
+        String displayName = display.getDisplayName(defaultLocale).orElse(null);
+        List<String> remark = display.getRemark(defaultLocale).orElse(Collections.emptyList());
         if (StringHelper.isNotBlank(displayName)) {
             MethodJavadoc.Builder docBuilder = MethodJavadoc.builder();
             docBuilder.beginJavadoc().addDocument(displayName);

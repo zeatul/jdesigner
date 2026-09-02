@@ -22,10 +22,11 @@ import glz.hawk.jdesigner.annotation.common.ImportDef;
 import glz.hawk.jdesigner.annotation.database.*;
 import glz.hawk.jdesigner.annotation.meta.metadata.ReferencedMetadata;
 import glz.hawkframework.dao.column.annotation.RecordId;
+import glz.hawkframework.dao.column.annotation.RecordShardingSource;
+import glz.hawkframework.dao.column.annotation.RecordShardingTarget;
 import glz.hawkframework.dao.table.annotation.ColumnCount;
 
 import static glz.hawk.bookstore.designer.database.BOOK.*;
-import static glz.hawk.jdesigner.spec.database.SortType.ASCEND;
 
 /**
  * This interface defines {@code Book} table.
@@ -33,8 +34,8 @@ import static glz.hawk.jdesigner.spec.database.SortType.ASCEND;
  * @author Hawk
  */
 @PrimaryKeyDef(@IndexColumnDef(BOOK_ID))
-@IndexDef(name = "UI_BOOK_ISBN", shortName = "ISBN", isUnique = true, indexColumns = @IndexColumnDef(fieldName = ISBN, sortType = ASCEND))
-@IndexDef(name = "UI_BOOK_ISBN2", shortName = "ISBN2", isUnique = true, indexColumns = {@IndexColumnDef(ISBN), @IndexColumnDef(TITLE)})
+@IndexDef(name = "UI_BOOK_ISBN", shortName = "ISBN", isUnique = true, indexColumns = @IndexColumnDef(ISBN))
+@IndexDef(name = "UI_BOOK_ISBN2", shortName = "ISBN2", isUnique = true, indexColumns = {@IndexColumnDef(ISBN), @IndexColumnDef(PHYSICAL_PART_NO), @IndexColumnDef(PUBLISH_DATE)})
 @ImportDef(TRACE.class)
 @ColumnCount(100)
 @TableDef
@@ -45,6 +46,7 @@ public interface BOOK {
     @ColumnDef(nullable = false)
     String BOOK_ID = "BOOK_ID";
 
+    @RecordShardingSource
     @ReferencedMetadata(lib = BookstoreMetadataLibrary.class, index = BookstoreMetadataLibrary.ISBN)
     @ColumnDef(nullable = false)
     String ISBN = "ISBN";
@@ -69,4 +71,8 @@ public interface BOOK {
     @ColumnDef(nullable = false)
     String PUBLISHER_ID = "PUBLISHER_ID";
 
+    @RecordShardingTarget
+    @ReferencedMetadata(BookstoreMetadataLibrary.class)
+    @ColumnDef(nullable = false)
+    String PHYSICAL_PART_NO = "PHYSICAL_PART_NO";
 }

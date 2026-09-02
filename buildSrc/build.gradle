@@ -8,3 +8,11 @@ repositories {
     mavenCentral()
 }
 
+allprojects {
+    configurations.configureEach {
+        // SNAPSHOT 版本缓存 0 分钟
+        resolutionStrategy.cacheChangingModulesFor 0, "minutes"
+        // 动态版本缓存 0 分钟
+        resolutionStrategy.cacheDynamicVersionsFor 0, "minutes"
+    }
+}

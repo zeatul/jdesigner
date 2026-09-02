@@ -21,11 +21,13 @@ import glz.hawk.bookstore.persist.po.AuthorPo;
 import glz.hawk.bookstore.persist.repository.AuthorRepository;
 import glz.hawk.bookstore.persist.repository.config.TestRepositoryConfig;
 import glz.hawk.bookstore.persist.repository.data.AuthorGenerator;
+import glz.hawkframework.dao.pagination.PagedIterator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,6 +48,43 @@ public class AuthorExRepositoryImplTest {
     private AuthorExRepository authorExRepository;
     @Autowired
     private AuthorRepository authorRepository;
+
+    @Test
+    public void pagedIterator_test() {
+        pagedIterator(199,76);
+        pagedIterator(400,40);
+        pagedIterator(1,1);
+        pagedIterator(100,99);
+        pagedIterator(99,100);
+    }
+
+    private void pagedIterator(int allRecordsCound, int pageSize) {
+
+        boolean inserted = false;
+        List<AuthorPo> authorPoList = Collections.emptyList();
+        try {
+            authorPoList = authorGenerator.generate(allRecordsCound);
+            final String contact = "abcd001";
+            authorPoList.forEach(authorPo -> authorPo.setContact(contact));
+            authorExRepository.insertBatch(authorPoList, 500);
+            inserted = true;
+            PagedIterator<BigInteger, AuthorPo> pagedIterator = new PagedIterator<BigInteger, AuthorPo>(
+                maxId -> authorExRepository.pagedQuery(maxId,pageSize, contact),
+                AuthorPo::getAuthorId);
+
+            int count = 0;
+            while (pagedIterator.hasNext()) {
+                pagedIterator.next();
+                count++;
+            }
+
+            assertThat(count).isEqualTo(allRecordsCound);
+        }finally {
+            if (inserted) {
+                authorExRepository.delete(authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList()));
+            }
+        }
+    }
 
     @Test
     public void insert_batch_test() {

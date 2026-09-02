@@ -120,5 +120,18 @@ public class InsertProcessorImpl implements InsertProcessor {
                 }
             });
         }
+
+        // 分片号
+        fieldDescriptors = m1.get(RecordShardingSource.class);
+        FieldDescriptor<Object, Object, Annotation> shardingSourceDescriptor = fieldDescriptors != null && !fieldDescriptors.isEmpty() ? fieldDescriptors.get(0) : null;
+        fieldDescriptors = m1.get(RecordShardingTarget.class);
+        FieldDescriptor<Object, Object, Annotation> shardingTargetDescriptor = fieldDescriptors != null && !fieldDescriptors.isEmpty() ? fieldDescriptors.get(0) : null;
+        if (shardingSourceDescriptor != null && shardingTargetDescriptor != null){
+            Object s  = shardingSourceDescriptor.getFieldSupplier().apply(po);
+            String shardingId = s.toString().hashCode() +"";
+            shardingTargetDescriptor.getFieldModifier().accept(po, shardingId);
+        }
+
+
     }
 }

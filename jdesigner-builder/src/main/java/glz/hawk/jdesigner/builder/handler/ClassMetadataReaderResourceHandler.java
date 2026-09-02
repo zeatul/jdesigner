@@ -49,7 +49,6 @@ import glz.hawk.jdesigner.spec.java.type.UniversalType;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 import glz.hawkframework.core.helper.StringHelper;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.core.type.classreading.MetadataReader;
 
 import javax.lang.model.element.Modifier;
@@ -163,14 +162,8 @@ public class ClassMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         if (getterEnabled(factoryContext)) {
             Display display = new Display() {
                 @Override
-                public @NonNull String getDisplayName(@Nullable Locale locale) {
-                    String displayName = fieldSupplier.getDisplay().getDisplayName();
-                    return StringHelper.isNotBlank(displayName) ? "Get " + displayName : "";
-                }
-
-                @Override
-                public @NonNull List<String> getRemark(Locale locale) {
-                    return fieldSupplier.getDisplay().getRemark(locale);
+                public Optional<String> getDisplayName(@NonNull Locale locale) {
+                    return fieldSupplier.getDisplay().getDisplayName(locale).map(displayName -> "Get " + displayName);
                 }
             };
             methodSuppliers.add(new SimpleMethodSupplier("get" + StringHelper.capitalize(fieldSupplier.getName()), fieldSupplier.getLocation(), display, getterModifiers(factoryContext), Collections.emptyList(), Collections.emptyList(), fieldSupplier.getType(), Collections.emptyList(), Collections.singletonList(statement(String.format("return %s", fieldSupplier.getName()))), factoryContext.getAllExtensions()));
@@ -179,14 +172,8 @@ public class ClassMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         if (setterEnabled(factoryContext)) {
             Display display = new Display() {
                 @Override
-                public @NonNull String getDisplayName(@Nullable Locale locale) {
-                    String displayName = fieldSupplier.getDisplay().getDisplayName();
-                    return StringHelper.isNotBlank(displayName) ? "Set " + displayName : "";
-                }
-
-                @Override
-                public @NonNull List<String> getRemark(Locale locale) {
-                    return fieldSupplier.getDisplay().getRemark(locale);
+                public Optional<String> getDisplayName(@NonNull Locale locale) {
+                    return fieldSupplier.getDisplay().getDisplayName(locale).map(displayName -> "Set " + displayName);
                 }
             };
             methodSuppliers.add(new SimpleMethodSupplier("set" + StringHelper.capitalize(fieldSupplier.getName()), fieldSupplier.getLocation(), display, setterModifiers(factoryContext), Collections.singletonList(new SimpleParameterSupplier<>(fieldSupplier.getName(), fieldSupplier.getLocation(), fieldSupplier.getDisplay(), fieldSupplier.getType(), Collections.emptySet(), Collections.emptyList(), Collections.emptyMap())), Collections.emptyList(), SimpleUniversalTypeHelper.VOID, Collections.emptyList(), Collections.singletonList(statement(String.format("this.%s = %s", fieldSupplier.getName(), fieldSupplier.getName()))), factoryContext.getAllExtensions()));
@@ -212,6 +199,7 @@ public class ClassMetadataReaderResourceHandler extends AbstractMetadataReaderRe
     protected ClassFactoryContext initClassFactoryContext() {
         ClassFactoryContext factoryContext = new ClassFactoryContext();
         factoryContext.setAnnotatedElement(classOfMetadataReader);
+        factoryContext.putExtension(Class.class.getCanonicalName(), classOfMetadataReader);
         return factoryContext;
     }
 
@@ -221,6 +209,7 @@ public class ClassMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         t.getTypeFactoryContext().setAnnotatedElement(annotatedElement);
         t.setParent(classFactoryContext);
         t.putNoDefAnnotations(AnnotationHelper.parse(annotatedElement));
+        t.putExtension(annotatedElement.getClass().getCanonicalName(), annotatedElement);
         return t;
     }
 
@@ -230,6 +219,7 @@ public class ClassMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         classTypeFactoryContext.setTypeClass(exceptionType);
         throwableFactoryContext.setAnnotatedElement(method);
         throwableFactoryContext.setClassTypeFactoryContext(classTypeFactoryContext);
+        throwableFactoryContext.putExtension(Method.class.getCanonicalName(), method);
         return throwableFactoryContext;
     }
 
@@ -237,6 +227,7 @@ public class ClassMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         ParameterFactoryContext parameterFactoryContext = new ParameterFactoryContext();
         parameterFactoryContext.setAnnotatedElement(parameter);
         parameterFactoryContext.getTypeFactoryContext().setAnnotatedElement(parameter);
+        parameterFactoryContext.putExtension(Parameter.class.getCanonicalName(), parameter);
         return parameterFactoryContext;
     }
 

@@ -61,8 +61,7 @@ public class SimpleTable extends AbstractModel<Table> implements Table {
 
     @Override
     public Optional<String> getComment(Locale locale) {
-        String comment = this.getDisplay().getDisplayName(locale);
-        return Optional.ofNullable(comment.trim().isEmpty() ? null : comment);
+        return this.getDisplay().getDisplayName(locale);
     }
 
     @Override

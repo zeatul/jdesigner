@@ -144,4 +144,8 @@ public interface BookstoreMetadataLibrary {
     @ReferencedDomain(lib = BookstoreDomainLibrary.class, index = LONG)
     @MetadataDef
     String RECORD_VERSION = "RECORD_VERSION";
+
+    @ReferencedDomain(lib = BookstoreDomainLibrary.class, index = VARCHAR20)
+    @MetadataDef
+    String PHYSICAL_PART_NO = "PHYSICAL_PART_NO";
 }

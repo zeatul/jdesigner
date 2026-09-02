@@ -38,6 +38,7 @@ import glz.hawk.jdesigner.generator.annotation.PackageMaps;
     ddlPackageName = "ddl",
     dialectName = "mysql",
     supportColumnInsertOrUpdate = true,
+    autoSharding = true,
     customizerProviderClass = BookstoreJ4sqlMybatisGeneratorCustomizerSupplier.class,
     tableEnumClassPackage = "glz.hawk.bookstore.persist.support.enums",
     tableEnumClassName = "BookstoreTableEnum"

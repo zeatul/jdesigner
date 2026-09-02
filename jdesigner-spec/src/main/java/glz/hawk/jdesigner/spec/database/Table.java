@@ -39,16 +39,6 @@ public interface Table extends Model {
     @Nonnull
     Column[] getColumns();
 
-    /**
-     * Obtains the comment of this {@code Table} according to the default {@link Locale} in the current context.
-     *
-     * @return the comment of {@code Table}
-     */
-    default Optional<String> getComment() {
-        return getComment(null);
-    }
-
-
     Optional<String> getComment(Locale locale);
 
     /**

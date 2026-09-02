@@ -17,10 +17,15 @@
 package glz.hawk.jdesigner.spec.impl.base;
 
 import glz.hawk.jdesigner.spec.base.Display;
+import glz.hawk.jdesigner.spec.base.LocaleDisplay;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+
+import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
 /**
  * This enum defines an implementation of {@link Display} without any display name, abbreviate name and remark.
@@ -31,9 +36,14 @@ public enum EmptyDisplay implements Display {
 
     INSTANCE;
 
-    @Nonnull
     @Override
-    public java.lang.String getDisplayName(@Nullable Locale locale) {
-        return "";
+    public @NonNull List<LocaleDisplay> getLocaleDisplays() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Optional<String> getDisplayName(@NonNull Locale locale) {
+        argNotNull(locale, "locale");
+        return Optional.empty();
     }
 }

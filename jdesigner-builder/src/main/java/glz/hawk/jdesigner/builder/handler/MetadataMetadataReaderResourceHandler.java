@@ -55,6 +55,7 @@ public class MetadataMetadataReaderResourceHandler extends AbstractMetadataReade
         MetadataFactoryContext factoryContext = new MetadataFactoryContext();
         factoryContext.setAnnotatedElement(definingField);
         factoryContext.putNoDefAnnotations(AnnotationHelper.parse(definingField));
+        factoryContext.putExtension(Field.class.getCanonicalName(), definingField);
         return factoryContext;
     }
 

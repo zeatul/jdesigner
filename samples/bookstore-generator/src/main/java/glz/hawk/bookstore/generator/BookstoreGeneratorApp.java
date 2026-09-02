@@ -78,8 +78,8 @@ public class BookstoreGeneratorApp {
 //        j4sqlGenerator.generateRepositoryImpl();
 //        j4sqlGenerator.generateDDL();
 //
-//        generateEnum(modelWarehouse);
-        generateDefinedClass(modelWarehouse);
+        generateEnum(modelWarehouse);
+//        generateDefinedClass(modelWarehouse);
 
         System.out.println("Succeeded to generate all classes.");
     }
@@ -137,8 +137,11 @@ public class BookstoreGeneratorApp {
              "mysql",
             new DefaultJ4sqlMybatisGeneratorCustomizer("mysql"),
             true,
+            true,
             "glz.hawk.bookstore.perssit.enums",
-            "BookstoreTables"
+            "BookstoreTables",
+            true,
+            true
         );
     }
 
@@ -150,10 +153,22 @@ public class BookstoreGeneratorApp {
             new String[0],
             new String[0],
             ENUM_CLASS_PACKAGE_GENERATOR,
-            new DefaultEnumClassGeneratorCustomizerSupplier().get(),
+            new BookstoreEnumClassGeneratorCustomizerSupplier().get(),
             path.toAbsolutePath().toFile()
         );
         generator.generateEnum();
+
+        Path path2 = srcGeneratedResources(rootProjectPath().resolve(PROJECT_PUB_PATH));
+        clearFiles(pathForPackage(path2, ENUM_PACKAGE_NAME));
+        EnumPropertiesGeneratorForFileSystem generator2 = new EnumPropertiesGeneratorForFileSystem(
+            modelWarehouse,
+            new String[0],
+            new String[0],
+            ENUM_CLASS_PACKAGE_GENERATOR,
+            new BookstoreEnumClassGeneratorCustomizerSupplier().get(),
+            path2.toAbsolutePath().toFile()
+        );
+        generator2.generateProperties();
     }
 
     private static void generateDefinedClass(ModelWarehouse modelWarehouse) {

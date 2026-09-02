@@ -24,6 +24,7 @@ import glz.hawk.bookstore.persist.sql.provider.AuthorSqlProvider;
 import glz.hawk.bookstore.persist.update.AuthorUpdate;
 import glz.hawk.j4sql.mybatis.batch.BatchExecutor;
 import glz.hawk.j4sql.util.ConditionBuilder;
+import glz.hawk.j4sql.util.DeleteWrapper;
 import glz.hawk.j4sql.util.QueryWrapper;
 import glz.hawkframework.core.tuple.Tuple2;
 import glz.hawkframework.core.tuple.Tuple3;
@@ -36,7 +37,9 @@ import org.springframework.stereotype.Repository;
 import java.math.BigInteger;
 import java.util.List;
 
-import static glz.hawk.bookstore.persist.support.BookAuthorMapSupport.AUTHOR_ID;
+import static glz.hawk.bookstore.persist.support.AuthorSupport.AUTHOR_ID;
+import static glz.hawk.bookstore.persist.support.AuthorSupport.CONTACT;
+import static glz.hawk.j4sql.support.impl.DSL.and;
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
 /**
@@ -53,8 +56,8 @@ public class AuthorExRepositoryImpl extends AbstractAuthorRepository implements 
 
     private final UpdateProcessor updateProcessor;
 
-    public AuthorExRepositoryImpl(BatchExecutor batchExecutor, AuthorMapper authorMapper,AuthorSqlProvider authorSqlProvider, InsertProcessor insertProcessor, UpdateProcessor updateProcessor) {
-        super(authorMapper,authorSqlProvider);
+    public AuthorExRepositoryImpl(BatchExecutor batchExecutor, AuthorMapper authorMapper, AuthorSqlProvider authorSqlProvider, InsertProcessor insertProcessor, UpdateProcessor updateProcessor) {
+        super(authorMapper, authorSqlProvider);
         this.batchExecutor = argNotNull(batchExecutor, "batchExecutor");
         this.insertProcessor = argNotNull(insertProcessor, "insertProcessor");
         this.updateProcessor = argNotNull(updateProcessor, "updateProcessor");
@@ -78,7 +81,7 @@ public class AuthorExRepositoryImpl extends AbstractAuthorRepository implements 
             authorUpdateWraps,
             batchSize,
             (m, p) -> {
-                UpdateParameter updateParameter = UpdateParameter.builder().setFieldUpdateObject(p.t1).setRecordVersion(p.t3).addParam("authorId",p.t2).build();
+                UpdateParameter updateParameter = UpdateParameter.builder().setFieldUpdateObject(p.t1).setRecordVersion(p.t3).addParam("authorId", p.t2).build();
                 updateProcessor.beforeUpdate(updateParameter);
                 m.update(authorSqlProvider.updateByPrimaryKey(p.t1, p.t2, p.t3));
             },
@@ -119,5 +122,23 @@ public class AuthorExRepositoryImpl extends AbstractAuthorRepository implements 
             .setOrderColumns(AUTHOR_ID.asc())
             .build();
         return queryMany(queryWrapper);
+    }
+
+    @Override
+    public List<AuthorPo> pagedQuery(BigInteger maxId,long pageSize, String contact) {
+        QueryWrapper queryWrapper = QueryWrapper.builder()
+            .setCondition(AUTHOR_ID.gt(maxId == null ? new BigInteger(Long.MIN_VALUE + "") : maxId), and(CONTACT.eq(contact)))
+            .setOrderColumns(AUTHOR_ID.asc())
+            .setOffsetAndLimit(0L, pageSize)
+            .build();
+        return queryMany(queryWrapper);
+    }
+
+    @Override
+    public void delete(List<BigInteger> authorIds) {
+        DeleteWrapper deleteWrapper = DeleteWrapper.builder()
+            .setCondition(AUTHOR_ID.in(authorIds))
+            .build();
+        delete(deleteWrapper);
     }
 }

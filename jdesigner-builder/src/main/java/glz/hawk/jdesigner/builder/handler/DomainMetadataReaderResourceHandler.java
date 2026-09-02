@@ -56,6 +56,7 @@ public class DomainMetadataReaderResourceHandler extends AbstractMetadataReaderR
         DomainFactoryContext factoryContext = new DomainFactoryContext();
         factoryContext.setAnnotatedElement(definingField);
         factoryContext.putNoDefAnnotations(AnnotationHelper.parse(definingField));
+        factoryContext.putExtension(Field.class.getCanonicalName(), definingField);
         return factoryContext;
     }
 

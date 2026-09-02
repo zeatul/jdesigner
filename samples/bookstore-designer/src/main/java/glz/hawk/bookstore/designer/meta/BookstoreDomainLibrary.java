@@ -34,7 +34,7 @@ import glz.hawk.jdesigner.annotation.meta.domain.value.ValueDef;
 @DomainDefContainer
 public interface BookstoreDomainLibrary {
 
-    @NumericDef(38)
+    @NumericDef(39)
     @DomainDef
     String BIG_INTEGER = "BIG_INTEGER";
 
@@ -76,9 +76,9 @@ public interface BookstoreDomainLibrary {
     String PRICE = "PRICE";
 
     @VarcharDef(50)
-    @ValueDef(code = "HISTORY", value = "history", displayDefs = {@DisplayDef("历史书")})
-    @ValueDef(code = "CHEMISTRY", value = "chemistry", displayDefs = {@DisplayDef("化学书")})
-    @ValueDef(code = "BIOLOGY", value = "biology", displayDefs = {@DisplayDef("生物书")})
+    @ValueDef(code = "HISTORY", value = "history", displayDefs = {@DisplayDef(locale = "zh-CN", displayName = "历史书"), @DisplayDef(locale = "en", displayName = "History")})
+    @ValueDef(code = "CHEMISTRY", value = "chemistry", displayDefs = {@DisplayDef(locale = "zh-CN", displayName = "化学书"), @DisplayDef(locale = "en", displayName = "Chemistry")})
+    @ValueDef(code = "BIOLOGY", value = "biology", displayDefs = {@DisplayDef(locale = "zh-CN", displayName = "生物书"), @DisplayDef(locale = "en", displayName = "Biology")})
     @DomainDef(isEnum = true)
     String BOOK_CATEGORY = "BOOK_CATEGORY";
 }

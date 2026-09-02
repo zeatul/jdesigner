@@ -22,6 +22,8 @@ import glz.hawk.jdesigner.spec.database.Table;
 import glz.hawk.jdesigner.translator.Translator;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Locale;
+
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
 /**
@@ -32,8 +34,9 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 public class TableToPojoJavadoc implements Translator<Table, TypeJavadoc> {
 
     protected final Translator<Table, String> tableNameTranslator;
-
-    public TableToPojoJavadoc(Translator<Table, String> tableNameTranslator) {
+    protected final Locale defaultLocale;
+    public TableToPojoJavadoc(Locale defaultLocale,Translator<Table, String> tableNameTranslator) {
+        this.defaultLocale = argNotNull(defaultLocale, "defaultLocale");
         this.tableNameTranslator = argNotNull(tableNameTranslator, "tableNameTranslator");
     }
 
@@ -43,8 +46,8 @@ public class TableToPojoJavadoc implements Translator<Table, TypeJavadoc> {
         argNotNull(table, "table");
         String tableName = tableNameTranslator.translate(table);
         TypeJavadoc.Builder javadocBuilder = TypeJavadoc.builder();
-        if (table.getComment().isPresent()) {
-            javadocBuilder.beginJavadoc().addDocument(table.getComment().get());
+        if (table.getComment(defaultLocale).isPresent()) {
+            javadocBuilder.beginJavadoc().addDocument(table.getComment(defaultLocale).get());
             javadocBuilder.beginJavadoc().addInlineHtml(HtmlTag.P, "Map to table: $L", tableName);
         } else {
             javadocBuilder.beginJavadoc().addDocument("Map to table: $L", tableName);

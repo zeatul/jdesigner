@@ -31,11 +31,11 @@ include 'jdesigner-generator'
 include 'jdesigner-generator-annotations'
 include 'jdesigner-generator-processor'
 
-include 'samples:bookstore-annotations'
-include 'samples:bookstore-designer'
-include 'samples:bookstore-generator'
-include 'samples:bookstore-persist'
-include 'samples:bookstore-pub'
+//include 'samples:bookstore-annotations'
+//include 'samples:bookstore-designer'
+//include 'samples:bookstore-generator'
+//include 'samples:bookstore-persist'
+//include 'samples:bookstore-pub'
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)

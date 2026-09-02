@@ -22,6 +22,8 @@ import glz.hawk.jdesigner.spec.database.Column;
 import glz.hawk.jdesigner.translator.Translator;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Locale;
+
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
 /**
@@ -31,16 +33,17 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
  */
 public class ColumnToGetterJavadoc implements Translator<Column, MethodJavadoc> {
     protected final Translator<Column, String> columnNameTranslator;
-
-    public ColumnToGetterJavadoc(Translator<Column, String> columnNameTranslator) {
+    protected final Locale defaultLocale;
+    public ColumnToGetterJavadoc(Locale defaultLocale,Translator<Column, String> columnNameTranslator) {
+        this.defaultLocale = argNotNull(defaultLocale, "defaultLocale");
         this.columnNameTranslator = argNotNull(columnNameTranslator, "columnNameTranslator");
     }
 
     @Override
     public @NonNull MethodJavadoc translate(@NonNull Column column) {
         MethodJavadoc.Builder javadocBuilder = MethodJavadoc.builder();
-        if (column.getComment().isPresent()) {
-            javadocBuilder.beginJavadoc().addDocument("Gets $L", column.getComment().get())
+        if (column.getComment(defaultLocale).isPresent()) {
+            javadocBuilder.beginJavadoc().addDocument("Gets $L", column.getComment(defaultLocale).get())
                 .addInlineHtml(HtmlTag.P, "Map to column: $L", columnNameTranslator.translate(column));
         } else {
             javadocBuilder.beginJavadoc().addDocument("Map to column: $L", columnNameTranslator.translate(column));

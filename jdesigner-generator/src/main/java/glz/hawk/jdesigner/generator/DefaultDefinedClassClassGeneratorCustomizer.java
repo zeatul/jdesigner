@@ -18,6 +18,8 @@ package glz.hawk.jdesigner.generator;
 
 import glz.hawk.jdesigner.spec.java.Class;
 
+import java.util.Locale;
+
 /**
  * This class is responsible for
  *
@@ -27,5 +29,10 @@ public class DefaultDefinedClassClassGeneratorCustomizer implements DefinedClass
     @Override
     public ModelFilter<Class> getClassFilter() {
         return aClass -> true;
+    }
+
+    @Override
+    public Locale getDefaultLocale() {
+        return Locale.CHINA;
     }
 }

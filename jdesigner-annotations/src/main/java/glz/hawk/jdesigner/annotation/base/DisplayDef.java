@@ -53,7 +53,7 @@ public @interface DisplayDef {
     /**
      * This attribute represents the {@link Locale} of {@code Display}
      */
-    String locale() default "";
+    String locale() default "zh-CN";
 
     /**
      * This attribute represents the {@code AbbreviatedDisplayName} of {@code Display}

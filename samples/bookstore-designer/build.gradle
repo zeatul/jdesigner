@@ -8,7 +8,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'io.github.zeatul:jdesigner-defaults:1.0.0-SNAPSHOT'
+        classpath 'io.github.zeatul:jdesigner-defaults:1.1.0-SNAPSHOT'
         classpath 'net.bytebuddy:byte-buddy-gradle-plugin:1.18.2'
     }
 }

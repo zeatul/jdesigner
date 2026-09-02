@@ -19,6 +19,7 @@ package glz.hawk.jdesigner.generator.processor;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
 import glz.hawk.jdesigner.generator.EnumClassGeneratorCustomizer;
 import glz.hawk.jdesigner.generator.EnumClassGeneratorForAnnotationProcessor;
+import glz.hawk.jdesigner.generator.EnumPropertiesGeneratorForAnnotationProcessor;
 import glz.hawk.jdesigner.generator.annotation.EnumClassGeneratorDef;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 
@@ -88,8 +89,14 @@ public class EnumGeneratorProcessor extends AbstractProcessor {
         Supplier<? extends ClasspathBuilderContext> builderContextSupplier = instance(getSupplierClass(def::builderContextSupplierClass));
         ModelWarehouse modelWarehouse = buildModelWarehouse(scanPackages, def.resourceCollectors(), messager, builderContextSupplier);
         Supplier<? extends EnumClassGeneratorCustomizer> customizerSupplier = instance(getSupplierClass(def::customizerSupplierClass));
-        EnumClassGeneratorForAnnotationProcessor generator = new EnumClassGeneratorForAnnotationProcessor(modelWarehouse,includePackages,excludePackages, buildPackageGenerator(def.enumClassPackageMaps()), customizerSupplier.get(), filer, new ArrayList<>(elements));
+        EnumClassGeneratorForAnnotationProcessor generator = new EnumClassGeneratorForAnnotationProcessor(modelWarehouse, includePackages, excludePackages, buildPackageGenerator(def.enumClassPackageMaps()), customizerSupplier.get(), filer, new ArrayList<>(elements));
         generator.generateEnum();
+
+        if (def.generateProperties()) {
+            EnumPropertiesGeneratorForAnnotationProcessor generator2 = new EnumPropertiesGeneratorForAnnotationProcessor(modelWarehouse, includePackages, excludePackages, buildPackageGenerator(def.enumClassPackageMaps()), customizerSupplier.get(), filer, new ArrayList<>(elements));
+            generator2.generateProperties();
+        }
+
         return true;
     }
 

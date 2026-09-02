@@ -17,7 +17,6 @@
 package glz.hawk.jdesigner.spec.base;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -31,13 +30,13 @@ import java.util.Optional;
 public interface Display {
 
     /**
-     * Obtains the display name according to the default {@link Locale} in the current context.
+     * Obtains a list of locale displayName pair.
      *
-     * @return the display name
+     * @return a list of {@link LocaleDisplay}, never {@code null}
      */
     @Nonnull
-    default String getDisplayName() {
-        return getDisplayName(null);
+    default List<LocaleDisplay> getLocaleDisplays() {
+        return Collections.emptyList();
     }
 
     /**
@@ -46,18 +45,7 @@ public interface Display {
      * @param locale the required Locale. Use the default {@code Locale} in the current context if input {@code locale} is {@code null}.
      * @return the localized display name
      */
-    @Nonnull
-    String getDisplayName(@Nullable Locale locale);
-
-    /**
-     * Obtains the abbreviated display name according to the default {@link Locale}.
-     * <p>Sometimes, there's not enough space for display name. So it's better to offer a abbreviated display name.</p>
-     *
-     * @return the abbreviated display name
-     */
-    default Optional<String> getAbbreviatedDisplayName() {
-        return getAbbreviatedDisplayName(null);
-    }
+    Optional<String> getDisplayName(@Nonnull Locale locale);
 
     /**
      * Obtains the localized abbreviated display name.
@@ -65,21 +53,10 @@ public interface Display {
      * @param locale the required Locale.Use the default system Locale if input {@code locale} is {@code null}.
      * @return the localized abbreviated display name
      */
-    @Nullable
-    default Optional<String> getAbbreviatedDisplayName(Locale locale) {
+    default Optional<String> getAbbreviatedDisplayName(@Nonnull Locale locale) {
         return Optional.empty();
     }
 
-    /**
-     * Obtains the remark according to the default {@link Locale}.
-     * <p>The {@code remark} is used to provide extra descriptions</p>
-     *
-     * @return the remark or an empty list
-     */
-    @Nonnull
-    default List<String> getRemark() {
-        return getRemark(null);
-    }
 
     /**
      * Obtains the localized remark of Model.
@@ -87,8 +64,7 @@ public interface Display {
      * @param locale the required Locale.Use the default system Locale if input {@code locale} is {@code null}.
      * @return the localized remark or an empty list
      */
-    @Nonnull
-    default List<String> getRemark(Locale locale) {
-        return Collections.emptyList();
+    default Optional<List<String>> getRemark(@Nonnull Locale locale) {
+        return Optional.empty();
     }
 }

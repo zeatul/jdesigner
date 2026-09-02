@@ -26,6 +26,6 @@ import java.util.function.Supplier;
 public class DefaultDefinedClassClassGeneratorCustomizerSupplier implements Supplier<DefinedClassClassGeneratorCustomizer> {
     @Override
     public DefinedClassClassGeneratorCustomizer get() {
-        return new  DefaultDefinedClassClassGeneratorCustomizer() {};
+        return new DefaultDefinedClassClassGeneratorCustomizer();
     }
 }

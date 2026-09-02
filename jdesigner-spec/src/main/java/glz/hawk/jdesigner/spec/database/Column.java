@@ -43,15 +43,6 @@ public interface Column extends Nameable, Locatable, Displayable, ModelPart<Tabl
     DataType getDataType();
 
     /**
-     * Obtains the comment of this {@code Column} according to the default {@link Locale} in the current context.
-     *
-     * @return the comment of column.
-     */
-    default Optional<String> getComment() {
-        return getComment(null);
-    }
-
-    /**
      * Obtains the localized comment of column.
      *
      * @param locale the required Locale. Use the default {@code Locale} in current context if input {@code locale} is {@code null}.

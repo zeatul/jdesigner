@@ -17,7 +17,8 @@
 package glz.hawk.jdesigner.generator;
 
 import glz.hawk.jdesigner.spec.java.Class;
-import glz.hawk.jdesigner.spec.meta.domain.Domain;
+
+import java.util.Locale;
 
 /**
  * This class is responsible for
@@ -26,4 +27,6 @@ import glz.hawk.jdesigner.spec.meta.domain.Domain;
  */
 public interface DefinedClassClassGeneratorCustomizer {
     ModelFilter<Class> getClassFilter();
+
+    Locale getDefaultLocale();
 }

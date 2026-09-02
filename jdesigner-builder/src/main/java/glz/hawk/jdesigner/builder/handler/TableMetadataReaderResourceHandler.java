@@ -103,6 +103,7 @@ public class TableMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         TableFactoryContext factoryContext = new TableFactoryContext();
         factoryContext.setAnnotatedElement(classOfMetadataReader);
         factoryContext.putNoDefAnnotations(AnnotationHelper.parse(classOfMetadataReader));
+        factoryContext.putExtension(Class.class.getCanonicalName(), classOfMetadataReader);
         return factoryContext;
     }
 
@@ -110,6 +111,7 @@ public class TableMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         ColumnFactoryContext factoryContext = new ColumnFactoryContext();
         factoryContext.setAnnotatedElement(field);
         factoryContext.putNoDefAnnotations(AnnotationHelper.parse(field));
+        factoryContext.putExtension(Field.class.getCanonicalName(), field);
         return factoryContext;
     }
 

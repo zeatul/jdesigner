@@ -59,20 +59,22 @@ public class BookExRepositoryImplTest {
         ScriptUtils.executeSqlScript(connection, new ClassPathResource("/sql/init_data.sql"));
     }
 
+
+
     @Test
     public void count_by_bookCategory_test() {
         List<BookCategoryPo> poList = bookExRepository.countByBookCategory();
         assertThat(poList)
             .hasSize(8)
-            .anyMatch(p -> "language".equals(p.getBookCategory()) && p.getCount() == 50)
-            .anyMatch(p -> "science".equals(p.getBookCategory()) && p.getCount() == 48);
+            .anyMatch(p -> "language".equals(p.getBookCategory()) && p.getCount() == 68)
+            .anyMatch(p -> "science".equals(p.getBookCategory()) && p.getCount() == 69);
 
         poList = bookExRepository.countByBookCategory(60);
         assertThat(poList)
-            .hasSize(3)
-            .anyMatch(p -> "nature".equals(p.getBookCategory()) && p.getCount() == 77)
-            .anyMatch(p -> "chemistry".equals(p.getBookCategory()) && p.getCount() == 66)
-            .anyMatch(p -> "math".equals(p.getBookCategory()) && p.getCount() == 84);
+            .hasSize(6)
+            .anyMatch(p -> "nature".equals(p.getBookCategory()) && p.getCount() == 62)
+            .anyMatch(p -> "chemistry".equals(p.getBookCategory()) && p.getCount() == 62)
+            .anyMatch(p -> "math".equals(p.getBookCategory()) && p.getCount() == 67);
 
         poList = bookExRepository.countByBookCategory(6110);
         assertThat(poList)
@@ -82,7 +84,7 @@ public class BookExRepositoryImplTest {
         assertThat(optional)
             .isPresent()
             .get()
-            .returns(59, BookCategoryPo::getCount)
+            .returns(64, BookCategoryPo::getCount)
             .returns("program", BookCategoryPo::getBookCategory);
         optional = bookExRepository.countByBookCategory("no-program");
         assertThat(optional)
@@ -104,11 +106,11 @@ public class BookExRepositoryImplTest {
         List<BookPo> poList = function.apply(ids);
         assertThat(poList).hasSize(0);
 
-        ids = Arrays.asList(new BigInteger("63882809829507652016013312"), new BigInteger("63882809854277449966551040"), new BigInteger("63882809867788248848662528"));
+        ids = Arrays.asList(new BigInteger("119772469799809451060232192"), new BigInteger("119772469858356246216048640"), new BigInteger("119772469932665640067661824"));
         poList = function.apply(ids);
         assertThat(poList).hasSize(3);
 
-        ids = Arrays.asList(new BigInteger("63882809829507652016013312"), new BigInteger("63882809854277449966551040"), BigInteger.ZERO);
+        ids = Arrays.asList(new BigInteger("119772469799809451060232192"), new BigInteger("119772469858356246216048640"), BigInteger.ZERO);
         poList = function.apply(ids);
         assertThat(poList).hasSize(2);
     }
@@ -116,13 +118,13 @@ public class BookExRepositoryImplTest {
     @Test
     public void query_book_by_bookCategory_and_priceRange_test() {
         List<BookPo> poList = bookExRepository.queryBookByBookCategoryAndPriceRange("history", BigDecimal.valueOf(5L), BigDecimal.valueOf(20L));
-        assertThat(poList).hasSize(14);
+        assertThat(poList).hasSize(6);
     }
 
     @Test
     public void query_book_by_bookCategory_and_priceRange_fullyDynamic_test() {
         List<BookPo> poList = bookExRepository.queryBookByBookCategoryAndPriceRangeFullyDynamic("history", BigDecimal.valueOf(5L), BigDecimal.valueOf(20L));
-        assertThat(poList).hasSize(14);
+        assertThat(poList).hasSize(6);
     }
 
     @Test

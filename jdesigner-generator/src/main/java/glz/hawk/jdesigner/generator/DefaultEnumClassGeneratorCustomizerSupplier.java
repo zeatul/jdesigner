@@ -16,12 +16,7 @@
 
 package glz.hawk.jdesigner.generator;
 
-import glz.hawk.jdesigner.spec.meta.domain.Domain;
-import glz.hawk.jdesigner.translator.Translator;
-
 import java.util.function.Supplier;
-
-import static glz.hawk.jdesigner.translator.convert.NameConverter.UPPER_UNDERSCORE_TO_UPPER_CAMEL;
 
 /**
  * This class is responsible for
@@ -31,15 +26,6 @@ import static glz.hawk.jdesigner.translator.convert.NameConverter.UPPER_UNDERSCO
 public class DefaultEnumClassGeneratorCustomizerSupplier implements Supplier<EnumClassGeneratorCustomizer> {
     @Override
     public EnumClassGeneratorCustomizer get() {
-        return new EnumClassGeneratorCustomizer() {
-            public Translator<Domain, String> getEnumClassNameTranslator() {
-                return domain -> UPPER_UNDERSCORE_TO_UPPER_CAMEL.convertTo(domain.getName().toUpperCase());
-            }
-
-            @Override
-            public ModelFilter<Domain> getEnumFilter() {
-                return model -> true;
-            }
-        };
+        return new DefaultEnumClassGeneratorCustomizer();
     }
 }

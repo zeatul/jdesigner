@@ -69,4 +69,9 @@ public @interface EnumClassGeneratorDef {
      * <p>This class is responsible for providing {@code ClasspathBuilderContext}</p>
      */
     Class<? extends Supplier<? extends ClasspathBuilderContext>> builderContextSupplierClass() default DefaultBuilderContextSupplier.class;
+
+    /**
+     * Whether to generate properties file
+     */
+    boolean generateProperties() default true;
 }

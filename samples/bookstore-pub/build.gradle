@@ -5,10 +5,12 @@ plugins {
 description = 'The pub layer for the bookstore.'
 
 dependencies {
+
     api project(':samples:bookstore-annotations')
     compileOnly project(':jdesigner-generator-annotations')
     api 'com.fasterxml.jackson.core:jackson-annotations'
     api 'io.github.zeatul:hawk-validator'
+    api 'io.github.zeatul:hawk-core'
 
     annotationProcessor project(':jdesigner-generator-processor')
     annotationProcessor project(':samples:bookstore-designer')

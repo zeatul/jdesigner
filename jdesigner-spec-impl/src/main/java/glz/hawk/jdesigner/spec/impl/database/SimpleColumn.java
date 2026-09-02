@@ -56,8 +56,7 @@ public class SimpleColumn extends AbstractModelPart<Table, Column> implements Co
     @Nullable
     @Override
     public Optional<String> getComment(Locale locale) {
-        String comment = this.metadata.getDisplay().getDisplayName(locale);
-        return Optional.ofNullable(comment.trim().isEmpty() ? null : comment);
+        return this.metadata.getDisplay().getDisplayName(locale);
     }
 
     @Override

@@ -51,7 +51,7 @@ public abstract class AbstractDefinedClassClassGenerator {
     }
 
     public void generateDefinedClass() {
-        Translator<Class, JavaFile> classToClassTranslator = new ClassToClass(universalTypeTypeNameTranslator, definedClassPackageGenerator::loadPackage);
+        Translator<Class, JavaFile> classToClassTranslator = new ClassToClass(definedClassClassGeneratorCustomizer.getDefaultLocale(), universalTypeTypeNameTranslator, definedClassPackageGenerator::loadPackage);
         List<glz.hawk.jdesigner.spec.java.Class> classes = modelWarehouse.listModels(Class.class);
         classes.stream()
             .filter(aClass -> GeneratorUtils.pass(aClass, includePackages, excludePackages) && definedClassClassGeneratorCustomizer.getClassFilter().pass(aClass))

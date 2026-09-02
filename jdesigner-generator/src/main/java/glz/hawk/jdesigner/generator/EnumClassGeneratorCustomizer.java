@@ -19,6 +19,8 @@ package glz.hawk.jdesigner.generator;
 import glz.hawk.jdesigner.spec.meta.domain.Domain;
 import glz.hawk.jdesigner.translator.Translator;
 
+import java.util.Locale;
+
 /**
  * This class is responsible for
  *
@@ -28,4 +30,8 @@ public interface EnumClassGeneratorCustomizer {
     Translator<Domain, String> getEnumClassNameTranslator();
 
     ModelFilter<Domain> getEnumFilter();
+
+    Locale getDefaultLocale();
+
+    String getPropertiesFilename();
 }

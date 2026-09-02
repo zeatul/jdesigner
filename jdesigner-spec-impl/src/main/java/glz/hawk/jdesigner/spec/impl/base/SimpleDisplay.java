@@ -17,9 +17,11 @@
 package glz.hawk.jdesigner.spec.impl.base;
 
 import glz.hawk.jdesigner.spec.base.Display;
+import glz.hawk.jdesigner.spec.base.LocaleDisplay;
+import glz.hawkframework.core.helper.LocaleHelper;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotBlank;
@@ -30,13 +32,13 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotBlank;
  * @author Hawk
  */
 public class SimpleDisplay implements Display {
-    private final String localeString;
+    private final Locale locale;
     private final String displayName;
     private final String abbreviateName;
     private final List<String> remark = new ArrayList<>();
 
     public SimpleDisplay(String localeString, String displayName, String abbreviateName, List<String> remark) {
-        this.localeString = localeString;
+        this.locale = LocaleHelper.parse(localeString);
         this.displayName = argNotBlank(displayName, "displayName");
         this.abbreviateName = abbreviateName;
         this.remark.addAll(remark);
@@ -46,25 +48,30 @@ public class SimpleDisplay implements Display {
         this(localeString,displayName,abbreviateName,Arrays.asList(remark));
     }
 
-    @Nonnull
     @Override
-    public String getDisplayName(@Nullable Locale locale) {
-        return displayName;
+    public @NonNull List<LocaleDisplay> getLocaleDisplays() {
+        return Collections.emptyList();
     }
 
-    @Nonnull
+
     @Override
-    public List<String> getRemark(Locale locale) {
-        return this.remark;
+    public Optional<String> getDisplayName(@Nonnull Locale locale) {
+        return Optional.ofNullable(displayName);
     }
 
-    @Nullable
+
     @Override
-    public Optional<String> getAbbreviatedDisplayName(Locale locale) {
+    public Optional<List<String>> getRemark(@Nonnull Locale locale) {
+        return Optional.of(remark);
+    }
+
+
+    @Override
+    public Optional<String> getAbbreviatedDisplayName(@Nonnull Locale locale) {
         return Optional.ofNullable(abbreviateName);
     }
 
-    public String getLocaleString() {
-        return localeString;
+    public Locale getLocale() {
+        return locale;
     }
 }

@@ -45,8 +45,12 @@ public class TableToTable implements Translator<Table, TableSpec> {
     protected final Translator<Table, Optional<String>> tableCommentTranslator;
     protected final Translator<Column, Optional<String>> columnCommentTranslator;
     protected final Translator<Table, List<String>> tableSuffixesTranslator;
+    protected final boolean isCreateTitle;
+    protected final boolean isCreateDrop;
 
-    public TableToTable(Translator<Table, String> tableNameTranslator, Translator<Column, String> columnNameTranslator, Translator<Column, DataTypeSpec> dataTypeSpecTranslator, Translator<Index, String> indexNameTranslator, Translator<Table, String> primaryKeyNameTranslator, Translator<Table, Optional<String>> tableCommentTranslator, Translator<Column, Optional<String>> columnCommentTranslator, Translator<Table, List<String>> tableSuffixesTranslator) {
+    public TableToTable(boolean isCreateTitle,boolean isCreateDrop,Translator<Table, String> tableNameTranslator, Translator<Column, String> columnNameTranslator, Translator<Column, DataTypeSpec> dataTypeSpecTranslator, Translator<Index, String> indexNameTranslator, Translator<Table, String> primaryKeyNameTranslator, Translator<Table, Optional<String>> tableCommentTranslator, Translator<Column, Optional<String>> columnCommentTranslator, Translator<Table, List<String>> tableSuffixesTranslator) {
+        this.isCreateTitle = isCreateTitle;
+        this.isCreateDrop= isCreateDrop;
         this.tableNameTranslator = argNotNull(tableNameTranslator, "tableNameTranslator");
         this.columnNameTranslator = argNotNull(columnNameTranslator, "columnNameTranslator");
         this.dataTypeSpecTranslator = argNotNull(dataTypeSpecTranslator, "dataTypeSpecTranslator");
@@ -62,7 +66,8 @@ public class TableToTable implements Translator<Table, TableSpec> {
     public TableSpec translate(@Nonnull Table table) {
         argNotNull(table, "table");
 
-        TableSpec.Builder tableSpecBuilder = TableSpec.builder(tableNameTranslator.translate(table));
+        TableSpec.Builder tableSpecBuilder = TableSpec.builder(tableNameTranslator.translate(table)).setCreateTitle(isCreateTitle).setCreateDrop(isCreateDrop);
+
         // comment
         tableCommentTranslator.translate(table).ifPresent(tableSpecBuilder::setComment);
         // column

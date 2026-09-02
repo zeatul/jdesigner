@@ -26,6 +26,7 @@ import glz.hawk.bookstore.persist.process.InsertProcessorImpl;
 import glz.hawk.bookstore.persist.process.UpdateProcessorImpl;
 import glz.hawk.bookstore.persist.repository.data.AuthorGenerator;
 import glz.hawk.bookstore.persist.repository.impl.AuthorRepositoryImpl;
+import glz.hawk.bookstore.persist.sharding.BookstoreShardingService;
 import glz.hawk.bookstore.persist.sql.provider.AuthorSqlProvider;
 import glz.hawk.j4sql.mybatis.batch.BatchExecutor;
 import glz.hawk.j4sql.mybatis.writer.MybatisBuilderContext;
@@ -34,7 +35,7 @@ import glz.hawk.j4sql.support.SqlBuilder;
 import glz.hawk.j4sql.support.SqlDialect;
 import glz.hawk.j4sql.support.impl.DefaultConfiguration;
 import glz.hawk.j4sql.support.impl.SqlBuilderImpl;
-import glz.hawkframework.core.helper.IpAddressHelper;
+import glz.hawkframework.core.helper.IpHelper;
 import glz.hawkframework.core.id.snowflake.SnowflakeIdConfig;
 import glz.hawkframework.core.id.snowflake.SnowflakeIdGeneratorForBigInteger;
 import glz.hawkframework.dao.context.DefaultExceptionConverter;
@@ -67,7 +68,7 @@ public class TestRepositoryConfig {
 
     // 各分段长度总和必须等于96
     private static final long DEFAULT_DATA_CENTER_ID = 1;
-    private static final long DEFAULT_MACHINE_ID = IpAddressHelper.ipv4ToLong("128.192.38.38");
+    private static final long DEFAULT_MACHINE_ID = IpHelper.ipv4ToLong("128.192.38.38");
     private static final LocalDate DEFAULT_INITIAL_DATE_OF_SNOWFLAKE_ID = LocalDate.of(2024, 11, 19);
     private static final long DEFAULT_DATA_CENTER_ID_BITS = 3;
     private static final long DEFAULT_MACHINE_ID_BITS = 32;
@@ -90,6 +91,11 @@ public class TestRepositoryConfig {
         snowflakeIdConfig.setSequenceBits(DEFAULT_SEQUENCE_BITS);
         snowflakeIdConfig.setDataCenterIdBits(DEFAULT_DATA_CENTER_ID_BITS);
         return new SnowflakeIdGeneratorForBigInteger(snowflakeIdConfig);
+    }
+
+    @Bean
+    public BookstoreShardingService bookstoreShardingService(){
+        return  new BookstoreShardingService();
     }
 
     @Bean

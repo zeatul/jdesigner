@@ -17,11 +17,15 @@
 package glz.hawk.jdesigner.spec.impl.base;
 
 import glz.hawk.jdesigner.spec.base.Display;
-import glz.hawkframework.core.helper.StringHelper;
+import glz.hawk.jdesigner.spec.base.LocaleDisplay;
+import glz.hawkframework.core.helper.LocaleHelper;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+
+import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
 /**
  * This class is an implementation of {@link Display} which supports I18N.
@@ -30,72 +34,49 @@ import java.util.*;
  */
 public class I18nDisplay implements Display {
 
-    private SimpleDisplay defaultSimpleDisplay;
-    private final Map<String, SimpleDisplay> map = new HashMap<>();
+    private final Map<Locale, SimpleDisplay> map = new HashMap<>();
 
     public void add(@Nonnull SimpleDisplay simpleDisplay) {
-        String localeString = simpleDisplay.getLocaleString();
-        if (StringHelper.isBlank(localeString)) {
-            if (defaultSimpleDisplay == null) {
-                this.defaultSimpleDisplay = simpleDisplay;
-            } else {
-                throw new IllegalStateException("A simpleDisplay with empty localString was added before!");
-            }
-        }
-
-        localeString = localeString.replace("_", "-");
-        String key = Locale.forLanguageTag(localeString).toString();
-        if (map.put(key, simpleDisplay) != null) {
-            throw new IllegalStateException(String.format("A simpleDisplay with Locale(%s) was added before!", key));
+        if (map.put(simpleDisplay.getLocale(), simpleDisplay) != null) {
+            throw new IllegalStateException(String.format("A simpleDisplay with Locale(%s) was added before!", simpleDisplay.getLocale().toString()));
         }
     }
 
-
-    @Nonnull
     @Override
-    public String getDisplayName(@Nullable Locale locale) {
-        return loadSimpleDisplay(locale).getDisplayName();
+    public @NonNull List<LocaleDisplay> getLocaleDisplays() {
+        List<LocaleDisplay> list = new ArrayList<>();
+        map.forEach((key, value) -> {
+            value.getDisplayName(key).ifPresent(displayName -> {
+                list.add(new LocaleDisplay(key, displayName));
+            });
+        });
+        return list;
+    }
+
+
+    @Override
+    public Optional<String> getDisplayName(@Nonnull Locale locale) {
+        return getSimpleDisplay(locale).flatMap(s -> s.getDisplayName(locale));
     }
 
     @Nullable
     @Override
-    public Optional<String> getAbbreviatedDisplayName(Locale locale) {
-        return loadSimpleDisplay(locale).getAbbreviatedDisplayName();
+    public Optional<String> getAbbreviatedDisplayName(@Nonnull Locale locale) {
+        return getSimpleDisplay(locale).flatMap(s -> s.getAbbreviatedDisplayName(locale));
     }
 
-    @Nonnull
+
     @Override
-    public List<String> getRemark(Locale locale) {
-        return loadSimpleDisplay(locale).getRemark(locale);
+    public Optional<List<String>> getRemark(@Nonnull Locale locale) {
+        return getSimpleDisplay(locale).flatMap(s -> s.getRemark(locale));
     }
 
-    protected SimpleDisplay loadSimpleDisplay(Locale locale) {
-        if (locale == null) {
-            if (this.defaultSimpleDisplay == null) {
-                throw new IllegalStateException("Found no default SimpleDisplay.");
-            } else {
-                return this.defaultSimpleDisplay;
-            }
-        }
-
-        SimpleDisplay simpleDisplay = map.get(locale.toString());
-
+    protected Optional<SimpleDisplay> getSimpleDisplay(@Nonnull Locale locale) {
+        argNotNull(locale, "locale");
+        SimpleDisplay simpleDisplay = map.get(locale);
         if (simpleDisplay == null) {
-            if (StringHelper.isNotBlank(locale.getCountry())) {
-                simpleDisplay = map.get(locale.getLanguage());
-            }
+            simpleDisplay = map.get(LocaleHelper.getLocaleWithoutCountry(locale));
         }
-
-        if (simpleDisplay == null) {
-            simpleDisplay = this.defaultSimpleDisplay;
-        }
-
-        if (simpleDisplay == null) {
-            throw new IllegalStateException(String.format("Found no matched SimpleDisplay for Locale(%s).", locale.toString()));
-        } else {
-            return simpleDisplay;
-        }
-
-
+        return Optional.ofNullable(simpleDisplay);
     }
 }

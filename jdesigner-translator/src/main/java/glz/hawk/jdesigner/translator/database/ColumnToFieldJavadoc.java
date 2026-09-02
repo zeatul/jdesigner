@@ -23,6 +23,8 @@ import glz.hawk.jdesigner.translator.Translator;
 
 import javax.annotation.Nonnull;
 
+import java.util.Locale;
+
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 
 /**
@@ -34,15 +36,18 @@ public class ColumnToFieldJavadoc implements Translator<Column, FieldJavadoc> {
 
     protected final Translator<Column, String> columnNameTranslator;
 
-    public ColumnToFieldJavadoc(Translator<Column, String> columnNameTranslator) {
+    protected final Locale defaultLocale;
+
+    public ColumnToFieldJavadoc(Locale defaultLocale,Translator<Column, String> columnNameTranslator) {
+        this.defaultLocale = argNotNull(defaultLocale, "defaultLocale");
         this.columnNameTranslator = argNotNull(columnNameTranslator, "columnNameTranslator");
     }
 
     @Override
     public @Nonnull FieldJavadoc translate(@Nonnull Column column) {
         FieldJavadoc.Builder javadocBuilder = FieldJavadoc.builder();
-        if (column.getComment().isPresent()) {
-            javadocBuilder.beginJavadoc().addDocument(column.getComment().get());
+        if (column.getComment(defaultLocale).isPresent()) {
+            javadocBuilder.beginJavadoc().addDocument(column.getComment(defaultLocale).get());
             javadocBuilder.beginJavadoc().addInlineHtml(HtmlTag.P, "Map to column: $L", columnNameTranslator.translate(column));
         } else {
             javadocBuilder.beginJavadoc().addDocument("Map to column: $L", columnNameTranslator.translate(column));
