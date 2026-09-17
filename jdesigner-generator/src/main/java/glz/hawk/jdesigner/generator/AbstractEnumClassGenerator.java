@@ -37,20 +37,22 @@ public abstract class AbstractEnumClassGenerator {
     private final String[] excludePackages;
     private final PackageGenerator enumClassPackageGenerator;
     private final EnumClassGeneratorCustomizer enumClassGeneratorCustomizer;
+    private final boolean useMethod;
 
 
-    public AbstractEnumClassGenerator(ModelWarehouse modelWarehouse, String[] includePackages, String[] excludePackages, PackageGenerator enumClassPackageGenerator, EnumClassGeneratorCustomizer enumClassGeneratorCustomizer
-                                      ) {
+    public AbstractEnumClassGenerator(ModelWarehouse modelWarehouse, String[] includePackages, String[] excludePackages, PackageGenerator enumClassPackageGenerator,
+                                      EnumClassGeneratorCustomizer enumClassGeneratorCustomizer, boolean useMethod) {
         this.modelWarehouse = modelWarehouse;
         this.includePackages = includePackages;
         this.excludePackages = excludePackages;
         this.enumClassPackageGenerator = enumClassPackageGenerator;
         this.enumClassGeneratorCustomizer = enumClassGeneratorCustomizer;
+        this.useMethod = useMethod;
     }
 
     public void generateEnum() {
         List<Domain> domains = modelWarehouse.listModels(Domain.class);
-        Translator<Domain, JavaFile> domainToEnumTranslator = new DomainToEnum(enumClassGeneratorCustomizer.getDefaultLocale(),enumClassPackageGenerator::loadPackage, enumClassGeneratorCustomizer.getEnumClassNameTranslator());
+        Translator<Domain, JavaFile> domainToEnumTranslator = new DomainToEnum(enumClassGeneratorCustomizer.getDefaultLocale(), enumClassPackageGenerator::loadPackage, enumClassGeneratorCustomizer.getEnumClassNameTranslator(),useMethod);
         domains.stream()
             .filter(Domain::isEnum)
             .filter(domain -> GeneratorUtils.pass(domain, includePackages, excludePackages) && enumClassGeneratorCustomizer.getEnumFilter().pass(domain))

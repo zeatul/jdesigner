@@ -32,8 +32,8 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 public class EnumClassGeneratorForFileSystem extends AbstractEnumClassGenerator {
     private final File directory;
 
-    public EnumClassGeneratorForFileSystem(ModelWarehouse modelWarehouse, String[] includePackages, String[] excludePackages, PackageGenerator enumClassPackageGenerator, EnumClassGeneratorCustomizer enumClassGeneratorCustomizer, File directory) {
-        super(modelWarehouse, includePackages, excludePackages, enumClassPackageGenerator, enumClassGeneratorCustomizer);
+    public EnumClassGeneratorForFileSystem(ModelWarehouse modelWarehouse, String[] includePackages, String[] excludePackages, PackageGenerator enumClassPackageGenerator, EnumClassGeneratorCustomizer enumClassGeneratorCustomizer, File directory,boolean useMethod) {
+        super(modelWarehouse, includePackages, excludePackages, enumClassPackageGenerator, enumClassGeneratorCustomizer, useMethod);
         this.directory = argNotNull(directory, "directory");
     }
 

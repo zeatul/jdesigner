@@ -35,8 +35,8 @@ public class EnumClassGeneratorForAnnotationProcessor extends AbstractEnumClassG
     private final Filer filer;
     private final List<Element> originatingElements;
 
-    public EnumClassGeneratorForAnnotationProcessor(ModelWarehouse modelWarehouse, String[] includePackages, String[] excludePackages, PackageGenerator enumClassPackageGenerator, EnumClassGeneratorCustomizer enumClassGeneratorCustomizer, Filer filer, List<Element> originatingElements) {
-        super(modelWarehouse,includePackages,excludePackages, enumClassPackageGenerator, enumClassGeneratorCustomizer);
+    public EnumClassGeneratorForAnnotationProcessor(ModelWarehouse modelWarehouse, String[] includePackages, String[] excludePackages, PackageGenerator enumClassPackageGenerator, EnumClassGeneratorCustomizer enumClassGeneratorCustomizer, Filer filer, List<Element> originatingElements,boolean useMethod) {
+        super(modelWarehouse,includePackages,excludePackages, enumClassPackageGenerator, enumClassGeneratorCustomizer,useMethod);
         this.filer = argNotNull(filer, "filer");
         this.originatingElements = originatingElements;
     }

@@ -154,7 +154,8 @@ public class BookstoreGeneratorApp {
             new String[0],
             ENUM_CLASS_PACKAGE_GENERATOR,
             new BookstoreEnumClassGeneratorCustomizerSupplier().get(),
-            path.toAbsolutePath().toFile()
+            path.toAbsolutePath().toFile(),
+            true
         );
         generator.generateEnum();
 

@@ -39,8 +39,7 @@ import java.util.Map;
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 import static glz.hawkframework.core.support.ArgumentSupport.argument;
 import static glz.hawkframework.core.support.StateSupport.stateTrue;
-import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.element.Modifier.*;
 
 /**
  * This class is responsible for
@@ -57,16 +56,19 @@ public class DomainToEnum implements Translator<Domain, JavaFile> {
 
     private final Locale defaultLocale;
 
+    private final boolean useMethod;
 
-    public DomainToEnum(Locale defaultLocale, Translator<Model, String> packageTranslator, Translator<Domain, String> enumNameTranslator, Translator<Domain, TypeName> typeNameTranslator) {
+
+    public DomainToEnum(Locale defaultLocale, Translator<Model, String> packageTranslator, Translator<Domain, String> enumNameTranslator, Translator<Domain, TypeName> typeNameTranslator, boolean useMethod) {
         this.defaultLocale = argNotNull(defaultLocale, "defaultLocale");
         this.packageTranslator = argNotNull(packageTranslator, "packageTranslator");
         this.enumNameTranslator = argNotNull(enumNameTranslator, "enumNameTranslator");
         this.typeNameTranslator = argNotNull(typeNameTranslator, "typeNameTranslator");
+        this.useMethod = useMethod;
     }
 
-    public DomainToEnum(Locale defaultLocale, Translator<Model, String> packageTranslator, Translator<Domain, String> enumNameTranslator) {
-        this(defaultLocale, packageTranslator, enumNameTranslator, domain -> ClassName.ofClass(String.class));
+    public DomainToEnum(Locale defaultLocale, Translator<Model, String> packageTranslator, Translator<Domain, String> enumNameTranslator, boolean useMethod) {
+        this(defaultLocale, packageTranslator, enumNameTranslator, domain -> ClassName.ofClass(String.class), useMethod);
     }
 
     @Nonnull
@@ -76,12 +78,21 @@ public class DomainToEnum implements Translator<Domain, JavaFile> {
         argument(domain, Domain::isEnum, d -> String.format("The domain: %s is not an enum.", d.getName()));
         argument(domain, d -> ObjectHelper.isNotEmpty(d.getValues()), d -> String.format("The domain: %s has no value.", d.getName()));
 
-        EnumSpec.Builder enumSpecBuilder = EnumSpec.builder(enumName(domain), PUBLIC)
-            .addField(valueType(domain), "value", Modifier.FINAL, PUBLIC)
-            .addConstructors(ConstructorSpec.builder()
-                .addParameter(String.class, "value")
-                .beginConstructorBody()
-                .addStatement("this.value = value").end().build());
+        EnumSpec.Builder enumSpecBuilder = EnumSpec.builder(enumName(domain), PUBLIC);
+        if (useMethod) {
+            enumSpecBuilder.addField(valueType(domain), "value", PRIVATE, Modifier.FINAL);
+            enumSpecBuilder.addMethod(MethodSpec.builder(valueType(domain), "getValue", PUBLIC)
+                .beginMethodBody()
+                .addStatement("return value")
+                .end()
+                .build());
+        }else{
+            enumSpecBuilder.addField(valueType(domain), "value", PUBLIC, Modifier.FINAL);
+        }
+        enumSpecBuilder.addConstructors(ConstructorSpec.builder()
+            .addParameter(String.class, "value")
+            .beginConstructorBody()
+            .addStatement("this.value = value").end().build());
         stateTrue(domain.getValues() != null && domain.getValues().length > 0, () -> String.format("The domain: %s has no value.", domain.getName()));
         Arrays.stream(domain.getValues()).forEach(v -> {
                 String enumConstantName = v.getCode().toUpperCase();
@@ -162,7 +173,7 @@ public class DomainToEnum implements Translator<Domain, JavaFile> {
         });
         valueMapInitializerBuilder.unindent()
             .add(".buildHashMap()");
-        return FieldSpec.builder(ParameterizedTypeName.of(Map.class, valueType(domain), domainTypeName(domain)), "nameMap", Modifier.PRIVATE, Modifier.FINAL, STATIC)
+        return FieldSpec.builder(ParameterizedTypeName.of(Map.class, valueType(domain), domainTypeName(domain)), "nameMap", PRIVATE, Modifier.FINAL, STATIC)
             .setInitializer(valueMapInitializerBuilder.build())
             .build();
     }
@@ -178,7 +189,7 @@ public class DomainToEnum implements Translator<Domain, JavaFile> {
         });
         valueMapInitializerBuilder.unindent()
             .add(".buildHashMap()");
-        return FieldSpec.builder(ParameterizedTypeName.of(Map.class, valueType(domain), domainTypeName), "valueMap", Modifier.PRIVATE, Modifier.FINAL, STATIC)
+        return FieldSpec.builder(ParameterizedTypeName.of(Map.class, valueType(domain), domainTypeName), "valueMap", PRIVATE, Modifier.FINAL, STATIC)
             .setInitializer(valueMapInitializerBuilder.build())
             .build();
     }

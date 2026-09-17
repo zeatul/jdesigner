@@ -26,7 +26,8 @@ import glz.hawk.jdesigner.generator.annotation.PackageMaps;
  */
 @EnumClassGeneratorDef(scanPackages = "glz.hawk.bookstore.designer.meta",
     resourceCollectors = "glz.hawk.bookstore.designer.BookstoreModelIndexer",
-    enumClassPackageMaps = @PackageMaps(namespacePackageMaps = {@PackageMaps.NamespacePackageMap(namespace = "glz.hawk.bookstore.designer.meta", packageName = "glz.hawk.bookstore.pub.enums")})
+    enumClassPackageMaps = @PackageMaps(namespacePackageMaps = {@PackageMaps.NamespacePackageMap(namespace = "glz.hawk.bookstore.designer.meta", packageName = "glz.hawk.bookstore.pub.enums")}),
+    useMethod = false
 )
 public class BookstoreEnumInitializer {
 }

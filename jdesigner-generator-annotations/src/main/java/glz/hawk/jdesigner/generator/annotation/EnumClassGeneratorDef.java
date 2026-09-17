@@ -74,4 +74,10 @@ public @interface EnumClassGeneratorDef {
      * Whether to generate properties file
      */
     boolean generateProperties() default true;
+
+    /**
+     * Whether to use method to get the enum value
+     * <p>If true, the enum value will be obtained by calling the method, otherwise by using the field</p>
+     */
+    boolean useMethod() default false;
 }

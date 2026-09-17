@@ -22,6 +22,7 @@ import glz.hawk.jdesigner.generator.EnumClassGeneratorForAnnotationProcessor;
 import glz.hawk.jdesigner.generator.EnumPropertiesGeneratorForAnnotationProcessor;
 import glz.hawk.jdesigner.generator.annotation.EnumClassGeneratorDef;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
+import glz.hawkframework.core.helper.ObjectHelper;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -82,14 +83,17 @@ public class EnumGeneratorProcessor extends AbstractProcessor {
         }
 
         EnumClassGeneratorDef def = elements.iterator().next().getAnnotation(EnumClassGeneratorDef.class);
+        if (def == null) throw new IllegalStateException("Found no EnumClassGeneratorDef.");
         String[] scanPackages = def.scanPackages();
+        if (ObjectHelper.isEmpty(scanPackages)) throw new IllegalStateException("The scanPackages attribute cannot be empty");
         String[] includePackages = def.includePackages();
         String[] excludePackages = def.excludePackages();
+        boolean useMethod = def.useMethod();
         Arrays.stream(scanPackages).forEach(s -> messager.printMessage(Diagnostic.Kind.NOTE, "scanPackage: " + s));
         Supplier<? extends ClasspathBuilderContext> builderContextSupplier = instance(getSupplierClass(def::builderContextSupplierClass));
         ModelWarehouse modelWarehouse = buildModelWarehouse(scanPackages, def.resourceCollectors(), messager, builderContextSupplier);
         Supplier<? extends EnumClassGeneratorCustomizer> customizerSupplier = instance(getSupplierClass(def::customizerSupplierClass));
-        EnumClassGeneratorForAnnotationProcessor generator = new EnumClassGeneratorForAnnotationProcessor(modelWarehouse, includePackages, excludePackages, buildPackageGenerator(def.enumClassPackageMaps()), customizerSupplier.get(), filer, new ArrayList<>(elements));
+        EnumClassGeneratorForAnnotationProcessor generator = new EnumClassGeneratorForAnnotationProcessor(modelWarehouse, includePackages, excludePackages, buildPackageGenerator(def.enumClassPackageMaps()), customizerSupplier.get(), filer, new ArrayList<>(elements), useMethod);
         generator.generateEnum();
 
         if (def.generateProperties()) {
