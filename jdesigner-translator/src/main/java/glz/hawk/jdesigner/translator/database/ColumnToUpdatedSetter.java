@@ -53,7 +53,7 @@ public class ColumnToUpdatedSetter implements Translator<Column, MethodSpec> {
         this.fieldTypeNameTranslator = argNotNull(fieldTypeNameTranslator, "fieldTypeNameTranslator");
         this.fieldUpdatedNameTranslator = argNotNull(fieldUpdatedNameTranslator, "fieldUpdatedNameTranslator");
         this.methodNameTranslator = argNotNull(methodNameTranslator, "methodNameTranslator");
-        this.methodJavadocTranslator = methodJavadocTranslator;
+        this.methodJavadocTranslator = argNotNull(methodJavadocTranslator, "methodJavadocTranslator");
     }
 
     @Nonnull

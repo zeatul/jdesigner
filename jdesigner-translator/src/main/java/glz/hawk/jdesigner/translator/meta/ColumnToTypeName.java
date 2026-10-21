@@ -36,6 +36,11 @@ public class ColumnToTypeName implements Translator<Column, TypeName> {
     @Nonnull
     @Override
     public TypeName translate(@Nonnull Column column) {
-        return dataTypeToTypeName.translate(argNotNull(column,"column").getDataType());
+        argNotNull(column, "column");
+        try {
+            return dataTypeToTypeName.translate(column.getDataType());
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException(String.format("Failed to convert Column['%s'] to TypeName", column.getName()), ex);
+        }
     }
 }

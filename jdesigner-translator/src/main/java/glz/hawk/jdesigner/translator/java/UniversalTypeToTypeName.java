@@ -93,8 +93,10 @@ public class UniversalTypeToTypeName implements Translator<UniversalType, TypeNa
     }
 
     protected WildcardTypeName convertToWildcardTypeName(UniversalType universalType) {
-        return WildcardTypeName.of(Arrays.stream(universalType.getUpperBounds()).map(this::translate).collect(Collectors.toList()),
-            Arrays.stream(universalType.getLowerBounds()).map(this::translate).collect(Collectors.toList()));
+        return WildcardTypeName.of(
+            Arrays.stream(universalType.getUpperBounds() == null ? new UniversalType[0] : universalType.getUpperBounds()).map(this::translate).collect(Collectors.toList()),
+            Arrays.stream(universalType.getLowerBounds() == null ? new UniversalType[0] : universalType.getLowerBounds()).map(this::translate).collect(Collectors.toList())
+        );
     }
 
     protected ArrayTypeName convertToArrayTypeName(UniversalType universalType) {

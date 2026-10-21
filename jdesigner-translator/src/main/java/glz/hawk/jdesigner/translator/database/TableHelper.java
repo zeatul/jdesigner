@@ -37,19 +37,15 @@ public abstract class TableHelper {
      * @return the required column
      */
     public static Optional<Column> findColumn(Table table, Class<? extends Annotation> annotationClass) {
-        for (int i = 0; i < table.getColumns().length; i++) {
-            Column column = table.getColumns()[i];
-            boolean[] flag = new boolean[]{false};
-            column.getNoDefAnnotations().ifPresent(list -> {
-                for (glz.hawk.jdesigner.spec.java.Annotation annotation : list) {
+        Column[] columns = table.getColumns();
+        for (int i = 0; i < columns.length; i++) {
+            Column column = columns[i];
+            if (column.getNoDefAnnotations().isPresent()) {
+                for (glz.hawk.jdesigner.spec.java.Annotation annotation : column.getNoDefAnnotations().get()) {
                     if (annotation.getType().canonicalName().equals(annotationClass.getCanonicalName())) {
-                        flag[0] = true;
-                        return;
+                        return Optional.of(column);
                     }
                 }
-            });
-            if (flag[0]) {
-                return Optional.of(column);
             }
         }
         return Optional.empty();

@@ -44,11 +44,12 @@ public class ColumnToSetterJavadoc implements Translator<Column, MethodJavadoc> 
     @Override
     public @NonNull MethodJavadoc translate(@NonNull Column column) {
         MethodJavadoc.Builder javadocBuilder = MethodJavadoc.builder();
+        String translatedName = columnNameTranslator.translate(column);
         if (column.getComment(defaultLocale).isPresent()) {
             javadocBuilder.beginJavadoc().addDocument("Sets $L", column.getComment(defaultLocale).get());
-            javadocBuilder.beginJavadoc().addInlineHtml(HtmlTag.P, "Map to column: $L", column.getName());
+            javadocBuilder.beginJavadoc().addInlineHtml(HtmlTag.P, "Map to column: $L", translatedName);
         } else {
-            javadocBuilder.beginJavadoc().addDocument("Map to column: $L", column.getName());
+            javadocBuilder.beginJavadoc().addDocument("Map to column: $L", translatedName);
         }
         return javadocBuilder.build();
     }

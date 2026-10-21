@@ -103,7 +103,7 @@ public class ClassToClass implements Translator<Class, JavaFile> {
 
     protected FieldSpec fieldSpec(Field f) {
         FieldSpec.Builder builder = FieldSpec.builder(typeNameTranslator.translate(f.getType()), f.getName(), f.getModifiers());
-        builder.addAnnotations(annotations(f)).build();
+        builder.addAnnotations(annotations(f));
         FieldJavadoc fieldJavadoc = fieldJavadoc(f);
         if (fieldJavadoc != null) builder.setJavadoc(fieldJavadoc);
         return builder.build();

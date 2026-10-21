@@ -19,9 +19,10 @@ package glz.hawk.jdesigner.builder.handler;
 import glz.hawk.jdesigner.annotation.meta.domain.DomainDef;
 import glz.hawk.jdesigner.annotation.meta.domain.DomainDefContainer;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
-import glz.hawk.jdesigner.builder.factory.java.common.AnnotationHelper;
+import glz.hawk.jdesigner.builder.factory.common.ExtensionKeys;
 import glz.hawk.jdesigner.builder.factory.meta.domain.DomainFactory;
 import glz.hawk.jdesigner.builder.factory.meta.domain.DomainFactoryContext;
+import glz.hawk.jdesigner.builder.factory.java.common.AnnotationHelper;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 import org.springframework.core.type.classreading.MetadataReader;
 
@@ -56,7 +57,7 @@ public class DomainMetadataReaderResourceHandler extends AbstractMetadataReaderR
         DomainFactoryContext factoryContext = new DomainFactoryContext();
         factoryContext.setAnnotatedElement(definingField);
         factoryContext.putNoDefAnnotations(AnnotationHelper.parse(definingField));
-        factoryContext.putExtension(Field.class.getCanonicalName(), definingField);
+        ExtensionKeys.putDeclaringExtension(factoryContext, ExtensionKeys.DECLARING_FIELD, ExtensionKeys.LEGACY_DECLARING_FIELD, definingField);
         return factoryContext;
     }
 

@@ -76,9 +76,11 @@ public class DefinedClassGeneratorProcessor extends AbstractProcessor {
 
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(DefinedClassGeneratorDef.class);
         if (elements.isEmpty()) {
-            throw new IllegalStateException("Found no class annotated with " + DefinedClassGeneratorDef.class);
+            messager.printMessage(Diagnostic.Kind.ERROR, "Found no class annotated with " + DefinedClassGeneratorDef.class);
+            return true;
         } else if (elements.size() > 1) {
-            throw new IllegalStateException("Only one class can be annotated with " + DefinedClassGeneratorDef.class);
+            messager.printMessage(Diagnostic.Kind.ERROR, "Only one class can be annotated with " + DefinedClassGeneratorDef.class);
+            return true;
         }
 
         DefinedClassGeneratorDef def = elements.iterator().next().getAnnotation(DefinedClassGeneratorDef.class);

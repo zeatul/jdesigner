@@ -44,6 +44,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * This class is responsible for
  *
@@ -82,13 +84,16 @@ public class DataGeneratorTest {
     public void generateDataTest() {
         List<AuthorPo> authorPoList = authorGenerator.generate(500);
         authorRepository.insertMultiple(authorPoList);
+        assertThat(authorPoList).hasSize(500);
 
         List<PublisherPo> publisherPoList = publisherGenerator.generate(10);
         publisherRepository.insertMultiple(publisherPoList);
+        assertThat(publisherPoList).hasSize(10);
 
         List<BookPo> bookPoList = bookGenerator.generate(500);
         bookPoList.forEach(po -> po.setPublisherId(publisherPoList.get(faker.random().nextInt(0, publisherPoList.size() - 1)).getPublisherId()));
         bookRepository.insertMultiple(bookPoList);
+        assertThat(bookPoList).hasSize(500);
 
         List<BookAuthorMapPo> bookAuthorMapPoList = bookAuthorMapGenerator.generate(800);
         Set<String> set = new HashSet<>();
@@ -103,10 +108,9 @@ public class DataGeneratorTest {
                     po.setAuthorId(authorPo.getAuthorId());
                 }
             }
-
         });
         bookAuthorMapRepository.insertMultiple(bookAuthorMapPoList);
+        assertThat(bookAuthorMapPoList).hasSize(800);
     }
-
 
 }

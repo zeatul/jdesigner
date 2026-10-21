@@ -34,9 +34,11 @@ import java.util.Arrays;
 public abstract class AnnotationUtils {
 
     public static AnnotationInstanceSpec annotationInstanceSpec(Annotation annotation, Translator<UniversalType, TypeName> typeNameTranslator) {
-        // TODO: 如何过滤掉注解的默认值
-        // 解析designer的class文件时，应该已经过滤掉了，此处无需过滤
-        AnnotationInstanceSpec.Builder builder = AnnotationInstanceSpec.builder((ClassName) typeNameTranslator.translate(annotation.getType()));
+        TypeName typeName = typeNameTranslator.translate(annotation.getType());
+        if (!(typeName instanceof ClassName)) {
+            throw new IllegalArgumentException(String.format("Annotation type must be a ClassName, got %s", typeName.getClass().getSimpleName()));
+        }
+        AnnotationInstanceSpec.Builder builder = AnnotationInstanceSpec.builder((ClassName) typeName);
         Arrays.stream(annotation.getAttributes()).forEach(a -> {
             if (a.getValue().getClass().isArray() && Annotation.class.isAssignableFrom(a.getValue().getClass().getComponentType())) {
                 int length = Array.getLength(a.getValue());

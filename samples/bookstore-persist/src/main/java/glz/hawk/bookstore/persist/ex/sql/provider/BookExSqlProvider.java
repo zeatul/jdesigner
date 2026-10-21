@@ -33,7 +33,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import static glz.hawk.bookstore.persist.support.BookSupport.*;
-import static glz.hawk.j4sql.mybatis.writer.MybatisBuilderContextImpl.DUMMY_INSTANCE;
+import static glz.hawk.j4sql.mybatis.writer.MybatisBuilderContextImpl.emptyInstance;
 import static glz.hawk.j4sql.support.impl.DSL.*;
 import static glz.hawkframework.core.support.ArgumentSupport.*;
 
@@ -63,7 +63,7 @@ public class BookExSqlProvider extends AbstractSqlProvider {
                     from(BOOK)
                     .groupBy(BOOK_CATEGORY)
                     .build(),
-                DUMMY_INSTANCE)))
+                emptyInstance())))
             .build();
     }
 
@@ -102,7 +102,7 @@ public class BookExSqlProvider extends AbstractSqlProvider {
                     .where(BOOK_CATEGORY.eq(MybatisParam.builder(paramName, String.class).setPrefix(GeneralStatementProvider.PARAM_PREFIX).build()))
                     .groupBy(BOOK_CATEGORY)
                     .build(),
-                DUMMY_INSTANCE))
+                emptyInstance()))
         ).addParam(paramName, bookCategory).build();
     }
 
@@ -123,7 +123,7 @@ public class BookExSqlProvider extends AbstractSqlProvider {
                 .from(BOOK)
                 .where(BOOK_ID.in(MybatisParam.builder(paramName, true).setPrefix(GeneralStatementProvider.PARAM_PREFIX).build()))
                 .build(),
-            DUMMY_INSTANCE));
+            emptyInstance()));
         return GeneralStatementProviderImpl.builder("<script>" + sql + "</script>").addParam(paramName, ids).build();
     }
 
@@ -156,7 +156,7 @@ public class BookExSqlProvider extends AbstractSqlProvider {
                     and(PRICE.between(MybatisParam.builder("minPrice", BigDecimal.class).setPrefix(GeneralStatementProvider.PARAM_PREFIX).build(),
                         MybatisParam.builder("maxPrice", BigDecimal.class).setPrefix(GeneralStatementProvider.PARAM_PREFIX).build())))
                 .build(),
-            DUMMY_INSTANCE));
+            emptyInstance()));
         return GeneralStatementProviderImpl.builder(sql)
             .addParam("bookCategory", bookCategory)
             .addParam("minPrice", minPrice)
@@ -184,7 +184,7 @@ public class BookExSqlProvider extends AbstractSqlProvider {
                 .limit(!isCount, MybatisParam.builder("limit", long.class).setPrefix(GeneralStatementProvider.PARAM_PREFIX).build())
                 .offset(!isCount, MybatisParam.builder("offset", Long.class).setPrefix(GeneralStatementProvider.PARAM_PREFIX).build())
                 .build(),
-            DUMMY_INSTANCE));
+            emptyInstance()));
         return GeneralStatementProviderImpl.builder(sql)
             .addParam(!isCount, "limit", offsetAndLimit.getLimit())
             .addParam(!isCount, "offset", offsetAndLimit.getOffset())

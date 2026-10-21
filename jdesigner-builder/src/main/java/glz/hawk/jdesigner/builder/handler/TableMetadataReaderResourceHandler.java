@@ -19,6 +19,7 @@ package glz.hawk.jdesigner.builder.handler;
 import glz.hawk.jdesigner.annotation.database.ColumnDef;
 import glz.hawk.jdesigner.annotation.database.TableDef;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
+import glz.hawk.jdesigner.builder.factory.common.ExtensionKeys;
 import glz.hawk.jdesigner.builder.factory.database.column.ColumnFactoryContext;
 import glz.hawk.jdesigner.builder.factory.database.column.ColumnSupplierFactory;
 import glz.hawk.jdesigner.builder.factory.database.index.IndexSupplierFactory;
@@ -34,11 +35,12 @@ import glz.hawk.jdesigner.spec.impl.base.ModelPartSupplier;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 import org.springframework.core.type.classreading.MetadataReader;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import java.lang.reflect.Field;
 
 import static glz.hawkframework.core.support.LogicSupport.consumeIfNotNull;
 
@@ -49,7 +51,6 @@ import static glz.hawkframework.core.support.LogicSupport.consumeIfNotNull;
  */
 public class TableMetadataReaderResourceHandler extends AbstractMetadataReaderResourceHandler {
 
-    //TODO: 改成ThreadLocal变量
     private final Map<String, Column> fieldNameColumnMap = new HashMap<>();
     private final List<ModelPartSupplier<Table, Column>> columnSuppliers = new ArrayList<>();
     private final List<ModelPartSupplier<Table, Index>> indexSuppliers = new ArrayList<>();
@@ -61,7 +62,7 @@ public class TableMetadataReaderResourceHandler extends AbstractMetadataReaderRe
 
     @Override
     public void handle() {
-        // clean
+        // Clean state from previous handle (handler is reused per resource in single-threaded context)
         fieldNameColumnMap.clear();
         columnSuppliers.clear();
         indexSuppliers.clear();
@@ -103,7 +104,7 @@ public class TableMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         TableFactoryContext factoryContext = new TableFactoryContext();
         factoryContext.setAnnotatedElement(classOfMetadataReader);
         factoryContext.putNoDefAnnotations(AnnotationHelper.parse(classOfMetadataReader));
-        factoryContext.putExtension(Class.class.getCanonicalName(), classOfMetadataReader);
+        ExtensionKeys.putDeclaringExtension(factoryContext, ExtensionKeys.DECLARING_CLASS, ExtensionKeys.LEGACY_DECLARING_CLASS, classOfMetadataReader);
         return factoryContext;
     }
 
@@ -111,7 +112,7 @@ public class TableMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         ColumnFactoryContext factoryContext = new ColumnFactoryContext();
         factoryContext.setAnnotatedElement(field);
         factoryContext.putNoDefAnnotations(AnnotationHelper.parse(field));
-        factoryContext.putExtension(Field.class.getCanonicalName(), field);
+        ExtensionKeys.putDeclaringExtension(factoryContext, ExtensionKeys.DECLARING_FIELD, ExtensionKeys.LEGACY_DECLARING_FIELD, field);
         return factoryContext;
     }
 

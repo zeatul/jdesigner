@@ -26,4 +26,17 @@ import java.lang.annotation.Annotation;
 public interface AnnotationParser<C, A extends Annotation> {
 
     void parse(C factoryContext, A annotation);
+
+    /**
+     * Parse an annotation without requiring explicit type casting.
+     * This default implementation handles the type casting internally.
+     */
+    default void parseRaw(Object factoryContext, Annotation annotation) {
+        // Default implementation - subclasses should override if needed
+        @SuppressWarnings("unchecked")
+        C ctx = (C) factoryContext;
+        @SuppressWarnings("unchecked")
+        A ann = (A) annotation;
+        parse(ctx, ann);
+    }
 }

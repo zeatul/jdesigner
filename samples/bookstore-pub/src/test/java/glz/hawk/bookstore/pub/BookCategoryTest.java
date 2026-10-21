@@ -19,6 +19,8 @@ package glz.hawk.bookstore.pub;
 import glz.hawk.bookstore.pub.enums.BookCategory;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * This class is responsible for
  * <p></p>
@@ -29,10 +31,11 @@ import org.junit.jupiter.api.Test;
 public class BookCategoryTest {
 
     @Test
-    public void test(){
+    public void test() {
         BookCategory bookCategory = BookCategory.BIOLOGY;
-        System.out.println(bookCategory.name());
-        System.out.println(bookCategory.getDeclaringClass().getCanonicalName());
-        System.out.println(bookCategory.getClass().getCanonicalName());
+        assertThat(bookCategory).isNotNull();
+        assertThat(bookCategory.name()).isEqualTo("BIOLOGY");
+        assertThat(bookCategory.getDeclaringClass().getCanonicalName()).isEqualTo("glz.hawk.bookstore.pub.enums.BookCategory");
+        assertThat(bookCategory.getClass().getCanonicalName()).isEqualTo("glz.hawk.bookstore.pub.enums.BookCategory");
     }
 }

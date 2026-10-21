@@ -26,9 +26,11 @@ import glz.hawk.bookstore.persist.process.InsertProcessorImpl;
 import glz.hawk.bookstore.persist.process.UpdateProcessorImpl;
 import glz.hawk.bookstore.persist.repository.data.AuthorGenerator;
 import glz.hawk.bookstore.persist.repository.impl.AuthorRepositoryImpl;
+import glz.hawk.bookstore.persist.repository.support.AuthorService;
 import glz.hawk.bookstore.persist.sharding.BookstoreShardingService;
 import glz.hawk.bookstore.persist.sql.provider.AuthorSqlProvider;
 import glz.hawk.j4sql.mybatis.batch.BatchExecutor;
+import glz.hawk.j4sql.mybatis.spring.MybatisSpringBatchExecutor;
 import glz.hawk.j4sql.mybatis.writer.MybatisBuilderContext;
 import glz.hawk.j4sql.mybatis.writer.MybatisSqlWriterImpl;
 import glz.hawk.j4sql.support.SqlBuilder;
@@ -44,13 +46,11 @@ import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-
 import java.time.LocalDate;
 import java.util.Locale;
 
@@ -66,7 +66,7 @@ import java.util.Locale;
 @EnableAutoConfiguration //自动加载全部AutoConfiguration
 public class TestRepositoryConfig {
 
-    // 各分段长度总和必须等于96
+    // 各分段长度总和必须等于95（BigInteger版本）
     private static final long DEFAULT_DATA_CENTER_ID = 1;
     private static final long DEFAULT_MACHINE_ID = IpHelper.ipv4ToLong("128.192.38.38");
     private static final LocalDate DEFAULT_INITIAL_DATE_OF_SNOWFLAKE_ID = LocalDate.of(2024, 11, 19);
@@ -74,6 +74,7 @@ public class TestRepositoryConfig {
     private static final long DEFAULT_MACHINE_ID_BITS = 32;
     private static final long DEFAULT_SEQUENCE_BITS = 16;
     private static final long DEFAULT_MILLISECOND_BITS = 44;
+    private static final long DEFAULT_EXPECTED_TOTAL_BITS = 95;
 
     @Bean
     public SqlBuilder<MybatisBuilderContext> sqlBuilder() {
@@ -82,20 +83,22 @@ public class TestRepositoryConfig {
 
     @Bean
     public SnowflakeIdGeneratorForBigInteger snowflakeIdGeneratorForBigInteger() {
-        SnowflakeIdConfig snowflakeIdConfig = new SnowflakeIdConfig();
-        snowflakeIdConfig.setDataCenterId(DEFAULT_DATA_CENTER_ID);
-        snowflakeIdConfig.setInitialDateOfSnowflakeId(DEFAULT_INITIAL_DATE_OF_SNOWFLAKE_ID);
-        snowflakeIdConfig.setMachineId(DEFAULT_MACHINE_ID);
-        snowflakeIdConfig.setMachineIdBits(DEFAULT_MACHINE_ID_BITS);
-        snowflakeIdConfig.setMillisecondBits(DEFAULT_MILLISECOND_BITS);
-        snowflakeIdConfig.setSequenceBits(DEFAULT_SEQUENCE_BITS);
-        snowflakeIdConfig.setDataCenterIdBits(DEFAULT_DATA_CENTER_ID_BITS);
+        SnowflakeIdConfig snowflakeIdConfig = SnowflakeIdConfig.builder()
+            .setDataCenterId(DEFAULT_DATA_CENTER_ID)
+            .setInitialDateOfSnowflakeId(DEFAULT_INITIAL_DATE_OF_SNOWFLAKE_ID)
+            .setMachineId(DEFAULT_MACHINE_ID)
+            .setDataCenterIdBits(DEFAULT_DATA_CENTER_ID_BITS)
+            .setMachineIdBits(DEFAULT_MACHINE_ID_BITS)
+            .setSequenceBits(DEFAULT_SEQUENCE_BITS)
+            .setMillisecondBits(DEFAULT_MILLISECOND_BITS)
+            .setExpectedTotalBits(DEFAULT_EXPECTED_TOTAL_BITS)
+            .build();
         return new SnowflakeIdGeneratorForBigInteger(snowflakeIdConfig);
     }
 
     @Bean
-    public BookstoreShardingService bookstoreShardingService(){
-        return  new BookstoreShardingService();
+    public BookstoreShardingService bookstoreShardingService() {
+        return new BookstoreShardingService();
     }
 
     @Bean
@@ -104,19 +107,18 @@ public class TestRepositoryConfig {
         return new SqlSessionTemplate(sqlSessionFactory, ExecutorType.SIMPLE);
     }
 
+    /**
+     * 注册批处理执行器
+     * <p>复用默认的SqlSessionFactory，通过TransactionAwareDataSourceProxy保证批处理与默认SqlSession共享同一个事务连接</p>
+     */
     @Bean
-    public SqlSessionTemplate batchSqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
-        return new SqlSessionTemplate(sqlSessionFactory, ExecutorType.BATCH);
+    public BatchExecutor batchExecutor(SqlSessionFactory sqlSessionFactory) throws Exception {
+        return new MybatisSpringBatchExecutor(sqlSessionFactory);
     }
 
     @Bean
-    public BatchExecutor batchExecutor(@Qualifier("batchSqlSessionTemplate") SqlSessionTemplate batchSqlSessionTemplate) {
-        return new BatchExecutor(batchSqlSessionTemplate);
-    }
-
-    @Bean
-    public AuthorExRepositoryImpl authorExRepository(BatchExecutor batchExecutor,AuthorMapper authorMapper, AuthorSqlProvider authorSqlProvider, InsertProcessor insertProcessor) {
-        return new AuthorExRepositoryImpl(batchExecutor,authorMapper, authorSqlProvider, insertProcessor,updateProcessor());
+    public AuthorExRepositoryImpl authorExRepository(BatchExecutor batchExecutor, AuthorMapper authorMapper, AuthorSqlProvider authorSqlProvider, InsertProcessor insertProcessor) {
+        return new AuthorExRepositoryImpl(batchExecutor, authorMapper, authorSqlProvider, insertProcessor, updateProcessor());
     }
 
     @Bean
@@ -137,5 +139,10 @@ public class TestRepositoryConfig {
     @Bean
     public DefaultExceptionConverter exceptionConverter() {
         return new DefaultExceptionConverter(null, null, null, null);
+    }
+
+    @Bean
+    public AuthorService authorService(){
+        return new AuthorService();
     }
 }

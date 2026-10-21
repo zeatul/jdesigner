@@ -16,15 +16,27 @@
 
 package glz.hawk.jdesigner.annotation.java;
 
+import glz.hawk.jdesigner.annotation.common.ModelOrSubModel;
 import glz.hawk.jdesigner.annotation.name.NameConverter;
 import glz.hawk.jdesigner.spec.java.Parameter;
 import org.springframework.core.annotation.AliasFor;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
 
 /**
  * This annotation defines a {@link Parameter}.
  *
  * @author Hawk
  */
+@ModelOrSubModel
+@Target({METHOD})
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
 public @interface ParameterDef {
 
     @AliasFor("name")

@@ -42,8 +42,12 @@ public class SimpleColumn extends AbstractModelPart<Table, Column> implements Co
     private final boolean nullable;
 
     public SimpleColumn(Table owner, Metadata metadata, boolean nullable, Map<String, Object> extensions) {
-        super(metadata.getName(), metadata.getLocation(), metadata.getDisplay(), owner, extensions);
-        this.metadata = argNotNull(metadata);
+        super(argNotNull(metadata, "metadata").getName(),
+              metadata.getLocation(),
+              metadata.getDisplay(),
+              owner,
+              extensions);
+        this.metadata = metadata;
         this.nullable = nullable;
     }
 

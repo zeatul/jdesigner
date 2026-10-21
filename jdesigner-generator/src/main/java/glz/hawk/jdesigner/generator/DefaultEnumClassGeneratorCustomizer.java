@@ -31,7 +31,7 @@ import static glz.hawk.jdesigner.translator.convert.NameConverter.UPPER_UNDERSCO
  */
 public class DefaultEnumClassGeneratorCustomizer implements EnumClassGeneratorCustomizer{
     public Translator<Domain, String> getEnumClassNameTranslator() {
-        return domain -> UPPER_UNDERSCORE_TO_UPPER_CAMEL.convertTo(domain.getName().toUpperCase());
+        return domain -> UPPER_UNDERSCORE_TO_UPPER_CAMEL.convertTo(domain.getName().toUpperCase(Locale.ROOT));
     }
 
     @Override

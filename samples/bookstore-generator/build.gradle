@@ -1,13 +1,16 @@
 plugins {
-    id 'buildlogic.java-library-conventions'
+    id 'buildlogic.java-common-conventions'
 }
 
 description = 'Generate codes for the bookstore.'
 
 dependencies {
-    implementation 'io.github.zeatul:j4sql-mybatis-generator'
+    implementation 'io.github.zeatul:j4sql-mybatis-generator:1.2.1-SNAPSHOT'
     implementation project(':jdesigner-generator')
     implementation project(':samples:bookstore-designer')
-    implementation 'io.github.zeatul:project-tools'
+    implementation 'io.github.zeatul:project-tools:1.3.0-SNAPSHOT'
+
+    // Import jdesigner-bom to manage transitive jdesigner dependencies from j4sql
+    implementation(platform('io.github.zeatul:jdesigner-bom:1.3.0-SNAPSHOT'))
 }
 

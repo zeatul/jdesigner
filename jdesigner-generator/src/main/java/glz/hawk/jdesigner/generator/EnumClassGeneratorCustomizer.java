@@ -16,8 +16,10 @@
 
 package glz.hawk.jdesigner.generator;
 
+import glz.hawk.codepoet.java.type.TypeName;
 import glz.hawk.jdesigner.spec.meta.domain.Domain;
 import glz.hawk.jdesigner.translator.Translator;
+import glz.hawk.jdesigner.translator.meta.DataTypeToTypeName;
 
 import java.util.Locale;
 
@@ -34,4 +36,9 @@ public interface EnumClassGeneratorCustomizer {
     Locale getDefaultLocale();
 
     String getPropertiesFilename();
+
+    default Translator<Domain, TypeName> getTypeNameTranslator() {
+        DataTypeToTypeName dataTypeToTypeName = new DataTypeToTypeName();
+        return domain -> dataTypeToTypeName.translate(domain.getDataType());
+    }
 }

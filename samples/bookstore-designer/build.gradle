@@ -1,34 +1,21 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven {
-            name = 'Central Portal Snapshots'
-            url = 'https://central.sonatype.com/repository/maven-snapshots/'
-        }
-    }
-    dependencies {
-        classpath 'io.github.zeatul:jdesigner-defaults:1.1.0-SNAPSHOT'
-        classpath 'net.bytebuddy:byte-buddy-gradle-plugin:1.18.2'
-    }
-}
-
 plugins {
-    id 'buildlogic.java-library-conventions'
+    id 'buildlogic.java-common-conventions'
 }
-
-// The plugin ID comes from the filename in the META-INF/gradle-plugins/ directory inside the byte-buddy-gradle-plugin.jar file.
-apply plugin: 'net.bytebuddy.byte-buddy'
 
 description = 'Define models for the bookstore.'
 
 dependencies {
-    api project(':jdesigner-builder')
-    api project(':samples:bookstore-annotations')
-    api 'io.github.zeatul:hawk-dao-base'
-    api 'io.github.zeatul:hawk-validator'
-    api 'com.fasterxml.jackson.core:jackson-annotations'
-    api 'io.github.zeatul:j4sql-mybatis-generator'
+    implementation project(':jdesigner-builder')
+    implementation project(':samples:bookstore-annotations')
+    implementation 'io.github.zeatul:hawk-dao-base:1.3.0-SNAPSHOT'
+    implementation 'io.github.zeatul:hawk-validator:1.3.0-SNAPSHOT'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.17.1'
+    implementation 'io.github.zeatul:j4sql-mybatis-generator:1.2.1-SNAPSHOT'
+    implementation 'jakarta.validation:jakarta.validation-api:2.0.2'
+    implementation 'org.springframework:spring-context:5.3.39'
+
+    // Import jdesigner-bom to manage transitive jdesigner dependencies from j4sql
+    implementation(platform('io.github.zeatul:jdesigner-bom:1.3.0-SNAPSHOT'))
 
     annotationProcessor project(':jdesigner-indexer')
 }
@@ -68,13 +55,3 @@ tasks.register('checkJavaVersion') {
         println "OS: ${System.getProperty('os.name')} ${System.getProperty('os.version')} ${System.getProperty('os.arch')}"
     }
 }
-
-byteBuddy {
-    transformation {
-        plugin = glz.hawk.jdesigner.defaults.AutoFieldInitializerPlugin
-    }
-}
-
-
-
-

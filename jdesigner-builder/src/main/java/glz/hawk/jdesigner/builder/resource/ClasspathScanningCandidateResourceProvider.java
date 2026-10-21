@@ -34,7 +34,7 @@ class ClasspathScanningCandidateResourceProvider {
     private String resourcePattern = DEFAULT_ALL_RESOURCE_PATTERN;
 
     @Nullable
-    private ResourcePatternResolver resourcePatternResolver;
+    private final ResourcePatternResolver resourcePatternResolver;
 
     @Nullable
     private final ClassLoader classLoader;
@@ -42,10 +42,11 @@ class ClasspathScanningCandidateResourceProvider {
 
     public ClasspathScanningCandidateResourceProvider(@Nullable ClassLoader classLoader){
         this.classLoader = classLoader;
+        this.resourcePatternResolver = new PathMatchingResourcePatternResolver(classLoader);
     }
 
     public ClasspathScanningCandidateResourceProvider(){
-       this(null);
+        this(null);
     }
 
     /**
@@ -105,7 +106,7 @@ class ClasspathScanningCandidateResourceProvider {
         String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + resolveBasePackage(scanPackage)
                 + '/' + this.resourcePattern;
         try {
-            return getResourcePatternResolver().getResources(packageSearchPath);
+            return resourcePatternResolver.getResources(packageSearchPath);
         } catch (IOException e) {
             throw new UncheckedIOException("Meet unexpected error while scan " + packageSearchPath, e);
         }
@@ -124,13 +125,6 @@ class ClasspathScanningCandidateResourceProvider {
      */
     protected String resolveBasePackage(String basePackage) {
         return ClassUtils.convertClassNameToResourcePath(basePackage);
-    }
-
-    private ResourcePatternResolver getResourcePatternResolver() {
-        if (this.resourcePatternResolver == null) {
-            this.resourcePatternResolver = new PathMatchingResourcePatternResolver(classLoader);
-        }
-        return this.resourcePatternResolver;
     }
 
 

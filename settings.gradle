@@ -14,22 +14,17 @@ import org.gradle.api.initialization.resolve.RepositoriesMode
 
 rootProject.name = 'jdesigner'
 
-//This builder has no functionality; it is solely intended to work around the bug of the byte-buddy-gradle-plugin used in the bookstore-designer project.
-includeBuild("virtual-builder")
-
-include 'fenris-designer'
-include 'java-assist-plugin-test'
-
 include 'jdesigner-spec'
 include 'jdesigner-spec-impl'
 include 'jdesigner-annotations'
 include 'jdesigner-builder'
-include 'jdesigner-defaults'
 include 'jdesigner-indexer'
 include 'jdesigner-translator'
 include 'jdesigner-generator'
 include 'jdesigner-generator-annotations'
 include 'jdesigner-generator-processor'
+
+include 'jdesigner-bom'
 
 include 'samples:bookstore-annotations'
 include 'samples:bookstore-designer'

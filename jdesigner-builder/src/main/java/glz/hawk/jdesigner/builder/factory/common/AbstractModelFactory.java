@@ -59,7 +59,8 @@ public abstract class AbstractModelFactory<M, C extends AbstractModelFactoryCont
 
 
     protected String getNamespace() {
-        return getDefiningClass().getPackage().getName();
+        Package pkg = getDefiningClass().getPackage();
+        return pkg != null ? pkg.getName() : "";
     }
 
     protected String getName() {

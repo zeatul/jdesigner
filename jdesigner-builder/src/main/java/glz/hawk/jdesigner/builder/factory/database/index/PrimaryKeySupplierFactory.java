@@ -18,13 +18,11 @@ package glz.hawk.jdesigner.builder.factory.database.index;
 
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
 import glz.hawk.jdesigner.builder.factory.common.AbstractCommonFactory;
-import glz.hawk.jdesigner.builder.factory.database.column.FieldNameIndexedColumnSupplier;
 import glz.hawk.jdesigner.spec.database.Column;
 import glz.hawk.jdesigner.spec.database.IndexColumn;
 import glz.hawk.jdesigner.spec.database.PrimaryKey;
 import glz.hawk.jdesigner.spec.database.Table;
 import glz.hawk.jdesigner.spec.impl.base.ModelPartSupplier;
-import glz.hawk.jdesigner.spec.impl.database.SimpleIndexColumnSupplier;
 import glz.hawk.jdesigner.spec.impl.database.SimplePrimaryKeySupplier;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 
@@ -42,9 +40,7 @@ public class PrimaryKeySupplierFactory extends AbstractCommonFactory<ModelPartSu
 
     public PrimaryKeySupplierFactory(ModelWarehouse modelWarehouse, ClasspathBuilderContext builderContext, PrimaryKeyFactoryContext factoryContext, Map<String, Column> fieldNameColumnMap) {
         super(modelWarehouse, builderContext, factoryContext);
-        factoryContext.getIndexColumnFactoryContextList().stream()
-            .map(i -> new SimpleIndexColumnSupplier<PrimaryKey>(new FieldNameIndexedColumnSupplier(fieldNameColumnMap, i.getFieldName()), i.getSortType(), i.getAllExtensions()))
-            .forEach(indexColumnSuppliers::add);
+        indexColumnSuppliers.addAll(factoryContext.buildIndexColumnSuppliers(fieldNameColumnMap));
     }
 
     @Override

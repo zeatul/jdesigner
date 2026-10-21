@@ -49,7 +49,7 @@ public class DomainsToPropertiesFiles implements Translator<List<Domain>, List<P
 
     @Override
     public @NonNull List<PropertiesFile> translate(@NonNull List<Domain> domains) {
-        Map<String, PropertiesFile> map = new HashMap<>();
+        Map<String, PropertiesFile> map = new LinkedHashMap<>();
         domains.forEach(domain -> {
             if (domain.getValues() == null || domain.getValues().length == 0) return;
             Arrays.stream(domain.getValues()).forEach(value -> {
@@ -58,7 +58,7 @@ public class DomainsToPropertiesFiles implements Translator<List<Domain>, List<P
                     Locale locale = ld.locale;
                     String keyForMap = packageName + ":" + locale.toString();
                     Properties properties = map.computeIfAbsent(keyForMap, k -> PropertiesFile.builder(packageName, locale).setFilename(filename).build()).properties;
-                    String key = packageName + "." + enumNameTranslator.translate(domain) + "." + value.getCode().toUpperCase();
+                    String key = packageName + "." + enumNameTranslator.translate(domain) + "." + value.getCode().toUpperCase(Locale.ROOT);
                     properties.put(key, ld.displayName);
                 });
             });

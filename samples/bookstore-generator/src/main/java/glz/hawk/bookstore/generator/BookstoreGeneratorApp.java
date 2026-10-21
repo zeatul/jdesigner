@@ -138,7 +138,7 @@ public class BookstoreGeneratorApp {
             new DefaultJ4sqlMybatisGeneratorCustomizer("mysql"),
             true,
             true,
-            "glz.hawk.bookstore.perssit.enums",
+            "glz.hawk.bookstore.persist.enums",
             "BookstoreTables",
             true,
             true

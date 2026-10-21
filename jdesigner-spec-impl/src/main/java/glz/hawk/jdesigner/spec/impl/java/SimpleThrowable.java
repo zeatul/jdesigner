@@ -32,7 +32,7 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
  *
  * @author Hawk
  */
-public class SimpleThrowable<O extends Executable<O>> extends AbstractModelPart<O, Parameter<O>> implements Throwable<O> {
+public class SimpleThrowable<O extends Executable<O>> extends AbstractModelPart<O, Throwable<O>> implements Throwable<O> {
 
     private final UniversalType type;
 

@@ -21,6 +21,7 @@ import glz.hawk.jdesigner.spec.base.UniqueKeyHelper;
 import glz.hawk.jdesigner.spec.database.Index;
 import glz.hawk.jdesigner.spec.database.PrimaryKey;
 import glz.hawk.jdesigner.spec.database.Table;
+import glz.hawk.jdesigner.spec.manager.DuplicateModelException;
 import glz.hawk.jdesigner.spec.manager.ModelNotFoundException;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 import glz.hawkframework.core.helper.ObjectHelper;
@@ -36,6 +37,9 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
 /**
  * This class is a simple implementation of {@link ModelWarehouse}.
  * <p>It keeps all the {@code Model}s in the memory.</p>
+ * <p><strong>Thread Safety:</strong> This class is <strong>not thread-safe</strong>.
+ * It is designed for single-threaded use during model building phase.
+ * If concurrent access is required, external synchronization or a concurrent implementation should be used.</p>
  *
  * @author Hawk
  */
@@ -96,15 +100,24 @@ public class SimpleModelWarehouse implements ModelWarehouse {
         Class<? extends Model> modelClass = argNotNull(model.getModelClass(), "model's modelClass");
 
         String key = model.getUniqueKey();
-        if (keyMap.putIfAbsent(key, model) != null) {
-            throw new IllegalStateException(String.format("Add model with duplicate key = %s", key));
+        Map<String, Model> innerLocationMap = locationMap.get(modelClass);
+        String location = model.getLocation();
+
+        // Pre-check both maps to avoid partial insertion
+        if (keyMap.containsKey(key)) {
+            throw new DuplicateModelException(String.format("Add model with duplicate key = %s", key));
+        }
+        if (innerLocationMap != null && innerLocationMap.containsKey(location)) {
+            throw new DuplicateModelException(String.format("Add model with duplicate location = %s", location));
         }
 
-        Map<String, Model> innerLocationMap = locationMap.computeIfAbsent(modelClass, k -> new HashMap<>());
-        String location = model.getLocation();
-        if (innerLocationMap.putIfAbsent(location, model) != null) {
-            throw new IllegalStateException(String.format("Add model with duplicate location = %s", location));
+        // Both checks passed, now insert
+        keyMap.put(key, model);
+        if (innerLocationMap == null) {
+            innerLocationMap = new HashMap<>();
+            locationMap.put(modelClass, innerLocationMap);
         }
+        innerLocationMap.put(location, model);
     }
 
     @Override

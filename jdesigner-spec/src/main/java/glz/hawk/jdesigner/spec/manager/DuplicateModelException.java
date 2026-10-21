@@ -26,4 +26,7 @@ import glz.hawk.jdesigner.spec.base.Model;
  * @author Hawk
  */
 public class DuplicateModelException extends RuntimeException {
+    public DuplicateModelException(String message) {
+        super(message);
+    }
 }

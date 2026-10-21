@@ -22,11 +22,10 @@ import java.util.List;
 
 /**
  * Scans the specified {@code packages} to find the required {@link Resource resources}.
+ * It supports {@code Ant-Style} patterns.
  *
  * @author Hawk
+ * @see AntPathMatcher
  */
 public interface ClasspathResourceScanner extends ResourceScanner {
-    void setScanPackages(String[] scanPackages);
-
-    void setScanPackages(List<String> scanPackageList);
 }

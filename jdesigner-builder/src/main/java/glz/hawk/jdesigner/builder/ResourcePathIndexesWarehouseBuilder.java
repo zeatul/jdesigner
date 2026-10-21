@@ -73,13 +73,13 @@ public class ResourcePathIndexesWarehouseBuilder extends AbstractResourceModelWa
             for (String resourcePath : resourcePaths) {
                 if (isLegal(resourcePath)) {
                     try {
-                        Class<?> c = Class.forName(resourcePath);
-                        InputStream in = c.getResourceAsStream(c.getSimpleName() + ".class");
-                        byte[] bytes = readAllBytes(in);
-                        in.close();
-                        System.out.println(bytes.length);
-                        ByteArrayResource bar = new ByteArrayResource(bytes, c.getSimpleName() + ".class");
-                        resourceList.add(bar);
+                        Class<?> c = Class.forName(resourcePath, true, classLoader);
+                        try (InputStream in = c.getResourceAsStream(c.getSimpleName() + ".class")) {
+                            if (in == null) throw new IllegalStateException("resource class file not found : " + resourcePath);
+                            byte[] bytes = readAllBytes(in);
+                            ByteArrayResource bar = new ByteArrayResource(bytes, c.getSimpleName() + ".class");
+                            resourceList.add(bar);
+                        }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

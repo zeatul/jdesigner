@@ -23,6 +23,8 @@ import glz.hawk.jdesigner.builder.factory.database.index.PrimaryKeyFactoryContex
 import javax.annotation.Nonnull;
 import java.util.*;
 
+import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
+
 /**
  * This class is responsible for providing necessary information for {@link TableFactory} to build a {@code Table} instance.
  *
@@ -31,6 +33,8 @@ import java.util.*;
 public class TableFactoryContext extends AbstractModelFactoryContext {
     private final Map<String, IndexFactoryContext> indexFactoryContextMap = new LinkedHashMap<>();
     private PrimaryKeyFactoryContext primaryKeyFactoryContext;
+
+    private java.lang.Class<?> declaringClass;
 
     public PrimaryKeyFactoryContext getPrimaryKeyFactoryContext() {
         return primaryKeyFactoryContext;
@@ -48,5 +52,13 @@ public class TableFactoryContext extends AbstractModelFactoryContext {
 
     public List<IndexFactoryContext> getIndexFactoryContextList() {
         return Collections.unmodifiableList(new ArrayList<>(indexFactoryContextMap.values()));
+    }
+
+    public java.lang.Class<?> getDeclaringClass() {
+        return declaringClass;
+    }
+
+    public void setDeclaringClass(java.lang.Class<?> declaringClass) {
+        this.declaringClass = declaringClass;
     }
 }

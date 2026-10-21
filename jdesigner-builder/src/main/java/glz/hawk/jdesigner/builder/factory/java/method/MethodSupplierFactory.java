@@ -59,7 +59,7 @@ public class MethodSupplierFactory extends AbstractModelFactory<ModelPartSupplie
 
     @Override
     protected ModelPartSupplier<glz.hawk.jdesigner.spec.java.Class, Method> executeBuild() {
-        return new SimpleMethodSupplier(getName(), getLocation(), getDisplay(), getModifiers(), getParameterSuppliers(), getThrowableSupplierss(), getReturnType(), annotations, getStatements(), factoryContext.getAllExtensions());
+        return new SimpleMethodSupplier(getName(), getLocation(), getDisplay(), getModifiers(), getParameterSuppliers(), getThrowableSuppliers(), getReturnType(), annotations, getStatements(), factoryContext.getAllExtensions());
     }
 
     protected Set<Modifier> getModifiers() {
@@ -74,7 +74,7 @@ public class MethodSupplierFactory extends AbstractModelFactory<ModelPartSupplie
         return Collections.emptyList();
     }
 
-    protected List<ModelPartSupplier<Method, glz.hawk.jdesigner.spec.java.Throwable<Method>>> getThrowableSupplierss() {
+    protected List<ModelPartSupplier<Method, glz.hawk.jdesigner.spec.java.Throwable<Method>>> getThrowableSuppliers() {
         return this.throwableSuppliers;
     }
 

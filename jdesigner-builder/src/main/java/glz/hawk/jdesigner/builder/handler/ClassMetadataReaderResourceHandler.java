@@ -51,6 +51,8 @@ import glz.hawkframework.core.helper.StringHelper;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.core.type.classreading.MetadataReader;
 
+import glz.hawk.jdesigner.builder.factory.common.ExtensionKeys;
+
 import javax.lang.model.element.Modifier;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -199,7 +201,7 @@ public class ClassMetadataReaderResourceHandler extends AbstractMetadataReaderRe
     protected ClassFactoryContext initClassFactoryContext() {
         ClassFactoryContext factoryContext = new ClassFactoryContext();
         factoryContext.setAnnotatedElement(classOfMetadataReader);
-        factoryContext.putExtension(Class.class.getCanonicalName(), classOfMetadataReader);
+        ExtensionKeys.putDeclaringExtension(factoryContext, ExtensionKeys.DECLARING_CLASS, ExtensionKeys.LEGACY_DECLARING_CLASS, classOfMetadataReader);
         return factoryContext;
     }
 
@@ -209,7 +211,15 @@ public class ClassMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         t.getTypeFactoryContext().setAnnotatedElement(annotatedElement);
         t.setParent(classFactoryContext);
         t.putNoDefAnnotations(AnnotationHelper.parse(annotatedElement));
-        t.putExtension(annotatedElement.getClass().getCanonicalName(), annotatedElement);
+        if (annotatedElement instanceof java.lang.reflect.Field) {
+            ExtensionKeys.putDeclaringExtension(t, ExtensionKeys.DECLARING_FIELD, ExtensionKeys.LEGACY_DECLARING_FIELD, annotatedElement);
+        } else if (annotatedElement instanceof Method) {
+            ExtensionKeys.putDeclaringExtension(t, ExtensionKeys.DECLARING_METHOD, ExtensionKeys.LEGACY_DECLARING_METHOD, annotatedElement);
+        } else if (annotatedElement instanceof java.lang.reflect.Parameter) {
+            ExtensionKeys.putDeclaringExtension(t, ExtensionKeys.DECLARING_PARAMETER, ExtensionKeys.LEGACY_DECLARING_PARAMETER, annotatedElement);
+        } else if (annotatedElement instanceof java.lang.Class<?>) {
+            ExtensionKeys.putDeclaringExtension(t, ExtensionKeys.DECLARING_CLASS, ExtensionKeys.LEGACY_DECLARING_CLASS, annotatedElement);
+        }
         return t;
     }
 
@@ -219,7 +229,8 @@ public class ClassMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         classTypeFactoryContext.setTypeClass(exceptionType);
         throwableFactoryContext.setAnnotatedElement(method);
         throwableFactoryContext.setClassTypeFactoryContext(classTypeFactoryContext);
-        throwableFactoryContext.putExtension(Method.class.getCanonicalName(), method);
+        throwableFactoryContext.putExtension(ExtensionKeys.DECLARING_METHOD, method);
+        throwableFactoryContext.putExtension(ExtensionKeys.LEGACY_DECLARING_METHOD, method);
         return throwableFactoryContext;
     }
 
@@ -227,7 +238,7 @@ public class ClassMetadataReaderResourceHandler extends AbstractMetadataReaderRe
         ParameterFactoryContext parameterFactoryContext = new ParameterFactoryContext();
         parameterFactoryContext.setAnnotatedElement(parameter);
         parameterFactoryContext.getTypeFactoryContext().setAnnotatedElement(parameter);
-        parameterFactoryContext.putExtension(Parameter.class.getCanonicalName(), parameter);
+        parameterFactoryContext.putExtension(ExtensionKeys.DECLARING_PARAMETER, parameter);
         return parameterFactoryContext;
     }
 

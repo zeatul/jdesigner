@@ -1,0 +1,29 @@
+plugins {
+    id 'buildlogic.java-platform-conventions'
+}
+
+description = 'Bill of Materials for jdesigner modules'
+
+// The BOM version comes from gradle.properties (rootProject.version).
+// Dynamically discover the jdesigner modules published by this build; samples and helper
+// projects (fenris-designer, java-assist-plugin-test) are intentionally excluded.
+def jdesignerModules = rootProject.subprojects
+    .findAll { it.name.startsWith('jdesigner-') && !it.name.endsWith('-bom') }
+    .collect { it.name }
+    .sort()
+
+publishing {
+    publications {
+        // Only the jdesigner-* modules published by this project.
+        jdesignerBom(MavenPublication) {
+            artifactId = 'jdesigner-bom'
+
+            def constraints = jdesignerModules.collect { module ->
+                [group: 'io.github.zeatul', artifactId: module, version: 'jdesigner.version']
+            }
+            def propertiesMap = ['jdesigner.version': version.toString()]
+
+            writeDependencyManagement(pom, [constraints: constraints, propertiesMap: propertiesMap])
+        }
+    }
+}

@@ -56,13 +56,12 @@ public abstract class AbstractExecutable<T extends Executable<T>> extends Abstra
     @SuppressWarnings("unchecked")
     @Override
     public Parameter<T>[] getParameters() {
-        return parameterMap.values().toArray(new Parameter[]{});
+        return parameterMap.values().toArray(new Parameter[0]);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Throwable<T>[] getThrowables() {
-        return throwableMap.values().toArray(new Throwable[]{});
+        return throwableMap.values().toArray(new Throwable[0]);
     }
 
     protected void addParameter(Parameter<T> parameter) {

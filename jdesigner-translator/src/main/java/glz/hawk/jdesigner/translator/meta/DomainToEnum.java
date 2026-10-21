@@ -90,12 +90,12 @@ public class DomainToEnum implements Translator<Domain, JavaFile> {
             enumSpecBuilder.addField(valueType(domain), "value", PUBLIC, Modifier.FINAL);
         }
         enumSpecBuilder.addConstructors(ConstructorSpec.builder()
-            .addParameter(String.class, "value")
+            .addParameter(valueType(domain), "value")
             .beginConstructorBody()
             .addStatement("this.value = value").end().build());
         stateTrue(domain.getValues() != null && domain.getValues().length > 0, () -> String.format("The domain: %s has no value.", domain.getName()));
         Arrays.stream(domain.getValues()).forEach(v -> {
-                String enumConstantName = v.getCode().toUpperCase();
+                String enumConstantName = v.getCode().toUpperCase(Locale.ROOT);
                 String displayName = v.getDisplay().getDisplayName(defaultLocale).orElseThrow(
                     () -> new IllegalStateException(String.format("The value: %s of domain: %s has no display name for locale: %s.", v.getCode(), domain.getName(), defaultLocale.toString())));
                 enumSpecBuilder.addEnumConstant(enumConstantName, ClassSpec.anonymousBuilder("$S", v.getValue())
@@ -169,11 +169,11 @@ public class DomainToEnum implements Translator<Domain, JavaFile> {
             .newLine()
             .indent();
         Arrays.stream(domain.getValues()).forEach(v -> {
-            valueMapInitializerBuilder.add(".put($L.name(), $L)", v.getCode().toUpperCase(), v.getCode().toUpperCase()).newLine();
+            valueMapInitializerBuilder.add(".put($L.name(), $L)", v.getCode().toUpperCase(Locale.ROOT), v.getCode().toUpperCase(Locale.ROOT)).newLine();
         });
         valueMapInitializerBuilder.unindent()
             .add(".buildHashMap()");
-        return FieldSpec.builder(ParameterizedTypeName.of(Map.class, valueType(domain), domainTypeName(domain)), "nameMap", PRIVATE, Modifier.FINAL, STATIC)
+        return FieldSpec.builder(ParameterizedTypeName.of(Map.class, ClassName.ofClass(String.class), domainTypeName(domain)), "nameMap", PRIVATE, Modifier.FINAL, STATIC)
             .setInitializer(valueMapInitializerBuilder.build())
             .build();
     }
@@ -185,7 +185,7 @@ public class DomainToEnum implements Translator<Domain, JavaFile> {
             .newLine()
             .indent();
         Arrays.stream(domain.getValues()).forEach(v -> {
-            valueMapInitializerBuilder.add(".put($L.value, $L)", v.getCode().toUpperCase(), v.getCode().toUpperCase()).newLine();
+            valueMapInitializerBuilder.add(".put($L.value, $L)", v.getCode().toUpperCase(Locale.ROOT), v.getCode().toUpperCase(Locale.ROOT)).newLine();
         });
         valueMapInitializerBuilder.unindent()
             .add(".buildHashMap()");

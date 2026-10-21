@@ -38,12 +38,16 @@ public class SimpleIndexColumn<T extends IndexSupport<T>> extends AbstractModelP
     private final SortType sortType;
 
     public SimpleIndexColumn(T owner, Column column, SortType sortType) {
-        super(column.getName(), column.getLocation(), column.getDisplay(), owner, Collections.emptyMap());
+        super(argNotNull(column, "column").getName(),
+              column.getLocation(),
+              column.getDisplay(),
+              owner,
+              Collections.emptyMap());
+        this.column = column;
+        this.sortType = argNotNull(sortType, "sortType");
         if (column.getOwner() != owner.getOwner()) {
             throw new IllegalStateException("The column's owner table must be same as the index's or primary key's owner table.");
         }
-        this.column = argNotNull(column, "column");
-        this.sortType = argNotNull(sortType, "sortType");
     }
 
     public SimpleIndexColumn(T owner, Column column) {

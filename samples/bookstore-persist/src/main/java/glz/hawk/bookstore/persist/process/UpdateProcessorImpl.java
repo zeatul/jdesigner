@@ -38,7 +38,6 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
  *
  * @author Hawk
  */
-@SuppressWarnings("unchecked")
 public class UpdateProcessorImpl implements UpdateProcessor {
     private final ConcurrentHashMap<Class<?>, Map<Class<? extends Annotation>, List<FieldDescriptor<Object, Object, Annotation>>>> map = new ConcurrentHashMap<>();
 

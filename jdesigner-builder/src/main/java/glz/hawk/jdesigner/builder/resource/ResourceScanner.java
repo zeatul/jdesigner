@@ -14,8 +14,9 @@ public interface ResourceScanner {
     /**
      * Scan and return all the matched {@link Resource}.
      *
+     * @param scanPackages the packages to scan
      * @return a list of resources.
      */
     @NonNull
-    List<Resource> scan();
+    List<Resource> scan(String[] scanPackages);
 }

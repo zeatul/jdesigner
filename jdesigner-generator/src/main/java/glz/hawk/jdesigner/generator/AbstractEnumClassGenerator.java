@@ -52,7 +52,7 @@ public abstract class AbstractEnumClassGenerator {
 
     public void generateEnum() {
         List<Domain> domains = modelWarehouse.listModels(Domain.class);
-        Translator<Domain, JavaFile> domainToEnumTranslator = new DomainToEnum(enumClassGeneratorCustomizer.getDefaultLocale(), enumClassPackageGenerator::loadPackage, enumClassGeneratorCustomizer.getEnumClassNameTranslator(),useMethod);
+        Translator<Domain, JavaFile> domainToEnumTranslator = new DomainToEnum(enumClassGeneratorCustomizer.getDefaultLocale(), enumClassPackageGenerator::loadPackage, enumClassGeneratorCustomizer.getEnumClassNameTranslator(), enumClassGeneratorCustomizer.getTypeNameTranslator(), useMethod);
         domains.stream()
             .filter(Domain::isEnum)
             .filter(domain -> GeneratorUtils.pass(domain, includePackages, excludePackages) && enumClassGeneratorCustomizer.getEnumFilter().pass(domain))

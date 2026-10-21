@@ -59,11 +59,14 @@ public abstract class AnnotationHelper {
             Object currentValue = annotationAttributes.get(attributeName);
             Object defaultValue = getDefaultValue(annotation, attributeName);
             if (!ObjectUtils.nullSafeEquals(currentValue, defaultValue)) {
-                if (currentValue.getClass().isArray() && currentValue.getClass().getComponentType().isAnnotation()) {
+                if (currentValue != null && currentValue.getClass().isArray() && currentValue.getClass().getComponentType().isAnnotation()) {
                     int length = Array.getLength(currentValue);
                     SimpleAnnotation[] ss = new SimpleAnnotation[length];
-                    for (int i=0; i<length; i++){
-                        ss[i] = convert((Annotation) Array.get(currentValue,i));
+                    for (int i = 0; i < length; i++) {
+                        Object element = Array.get(currentValue, i);
+                        if (element instanceof Annotation) {
+                            ss[i] = convert((Annotation) element);
+                        }
                     }
                     attributeList.add(new SimpleAnnotationAttribute(attributeName, ss));
                 } else if (currentValue instanceof Annotation) {

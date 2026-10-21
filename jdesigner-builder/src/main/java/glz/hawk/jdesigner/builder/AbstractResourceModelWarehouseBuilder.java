@@ -51,6 +51,7 @@ public abstract class AbstractResourceModelWarehouseBuilder implements ModelWare
 
     private final ClasspathBuilderContext builderContext;
     private final ModelWarehouseProducer modelWarehouseProducer;
+    protected final ClassLoader classLoader;
 
     protected AbstractResourceModelWarehouseBuilder(ClasspathBuilderContext builderContext, ModelWarehouseProducer modelWarehouseProducer) {
         this(null, builderContext, modelWarehouseProducer);
@@ -59,6 +60,7 @@ public abstract class AbstractResourceModelWarehouseBuilder implements ModelWare
     protected AbstractResourceModelWarehouseBuilder(ClassLoader classLoader, ClasspathBuilderContext builderContext, ModelWarehouseProducer modelWarehouseProducer) {
         this.builderContext = argNotNull(builderContext, "builderContext");
         this.modelWarehouseProducer = argNotNull(modelWarehouseProducer, "modelWarehouseProducer");
+        this.classLoader = classLoader;
         this.metadataReaderFactory = new CachingMetadataReaderFactory(classLoader);
     }
 

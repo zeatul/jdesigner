@@ -4,1006 +4,319 @@
 
 ---
 
-# hawk-java-generator
+# jdesigner
 
-`hawk-java-generator` 是一个用来生成 `.java` source files的JAVA API工具包.
+**jdesigner** 是一个元数据驱动的 Java 代码生成框架。开发者通过注解定义数据模型、接口和数据库模式，框架自动生成类型安全的 Java 代码、数据库脚本和持久化层。
 
-代码生成对于注解处理器，对于基于元素据生成代码的场合有奇效，特别是有企业级数组字典，接口规范，数据模型的场景。
-通过代码生成，只要维护元数据，就可以随时生成优秀的代码。结合[JAVA注解模型API包](https://)可以大大提高项目的可读性，规范性，和扩展能力。
+> **核心理念**：一次定义，多处生成。以元数据为单一事实来源。
 
-`hawk-java-generator`参考了优秀的[square/javapoet](https://github.com/square/javapoet)
-项目，该项目已经[不再维护](https://github.com/square/javapoet/discussions/866)。\
-`hawk-java-generator`是更好的`javapoet`:
+---
 
-- 优化了java代码生成的效率。
-- 自动处理引用和静态引用的碰撞问题。
-- 提供了更便利，更接近java代码习惯的控制流写法。
-- 提供了更完善和更便利的javadoc的写法。
-- 提供了lambda表达式来完善流式API。
+## 概览
 
-## 依赖
+jdesigner 将带注解的 Java 接口（元数据）转换为：
 
-Gradle:
+- **Java 领域模型** - 具备完全类型安全的类、枚举、接口
+- **数据库模式** - 表、列、索引、主键、外键
+- **持久化层** - MyBatis Mapper、Repository、SQL Provider、POJO
+- **API 契约** - VO/DTO 类、服务接口
+- **国际化资源** - 枚举显示名的 Properties 文件
+
+---
+
+## 架构
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        元数据（注解）                           │
+│  @DomainDef @MetadataDef @TableDef @ClassDef @ColumnDef ...    │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+          ┌────────────────┼────────────────┐
+          ▼                ▼                ▼
+    ┌──────────┐    ┌──────────┐    ┌──────────┐
+    │  模型构建 │    │ 数据库翻译│    │  代码生成 │
+    │  Builder │    │ Translator│   │ Generator│
+    └────┬─────┘    └────┬─────┘    └────┬─────┘
+         │               │               │
+         ▼               ▼               ▼
+    ┌─────────────────────────────────────────────┐
+    │              生成制品                        │
+    │  • 领域模型（枚举、类、接口）                  │
+    │  • 数据库 DDL（MySQL、PostgreSQL 等）         │
+    │  • MyBatis Mapper / Repository / SQL        │
+    │  • API 契约（VO、DTO、服务接口）              │
+    │  • i18n Properties 文件                      │
+    └─────────────────────────────────────────────┘
+```
+
+---
+
+## 核心特性
+
+| 特性 | 说明 |
+|------|------|
+| **元数据优先** | 使用声明式注解在 Java 接口上定义模型 |
+| **类型安全生成** | 生成的代码完全类型安全，IDE 友好 |
+| **多语言 i18n** | 自动生成枚举显示名的多语言 Properties 文件 |
+| **数据库无关** | 支持 MySQL、PostgreSQL、Oracle、SQL Server 等 |
+| **MyBatis 集成** | 开箱即用生成 Mapper、XML、Repository、SQL Provider |
+| **增量编译** | 注解处理器支持增量构建 |
+| **可扩展** | 自定义翻译器、生成器、命名转换器 |
+| **零运行时依赖** | 纯编译期生成，无运行时开销 |
+
+---
+
+## 模块
+
+| 模块 | 说明 |
+|------|------|
+| `jdesigner-spec` | 核心模型接口（Model、Domain、Metadata、Table、Column 等） |
+| `jdesigner-spec-impl` | 模型默认实现 |
+| `jdesigner-annotations` | 注解定义（@DomainDef、@MetadataDef、@TableDef 等） |
+| `jdesigner-builder` | 从注解/类路径扫描构建模型 |
+| `jdesigner-translator` | 将模型翻译为 code-poet 规格 |
+| `jdesigner-generator` | 文件系统 / 注解处理器代码生成器 |
+| `jdesigner-generator-processor` | 增量生成的注解处理器 |
+| `jdesigner-indexer` | 模型索引生成，用于快速类路径扫描 |
+| `samples/bookstore-*` | 完整示例应用 |
+
+---
+
+## 快速开始
+
+### 1. 添加依赖
+
+**Gradle:**
+```groovy
+dependencies {
+    // 核心注解
+    implementation 'io.github.zeatul:jdesigner-annotations:<version>'
+    
+    // 注解处理器（增量生成）
+    annotationProcessor 'io.github.zeatul:jdesigner-generator-processor:<version>'
+    
+    // 可选：MyBatis 生成器集成
+    implementation 'io.github.zeatul:j4sql-mybatis-generator:<version>'
+}
+```
+
+**Maven:**
+```xml
+<dependencies>
+    <dependency>
+        <groupId>io.github.zeatul</groupId>
+        <artifactId>jdesigner-annotations</artifactId>
+        <version>${version}</version>
+    </dependency>
+</dependencies>
+```
+
+### 2. 定义元数据
+
+```java
+// 领域定义（可复用类型）
+@DomainDefContainer
+public interface BookstoreDomainLibrary {
+    
+    @VarcharDef(50)
+    @DomainDef
+    String VARCHAR50 = "VARCHAR50";
+    
+    @VarcharDef(50)
+    @ValueDef(code = "FICTION", value = "fiction", displayDefs = {
+        @DisplayDef(locale = "zh-CN", displayName = "小说"),
+        @DisplayDef(locale = "en", displayName = "Fiction")
+    })
+    @ValueDef(code = "SCIENCE", value = "science", displayDefs = {
+        @DisplayDef(locale = "zh-CN", displayName = "科普"),
+        @DisplayDef(locale = "en", displayName = "Science")
+    })
+    @DomainDef(isEnum = true)
+    String BOOK_CATEGORY = "BOOK_CATEGORY";
+}
+
+// 元数据定义（业务属性）
+@MetadataDefContainer
+public interface BookstoreMetadataLibrary {
+    @ReferencedDomain(lib = BookstoreDomainLibrary.class, index = BookstoreDomainLibrary.VARCHAR50)
+    @MetadataDef
+    @DisplayDef("书名")
+    String TITLE = "TITLE";
+    
+    @ReferencedDomain(lib = BookstoreDomainLibrary.class, index = BookstoreDomainLibrary.BOOK_CATEGORY)
+    @MetadataDef
+    String BOOK_CATEGORY = "BOOK_CATEGORY";
+}
+
+// 表定义（数据库模式）
+@TableDef
+@PrimaryKeyDef(@IndexColumnDef(BOOK_ID))
+@IndexDef(name = "IDX_BOOK_TITLE", indexColumns = @IndexColumnDef(TITLE))
+public interface BOOK {
+    @ReferencedMetadata(lib = BookstoreMetadataLibrary.class, index = BookstoreMetadataLibrary.BOOK_ID)
+    @ColumnDef(nullable = false)
+    String BOOK_ID = "BOOK_ID";
+    
+    @ReferencedMetadata(lib = BookstoreMetadataLibrary.class, index = BookstoreMetadataLibrary.TITLE)
+    @ColumnDef(nullable = false)
+    String TITLE = "TITLE";
+    
+    @ReferencedMetadata(lib = BookstoreMetadataLibrary.class, index = BookstoreMetadataLibrary.BOOK_CATEGORY)
+    @ColumnDef(nullable = false)
+    String BOOK_CATEGORY = "BOOK_CATEGORY";
+}
+```
+
+#### 字段名与列名的区别
+
+生成 PO 的**字段名**与它绑定的**数据库列名**来自**两个不同的地方**：
+
+| | 来源 | 示例 |
+|---|---|---|
+| **数据库列名** | 所引用 `Metadata` 的 `name` | `BOOK_ID` |
+| **Java 字段名** | `@TableDef` 接口中声明字段的名字 | `BOOK_ID2` |
+
+也就是说，**字段名优先**：生成器先取声明处字段自身的名字，只有当取不到声明字段时才回退到 metadata（列）名。这样可以复用同一份 metadata 定义到多张表，甚至在同一张表中出现两次，同时为每一处赋予不同的 Java 字段名：
+
+```java
+@PrimaryKeyDef(@IndexColumnDef(BOOK_EXAM.BOOK_ID2))
+@IndexDef(name = "UI_BOOK_ISBN_EX", shortName = "ISBN_EX", isUnique = true,
+          indexColumns = @IndexColumnDef(BOOK_EXAM.ISBN2))
+@TableDef
+public interface BOOK_EXAM {
+
+    // Java 字段名 -> bookId2，数据库列名 -> BOOK_ID
+    @ReferencedMetadata(lib = BookstoreMetadataLibrary.class, index = BookstoreMetadataLibrary.BOOK_ID)
+    @RecordId
+    @ColumnDef(nullable = false)
+    String BOOK_ID2 = "BOOK_ID2";
+
+    // Java 字段名 -> isbn2，数据库列名 -> ISBN
+    @RecordShardingSource
+    @ReferencedMetadata(lib = BookstoreMetadataLibrary.class, index = BookstoreMetadataLibrary.ISBN)
+    @ColumnDef(nullable = false)
+    String ISBN2 = "ISBN2";
+}
+```
+
+生成的 PO 会把声明的字段名绑定到 metadata 的列名上：
+
+```java
+public class BookExamPo {
+
+    /** Map to column: BOOK_ID */
+    @RecordId
+    private BigInteger bookId2;   // 字段名来自 BOOK_ID2，列名来自 metadata BOOK_ID
+
+    /** Map to column: ISBN */
+    @RecordShardingSource
+    private String isbn2;         // 字段名来自 ISBN2，列名来自 metadata ISBN
+}
+```
+
+因此，`@PrimaryKeyDef` 与 `@IndexDef` 是按**声明的字段名**（`BOOK_ID2`、`ISBN2`）引用列的，生成的 SQL 会把物理列别名成该字段名：
+
+```sql
+SELECT BOOK_ID AS "bookId2", ISBN AS "isbn2" FROM BOOK_EXAM WHERE BOOK_ID = ?
+```
+
+> **注意**：当声明的字段名与 metadata 名不一致时，凡是面向数据库的部分（DDL、`INSERT`/`UPDATE`/`WHERE`、列别名）都以 metadata 名为准；而生成的 Java 成员（PO 字段、getter/setter、Repository 方法参数）则以声明的字段名为准。
+
+### 3. 配置生成器
 
 ```groovy
-implementation 'io.github.zeatul:hawk-java-generator:<version>'
-implementation 'io.github.zeatul:hawk-core::<version>'
-```
-
-Maven:
-
-```xml
-
-<dependency>
-    <groupId>io.github.zeatul</groupId>
-    <artifactId>hawk-java-generator</artifactId>
-    <version>$version$</version>
-</dependency>
-```
-
-## Hello World
-
-这是一个随处可见的 `HelloWorld` 类:
-
-```java
-public class HelloWorld {
-    public static void main(String... args) {
-        System.out.println("Hello,Hawk Java Generator.");
-    }
+// 注解处理器选项 (gradle)
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-parameters'
+    options.compilerArgs += [
+        '-AindexerPackageName=com.example.designer',
+        '-AindexerClassName=MyModelIndexer'
+    ]
 }
 ```
 
-这是一个用来生成上文所述的`HelloWorld`类的`HelloWorldGenerator`类:
+### 4. 构建与生成
 
-```java
-import glz.hawk.codepoet.java.ClassSpec;
-import glz.hawk.codepoet.java.JavaFile;
-import glz.hawk.codepoet.java.MethodSpec;
-import type.glz.hawk.poet.java.ArrayTypeName;
-
-import javax.lang.model.element.Modifier;
-
-import static type.glz.hawk.poet.java.VoidTypeName.VOID;
-
-public class HelloWorldGenerator {
-
-    public static void main(String[] args) {
-
-        ClassSpec classSpec = ClassSpec.builder("HelloWorld", Modifier.PUBLIC)
-            .addMethod(MethodSpec.builder(VOID, "main", Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(ArrayTypeName.ofClass(String.class), "args")
-                .varargs()
-                .beginMethodBody()
-                .addStatement("$T.out.println($S)", System.class, "Hello,Hawk Java Generator!")
-                .end()
-                .build())
-            .build();
-
-        JavaFile javaFile = JavaFile.builder("com.example", classSpec)
-            .build();
-
-        javaFile.writeTo(System.out);
-    }
-}
+```bash
+./gradlew compileJava  # 触发注解处理器
 ```
 
-通过`MethodSpec`来声明一个"main"方法，包括方法名称，方法参数，方法返回值，方法修饰符和方法体。
-通过ClassSpec来声明一个`HelloWorld`类，并将"main"方法加入该类。最后通过`JavaFile`将该类输出到控制台，当然也可以输出到文件里。
+生成的制品位于 `build/generated/sources/annotationProcessor/java/main/`。
 
-## 代码与控制流
+---
 
-`hawk-java-generator`的API尽可能采用不可变Java对象。同时，它还结合了建造者模式、链式调用，可变参数和lambda表达式，以使API更易于使用。
-hawk-java-generator为类（`ClassSpec`）、接口（`InterfaceSpec`）、枚举（`EnumSpec`）、注解（`AnnotationSpec`）、
-字段（`FieldSpec`）、方法（`MethodSpec`）、构造函数（`ConstructorSpec`）、参数（`ParameterSpec`）、注解实例（
-`AnnotationInstanceSpec`）
-、javadoc（`FileJavaDoc`, `TypeJavaDoc`, `FieldJavaDoc`, `MethodJavaDoc`, `ConstructorJavaDoc`）提供了相应的模型。
+## 生成制品
 
-对于方法和构造函数的方法体，以及javadoc的内容，`hawk-java-generator`提供了格式化字符串，缩进，换行API和控制流模型来帮助生成代码。
-你将发现写法和直接写java代码的方式几乎一摸一样。
+| 制品 | 位置 | 说明 |
+|------|------|------|
+| **枚举** | `com.example.pub.enums.*` | 类型安全枚举，含 i18n 显示名、`fromValue()`、`fromName()`、`parseByValue()`、`parseByName()` |
+| **Properties** | `resources/.../enum_display.properties` | 多语言枚举显示名 |
+| **领域类** | `com.example.pub.vo.*` | API 契约用 VO/DTO 类 |
+| **服务接口** | `com.example.pub.inf.*` | 服务接口定义 |
+| **MyBatis Mapper** | `com.example.persist.mapper.*` | Mapper 接口（CRUD + 自定义查询） |
+| **Repository** | `com.example.persist.repository.*` | Repository 接口与实现 |
+| **SQL Provider** | `com.example.persist.sql.provider.*` | 动态 SQL 构建器 |
+| **POJO** | `com.example.persist.po.*` | 数据库映射实体（字段名取声明处字段名，列名取 metadata 名，详见[字段名与列名的区别](#字段名与列名的区别)） |
+| **DDL** | `com.example.persist.ddl.*` | 数据库建表脚本 |
 
-### for 循环
+---
 
-#### 代码格式完全控制
+## 示例工程
 
-这是一个完全控制代码格式的示例
+`samples/` 目录包含完整可运行示例：
 
-```java
-MethodSpec sum = MethodSpec.builder(PrimitiveTypeName.INT, "sum")
-    .addParameter(ArrayTypeName.ofTypeName(ArrayTypeName.ofTypeName(PrimitiveTypeName.INT)), "a")
-    .beginMethodBody()
-    .addCode("int sum = 0;").addNewLine()
-    .addCode("for (int i = 0; i < a.length; i++){").addNewLine()
-    .addIndent()
-    .addCode("for (int j = 0; j< a[i].length; j++){").addNewLine()
-    .addIndent()
-    .addCode("sum = sum + a[i][j];").addNewLine()
-    .removeIndent()
-    .addCode("}").addNewLine()
-    .removeIndent()
-    .addCode("}").addNewLine()
-    .addCode("return sum;").addNewLine()
-    .end()
-    .build();
+| 示例 | 说明 |
+|------|------|
+| `bookstore-designer` | 元数据、领域、表定义 |
+| `bookstore-generator` | 生成器配置与执行 |
+| `bookstore-pub` | 生成的公共 API（枚举、VO、接口） |
+| `bookstore-persist` | 生成的持久层（MyBatis、Repository） |
+
+运行完整生成流水线：
+```bash
+./gradlew :samples:bookstore-generator:run
 ```
 
-这是生成的结果
+---
 
-```java
-int sum(int[][] a) {
-    int sum = 0;
-    for (int i = 0; i < a.length; i++) {
-        for (int j = 0; j < a[i].length; j++) {
-            sum = sum + a[i][j];
-        }
-    }
-    return sum;
-}
-```
+## 文档
 
-通过`addCode`方法来添加实际代码（分号需要手动添加），通过`addIndent`和`removeIndent`方法来控制缩进，通过`addNewLine`方法来换行。
+目前文档都收录在本 README 中：
 
-#### 代码格式由`hawk-java-generator`控制
+- [架构](#架构) - 模块交互
+- [核心特性](#核心特性) - 能力概览
+- [快速开始](#快速开始) - 依赖、元数据定义、生成器配置
+- [字段名与列名的区别](#字段名与列名的区别) - PO 字段名与数据库列名的推导规则
+- [生成制品](#生成制品) - 生成了什么、放在哪里
+- [示例工程](#示例工程) - 完整可运行示例
 
-这是一个由`hawk-java-generator`来控制代码格式的示例
+注解源码文档位于仓库内 `jdesigner-annotations/src/main/java/glz/hawk/jdesigner/annotation/`。
 
-```java
-MethodSpec sum = MethodSpec.builder(PrimitiveTypeName.INT, "sum")
-    .addParameter(ArrayTypeName.ofTypeName(ArrayTypeName.ofTypeName(PrimitiveTypeName.INT)), "a")
-    .beginMethodBody()
-    .addStatement("int sum = 0")
-    .beginFor("int i = 0; i < a.length; i++")
-    .beginFor("int j = 0; j < a[i].length; j++")
-    .addStatement("sum = sum + a[i][i]")
-    .endFor()
-    .endFor()
-    .end()
-    .build();
-```
+---
 
-生成的结果和上文的示例完全一样，但是代码非常简洁，而且格式也不容易出错.\
-通过`beginFor`和`endFor`方法来维护`for`循环的格式，通过`addStatement`方法来维护代码行的格式（自动添加分号和换行符）。
+## 环境要求
 
-### while 循环
+- **Java 8+** (测试通过 8、11、17、21)
+- **Gradle 7+** 或 **Maven 3.8+**
+- **启用注解处理** (现代构建工具默认开启)
 
-这是一个`while`循环的示例
+---
 
-```java
-MethodSpec modulo = MethodSpec.builder(INT, "modulo", Modifier.PUBLIC)
-    .addParameter(INT, "a")
-    .beginMethodBody()
-    .addStatement("int b = a > 0 ? a : -a")
-    .beginWhile("b >= 3")
-    .addStatement(" b = b / 3")
-    .endWhile()
-    .addStatement("return b")
-    .end()
-    .build();
-```
+## 许可证
 
-这是生成的结果
+Apache License 2.0 - 详见 [LICENSE](LICENSE)
 
-```java
-public int modulo(int a) {
-    int b = a > 0 ? a : -a;
-    while (b >= 3) {
-        b = b / 3;
-    }
-    return b;
-}
-```
+---
 
-通过`beginWhile`和`endWhile`方法来控制while循环语句的格式
+## 贡献
 
-### do while 循环
+欢迎贡献！请先在 https://github.com/zeatul/jdesigner/issues 提 issue 讨论改动，再行提交。
 
-这是一个`do-while`循环的示例
+---
 
-```java
-MethodSpec modulo = MethodSpec.builder(INT, "modulo", Modifier.PUBLIC)
-    .addParameter(INT, "a")
-    .addParameter(INT, "b")
-    .beginMethodBody()
-    .addStatement("a = $T.abs(a)", Math.class)
-    .addStatement("b = $T.abs(b)", Math.class)
-    .beginDo("a > b")
-    .addStatement("a = a / b")
-    .endDo()
-    .addStatement("return a")
-    .end()
-    .build();
-```
+## 链接
 
-这是生成的结果
-
-```java
-public int modulo(int a, int b) {
-    a = Math.abs(a);
-    b = Math.abs(b);
-    do {
-        a = a / b;
-    } while (a > b);
-    return a;
-}
-```
-
-通过`beginDo`和`endDo`方法来控制`do while`循环语句的格式
-
-### if-elseif-else 条件分支
-
-这是一个`if-elseif-else`条件分支的示例
-
-```java
-MethodSpec ifExample = MethodSpec.builder(VOID, "ifExample", Modifier.PUBLIC)
-    .addParameter(INT, "a")
-    .beginMethodBody()
-    .beginIf("a < 5")
-    .addStatement("System.out.println($S)", "The parameter is less than 5")
-    .beginElseIf("a < 100")
-    .addStatement("System.out.println($S)", "The parameter is greater or equal to 5 and less than 100")
-    .beginElse()
-    .addStatement("System.out.println($S)", "The parameter is greater than or equal to 100")
-    .endIf()
-    .end()
-    .build();
-```
-
-这是生成的结果
-
-```java
-public void ifExample(int a) {
-    if (a < 5) {
-        System.out.println("The parameter is less than 5");
-    } else if (a < 100) {
-        System.out.println("The parameter is greater or equal to 5 and less than 100");
-    } else {
-        System.out.println("The parameter is greater than or equal to 100");
-    }
-}
-```
-
-通过`beginIf`，`beginElseIf`，`beginElse`，`endIf`方法来控制`if-elseif-else`条件分支语句的格式。
-
-### switch-case-default 选择分支
-
-这是一个`switch-case-default`选择分支语句的示例
-
-```java
-MethodSpec ifExample = MethodSpec.builder(VOID, "switchExample", Modifier.PUBLIC)
-    .addParameter(CHAR, "ch")
-    .beginMethodBody()
-    .beginSwitch("ch")
-    .beginCase("'a'")
-    .addStatement("System.out.println($S)", "Found a")
-    .breakCase()
-    .beginCase("'b'")
-    .addStatement("System.out.println($S)", "Found b")
-    .breakCase()
-    .beginCase("'c'")
-    .endCase()
-    .beginCase("'d'")
-    .addStatement("System.out.println($S)", "Found c and d")
-    .breakCase()
-    .beginDefault()
-    .addStatement("System.out.println($S)", "Found other char")
-    .endSwitch()
-    .end()
-    .build();
-```
-
-这是生成的结果
-
-```java
-public void switchExample(char ch) {
-    switch (ch) {
-        case 'a':
-            System.out.println("Found a");
-            break;
-        case 'b':
-            System.out.println("Found b");
-            break;
-        case 'c':
-        case 'd':
-            System.out.println("Found c and d");
-            break;
-        default:
-            System.out.println("Found other char");
-    }
-}
-```
-
-通过`beginSwitch`，`beginCase`，`breakCase`，`beginDefault`，`endSwitch`方法来控制`switch-case-default`选择分支语句的格式。
-
-### try-catch-finally 语句
-
-这是一个`try-catch-finally`语句的示例
-
-```java
-MethodSpec readFile = MethodSpec.builder(VOID, "readFile", Modifier.PUBLIC)
-    .addAnnotation(AnnotationInstanceSpec.builder(SuppressWarnings.class).addMember("value", "CallToPrintStackTrace").build())
-    .addParameter(File.class, "file")
-    .beginMethodBody()
-    .addStatement("$T br = null", BufferedReader.class)
-    .beginTry()
-    .addStatement("br = new $T(new $T(file))", BufferedReader.class, FileReader.class)
-    .addStatement("String line")
-    .beginWhile("(line = br.readLine()) != null")
-    .addStatement("System.out.println(line)")
-    .endWhile()
-    .beginCatch("IOException e")
-    .addStatement("e.printStackTrace()")
-    .beginFinally()
-    .beginIf("br != null")
-    .beginTry()
-    .addStatement("br.close()")
-    .beginCatch("$T e", IOException.class)
-    .addStatement("e.printStackTrace()")
-    .endTry()
-    .endIf()
-    .endTry()
-    .end()
-    .build();
-```
-
-这是生成的结果
-
-```java
-
-@SuppressWarnings("CallToPrintStackTrace")
-public void readFile(File file) {
-    BufferedReader br = null;
-    try {
-        br = new BufferedReader(new FileReader(file));
-        String line;
-        while ((line = br.readLine()) != null) {
-            System.out.println(line);
-        }
-    } catch (IOException e) {
-        e.printStackTrace();
-    } finally {
-        if (br != null) {
-            try {
-                br.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-}
-```
-
-通过`beginTry`，`beginCatch`，`beginFinally`和`endTry`方法来控制`try-catch-finally`语句的格式。
-
-这是一个`try-with-resources`语句的示例
-
-```java
-MethodSpec readFile = MethodSpec.builder(VOID, "readFile", Modifier.PUBLIC)
-    .addAnnotation(AnnotationInstanceSpec.builder(SuppressWarnings.class).addMember("value", "CallToPrintStackTrace").build())
-    .addParameter(File.class, "file")
-    .beginMethodBody()
-    .beginTry("$T br = new $T(new $T(file))", BufferedReader.class, BufferedReader.class, FileReader.class)
-    .addStatement("String line")
-    .beginWhile("(line = br.readLine()) != null")
-    .addStatement("System.out.println(line)")
-    .endWhile()
-    .beginCatch("IOException e")
-    .addStatement("e.printStackTrace()")
-    .endTry()
-    .end()
-    .build();
-```
-
-这是生成的结果
-
-```java
-
-@SuppressWarnings("CallToPrintStackTrace")
-public void readFile(File file) {
-    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            System.out.println(line);
-        }
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-}
-```
-
-通过带参数的`beginTry`方法来生成`try-with-resources`语句。
-
-### BracketFlow
-
-用来帮助书写类似 (...), {...}, ({...})这样的代码块，提供缩进，启示换行，结束换行等选项
-
-### 占位符
-
-为了方便格式化字符串的输出， `hawk-java-generator`参照`JavaPoet`，提供了类似String.format("template", parameters...)
-的功能。\
-目前提供了如下几种类型的占位符：
-
-#### $L指代字面量
-
-使用`$L`来作为字面量的占位符，它在输出时，会被替换为对应的参数的字面值。\
-当前逻辑是调用String.valueOf()方法将参数转成字符串直接输出，几乎支持所有类型的参数。
-
-#### $S指代字符串
-
-使用`$S`来作为字符串的占位符，它在输出时，会被替换为对应参数转换成的字符串。
-`$L`调用String.valueOf()方法将参数转成字符串输出，并且自动用双引号加输出结果包起来，几乎支持所有类型的参数。
-
-#### $T指代类型
-
-使用`$T`来作为java类型的占位符，它在输出时，会被替换为对应的参数表示类型的名称，同时会记录该类型的完整名称，作为将来计算类引用的依据。
-`$T`仅仅支持用来表达类型的参数：`java.lang.Class`，`javax.lang.model.type.TypeMirror`，`javax.lang.model.element.Element`，
-`java.lang.reflect.Type`，`hawk-java-generator`的自有类型`type.glz.hawk.poet.java.TypeName`以及其子类。
-
-#### $N指代名字
-
-使用`$N`来作为`hawk-java-generator`内部特定类型的占位符，它在输出时，会被替换为对应的类型的名称属性的值。\
-`$N`仅仅支持`TypeSpec`，`FieldSpec`，`MethodSpec`，`ParameterSpec`和`java.lang.CharSequence`。
-
-这是一个演示所有占位符用法的例子：
-
-```java
-FieldSpec fieldSpec1 = FieldSpec.builder(String.class, "name", Modifier.PUBLIC).build();
-FieldSpec fieldSpec2 = FieldSpec.builder(ParameterizedTypeName.of(Class.class, WildcardTypeName.of()), "clazz", Modifier.PUBLIC).build();
-FieldSpec fieldSpec3 = FieldSpec.builder(PrimitiveTypeName.INT, "count", Modifier.PUBLIC).build();
-FieldSpec fieldSpec4 = FieldSpec.builder(ParameterizedTypeName.of(Map.class, String.class, BigDecimal.class), "map", Modifier.PUBLIC).build();
-ClassSpec classSpec = ClassSpec.builder("CodeAndControlFlowExample", Modifier.PUBLIC)
-    .addField(fieldSpec1)
-    .addField(fieldSpec2)
-    .addField(fieldSpec3)
-    .addField(fieldSpec4)
-    .addConstructor(ConstructorSpec.builder(Modifier.PUBLIC)
-        .beginConstructorBody()
-        .addStatement("this.$N = $S", fieldSpec1, "cat")
-        .addStatement("this.$N = $T.class", fieldSpec2, Map.class)
-        .addStatement("this.$N = $L", fieldSpec3, 1000)
-        .addStatement("this.$N = new $T<>()", fieldSpec4, HashMap.class)
-        .end()
-        .build())
-    .build();
-```
-
-这是输出结果
-
-```java
-
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.HashMap;
-
-public class CodeAndControlFlowExample {
-    public String name;
-    public Class<?> clazz;
-    public int count;
-    public Map<String, BigDecimal> map;
-
-    public CodeAndControlFlowExample() {
-        this.name = "cat";
-        this.clazz = Map.class;
-        this.count = 1000;
-        this.map = new HashMap<>();
-    }
-}
-```
-
-如上例所示：
-`$N`被field的名称（`name`、`clazz`、`count`）替换。
-`$S`被字符串`"cat"`替换。
-`$T`被`Map`，`HashMap`和`BigDecimal`的类名替换并且自动添加了类引用`java.util.Map`，`java.util.HashMap`和
-`java.math.BigDecimal`。
-`$L`被数字`1000`替换。
-
-### 定位符和参数匹配
-
-`glz.hawk.codepoet.java.JavaCodeBlock`模仿了`javapoet`的`CodeBlock`类，是专门用来管理代码块的类，它支持多种定位占位符和参数匹配的方法，
-但同一个代码块同时只能使用一种匹配方法。
-
-#### 相对位置参数
-
-参数按照格式化字符串内的占位符一样的方式排列，有多少个占位符就有多少给参数，它们按顺序一一对应。
-
-如下所示：
-
-```java
-JavaCodeBlock codeBlock = JavaCodeBlock.of("I ate $L $L.", 4, "apples");
-```
-
-将输出
-
-```text
-I ate 4 apples.
-```
-
-#### 索引位置参数
-
-在格式化字符串里的占位符前加上整数索引（从1开始计算），通过索引在传入的参数列表里找到该占位符对应的参数。
-
-如下所示：
-
-```java
-JavaCodeBlock codeBlock = JavaCodeBlock.of("I ate $2L $1L", "apples", 4);
-```
-
-也将输出
-
-```text
-I ate 4 apples.
-```
-
-#### 命名参数
-
-使用`$argumentName:X` 语法（其中'X'为格式字符）来定义格式化字符串，并传递包含格式字符串中所有参数键的map作为参数给
-`JavaCodeBlock.addNamed()` 或`JavaCodeBlock.ofNamed()`方法。
-参数名称允许使用 a-z、A-Z、0-9 及 _ 字符，且必须以小写字母开头。
-
-如下所示：
-
-```text
-Map<String, Object> map = new HashMap<>();
-map.put("food", "tacos");
-map.put("count", 3);
-JavaCodeBlock codeBlock = JavaCodeBlock.ofNamed("I ate $count:L $food:L",map);
-```
-
-也将输出
-
-```text
-I ate 4 apples.
-```
-
-## 变量类型
-
-变量类型支持Java语法中的所有类型，用来定义变量，参数，方法返回值。
-
-### 基础类型
-
-`type.glz.hawk.poet.java.PrimitiveTypeName`是一个枚举类，用来映射java的基础类型。
-
-### void类型
-
-`type.glz.hawk.poet.java.VoidTypeName`是一个枚举类，用来映射java的void类型。
-
-### 类类型
-
-`type.glz.hawk.poet.java.ClassName`对应于java类。\
-提供了如下几个静态工厂方法用来构造ClassName：
-
-```java
-import javax.lang.model.element.TypeElement;
-
-public static ClassName ofClass(Class<?> clazz);
-
-public static ClassName of(String packageName, String simpleName, String... simpleNames);
-
-public static ClassName of(TypeElement typeElement);
-
-public static ClassName ofGuess(String classNameString);
-```
-
-### 参数化类类型
-
-`type.glz.hawk.poet.java.ParameterizedTypeName`对应于带类型参数的类，支持java语法允许的所有类型参数。\
-提供了如下几个静态工厂用来构造ParameterizedTypeName：
-
-```java
-import type.glz.hawk.poet.java.ClassName;
-import type.glz.hawk.poet.java.TypeName;
-
-public static ParameterizedTypeName of(ClassName rawType, List<TypeName> typeArguments);
-
-public static ParameterizedTypeName of(ClassName rawType, TypeName... typeArguments);
-
-public static ParameterizedTypeName of(Class<?> rawType, TypeName... typeArguments);
-
-public static ParameterizedTypeName of(Class<?> rawType, Class<?>... typeArguments);
-```
-
-### 数组类型
-
-`type.glz.hawk.poet.java.ArrayTypeName`对应于数组，支持任意类型的数组，包括多维数组。\
-提供了如下几个静态工厂用来构造ArrayTypeName：
-
-```java
-import java.lang.reflect.Type;
-
-import type.glz.hawk.poet.java.TypeName;
-
-public static ArrayTypeName ofTypeName(TypeName componentTypeName);
-
-public static ArrayTypeName ofType(Type type);
-
-public static ArrayTypeName ofClass(Class<?> clazz);
-```
-
-### 类型变量
-
-`type.glz.hawk.poet.java.TypeVariableName`用来支持泛型所需的类型参数。\
-提供了如下几个静态工厂用来构造TypeVariableName：
-
-```java
-import javax.lang.model.type.TypeVariable;
-
-import type.glz.hawk.poet.java.TypeName;
-
-public static TypeVariableName of(String name);
-
-public static TypeVariableName of(String name, TypeName... bounds);
-
-public static TypeVariableName of(String name, Class<?>... bounds);
-
-public static TypeVariableName of(String name, Iterable<TypeName> bounds);
-
-public static TypeVariableName of(TypeVariable typeVariable);
-```
-
-### 通配符类型
-
-`type.glz.hawk.poet.java.WildcardTypeName`用来支持通配符类型。\
-提供了如下几个静态工厂用来构造WildcardTypeName：
-
-```java
-import javax.lang.model.type.WildcardType;
-
-import type.glz.hawk.poet.java.TypeName;
-
-public static WildcardTypeName of();
-
-public static WildcardTypeName of(List<TypeName> upperBounds, List<TypeName> lowerBounds);
-
-public static WildcardTypeName ofUpper(TypeName typeName);
-
-public static WildcardTypeName ofUpper(Class<?> clazz);
-
-public static WildcardTypeName ofLower(TypeName typeName);
-
-public static WildcardTypeName ofLower(Class<?> clazz);
-
-public static WildcardTypeName of(WildcardType wildcardType);
-```
-
-这是一个所有类型用法的示例：
-
-```java
-import glz.hawk.codepoet.java.ClassSpec;
-import glz.hawk.codepoet.java.InterfaceSpec;
-import glz.hawk.codepoet.java.MethodSpec;
-
-import javax.lang.model.element.Modifier;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-
-ClassSpec classSpec = ClassSpec.builder("TypeExample", Modifier.PUBLIC, Modifier.ABSTRACT)
-        .addTypeVariable(TypeVariableName.of("K"))
-        .addField(PrimitiveTypeName.DOUBLE, "d1", Modifier.STATIC)
-        .addField(PrimitiveTypeName.FLOAT, "f1", Modifier.STATIC)
-        .addField(LocalDateTime.class, "dateTime", Modifier.PUBLIC, Modifier.STATIC)
-        .addField(ClassName.ofClass(LocalDate.class), "date")
-        .addField(ClassName.ofGuess(LocalTime.class.getCanonicalName()), "time")
-        .addField(ClassName.of("java.util", "Map", "Entry"), "entry")
-        .addField(TypeVariableName.of("K"), "k", Modifier.PRIVATE)
-        .addField(ParameterizedTypeName.of(List.class, TypeVariableName.of("K")), "ks", Modifier.PUBLIC)
-        .addField(ParameterizedTypeName.of(List.class, WildcardTypeName.of()), "ks1", Modifier.PUBLIC)
-        .addField(ParameterizedTypeName.of(List.class, WildcardTypeName.ofUpper(Serializable.class)), "ks2", Modifier.PUBLIC)
-        .addField(ParameterizedTypeName.of(List.class, WildcardTypeName.ofLower(Serializable.class)), "ks3", Modifier.PUBLIC)
-        .addField(ParameterizedTypeName.of(Map.class, ClassName.ofClass(String.class), WildcardTypeName.of()), "map1", Modifier.PUBLIC)
-        .addField(ParameterizedTypeName.of(Map.class, ClassName.ofClass(String.class), ParameterizedTypeName.of(Map.class, ClassName.ofClass(Integer.class), WildcardTypeName.ofUpper(TypeVariableName.of("K")))), "map2", Modifier.PUBLIC)
-        .addField(ArrayTypeName.ofTypeName(TypeVariableName.of("K")), "array1", Modifier.PUBLIC)
-        .addField(PrimitiveTypeName.INT, "intA", Modifier.PUBLIC)
-        .addField(Integer.class, "integerA", Modifier.PUBLIC)
-        .addField(ArrayTypeName.ofTypeName(PrimitiveTypeName.INT), "intArray", Modifier.PUBLIC)
-        .addField(ArrayTypeName.ofTypeName(ArrayTypeName.ofTypeName(PrimitiveTypeName.INT)), "intArrayArray", Modifier.PUBLIC)
-        .addField(ArrayTypeName.ofClass(Integer.class), "integerArray", Modifier.PUBLIC)
-        .addMethod(MethodSpec.builder(VoidTypeName.VOID, "method0", Modifier.PUBLIC, Modifier.ABSTRACT).build())
-        .addMethod(MethodSpec.builder(TypeVariableName.of("H"), "method1", Modifier.PROTECTED, Modifier.ABSTRACT)
-                .addTypeVariable(TypeVariableName.of("H"))
-                .addParameter(TypeVariableName.of("K"), "k", Modifier.FINAL)
-                .build())
-        .addMethod(MethodSpec.builder(TypeVariableName.of("H"), "method2", Modifier.PROTECTED, Modifier.ABSTRACT)
-                .addTypeVariable(TypeVariableName.of("H"))
-                .addTypeVariable(TypeVariableName.of("V"))
-                .addTypeVariable(TypeVariableName.of("E", Throwable.class))
-                .addParameter(TypeVariableName.of("K"), "k", Modifier.FINAL)
-                .addParameter(TypeVariableName.of("V"), "v", Modifier.FINAL)
-                .addThrowable(TypeVariableName.of("E"))
-                .build())
-        .build();
-```
-
-这是生成的代码：
-
-```java
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-public abstract class TypeExample<K> {
-    static double d1;
-    static float f1;
-    public static LocalDateTime dateTime;
-    LocalDate date;
-    LocalTime time;
-    Entry entry;
-    private K k;
-    public List<K> ks;
-    public List<?> ks1;
-    public List<? extends Serializable> ks2;
-    public List<? super Serializable> ks3;
-    public Map<String, ?> map1;
-    public Map<String, Map<Integer, ? extends K>> map2;
-    public K[] array1;
-    public int intA;
-    public Integer integerA;
-    public int[] intArray;
-    public int[][] intArrayArray;
-    public Integer[] integerArray;
-
-    public abstract void method0();
-
-    protected abstract <H> H method1(final K k);
-
-    protected abstract <H, V, E extends Throwable> H method2(final K k, final V v) throws E;
-}
-```
-
-## 静态引用
-
-静态引用的核心功能是省略类名，直接使用静态成员，从而达到简化代码、提高表达力的目的。它的作用域是整个java文件范围内。
-
-TypeSpec提供了如下增加静态引用的API：
-
-```java
-public T addStaticImport(Enum<?> constant);
-
-public T addStaticImport(Class<?> clazz, String... names);
-
-public T addStaticImport(ClassName className, String... names);
-```
-
-这是一个静态引用的示例：
-
-```java
-ClassSpec classSpec = ClassSpec.builder("StaticImportDemo", Modifier.PUBLIC)
-    .addStaticImport(PrimitiveTypeName.class, "*")
-    .addStaticImport(PrimitiveTypeName.BOOLEAN)
-    .addStaticImport(PrimitiveTypeName.class, "INT", "LONG")
-    .addStaticImport(ClassName.ofClass(PrimitiveTypeName.class), "CHAR", "DOUBLE")
-    .build();
-```
-
-这是生成的代码
-
-```java
-
-import static type.glz.hawk.poet.java.PrimitiveTypeName.BOOLEAN;
-import static type.glz.hawk.poet.java.PrimitiveTypeName.CHAR;
-import static type.glz.hawk.poet.java.PrimitiveTypeName.DOUBLE;
-import static type.glz.hawk.poet.java.PrimitiveTypeName.INT;
-import static type.glz.hawk.poet.java.PrimitiveTypeName.LONG;
-
-public class StaticImportDemo {
-}
-```
-
-## 定义类型
-
-支持定义的类型有：类、接口、枚举、注解。
-
-### 定义类变量
-
-`FieldSpec`负责维护类变量的类型，名称，修饰符，注解，初始化值和注释。\
-这是一个`FieldSpec`用法的示例：
-
-```java
-import glz.hawk.codepoet.java.ClassSpec;
-import glz.hawk.codepoet.java.FieldSpec;
-import glz.hawk.codepoet.java.JavaFile;
-import type.glz.hawk.poet.java.ArrayTypeName;
-import type.glz.hawk.poet.java.ParameterizedTypeName;
-
-import javax.annotation.Nonnull;
-
-import java.util.Map;
-
-import static javax.lang.model.element.Modifier.*;
-
-FieldSpec fieldSpec1 = FieldSpec.builder(String.class, "name", PRIVATE)
-        .setJavadoc("This is a field javadoc example.")
-        .build();
-
-FieldSpec fieldSpec2 = FieldSpec.builder(ArrayTypeName.ofTypeName(INT), "numbers", PUBLIC, STATIC)
-        .setInitializer("new $T[]{$L, $L, $L}", INT, 1, 2, 3)
-        .addAnnotation(Nonnull.class)
-        .build();
-
-ClassSpec classSpec = ClassSpec.builder("FieldDemo", PUBLIC)
-        .addField(fieldSpec1)
-        .addField(fieldSpec2)
-        .addField(ParameterizedTypeName.of(Map.class, String.class, Object.class), "map", PRIVATE)
-        .addField(String.class, "str2", PROTECTED)
-        .build();
-```
-
-这是生成的代码
-
-```java
-import java.util.Map;
-import javax.annotation.Nonnull;
-
-public class FieldDemo {
-    /**
-     * This is a field javadoc example.
-     */
-    private String name;
-    @Nonnull
-    public static int[] numbers = new int[]{1, 2, 3};
-    private Map<String, Object> map;
-    protected String str2;
-}
-```
-
-不仅可以用`FieldSpec.Builder`定义`FieldSpec`，再添加到类定义中，也可以直接通过提供类型，变量名称和修饰符的快捷方式直接添加变量到类定义中。
-定义静态类变量只需要添加修饰符`static`
-
-### 定义参数
-
-`ParameterSpec`负责维护方法或者构造函数的参数的类型，名称，注解和修饰符。\
-这是一个`ParameterSpec`的用法示例。
-
-```java
-
-import type.glz.hawk.poet.java.ArrayTypeName;
-
-import javax.annotation.Nonnull;
-
-import static javax.lang.model.element.Modifier.*;
-
-ParameterSpec param1 = ParameterSpec.builder(String.class, "name").build();
-ParameterSpec param2 = ParameterSpec.builder(String.class, "unmodifiableName", FINAL).build();
-ParameterSpec param3 = ParameterSpec.builder(String.class, "simpleName")
-        .addAnnotation(Nonnull.class)
-        .build();
-
-MethodSpec method1 = MethodSpec.builder(String.class, "search1", PUBLIC, ABSTRACT)
-        .addParameters(param1, param2, param3)
-        .build();
-
-MethodSpec method2 = MethodSpec.builder(String.class, "search2", PUBLIC, ABSTRACT)
-        .addParameter(String.class, "name", FINAL)
-        .build();
-
-MethodSpec method3 = MethodSpec.builder(String.class, "search3", PUBLIC, ABSTRACT)
-        .addParameter(String.class, "firstName")
-        .addParameter(ArrayTypeName.ofClass(String.class), "names")
-        .varargs()
-        .build();
-
-ClassSpec classSpec = ClassSpec.builder("ParameterDemo", PUBLIC, ABSTRACT)
-        .addMethod(method1)
-        .addMethod(method2)
-        .addMethod(method3)
-        .build();
-```
-
-这是生成的代码：
-
-```java
-import javax.annotation.Nonnull;
-
-public abstract class ParameterDemo {
-    public abstract String search1(String name, final String unmodifiableName, @Nonnull String simpleName);
-
-    public abstract String search2(final String name);
-
-    public abstract String search3(String firstName, String... names);
-}
-```
-
-不仅可以用`ParameterSpec.Builder`定义参数，再添加到方法定义中，也可以直接通过提供类型，变量名称和修饰符的快捷方式直接添加参数到方法定义中。\
-定义可变参数：方法的最后一个参数必须是数组，同时还要调用`varargs()`告诉`MethodSpec`最后一个参数是可变参数。
-
-## 定义方法
-`MethodSpec`负责维护方法的返回类型、名称、参数、异常、修饰符、注解、方法体和注释。\
-这是一个`MethodSpec`的用法示例：
-```java
-MethodSpec method1 = MethodSpec.builder(VOID, "getValue", PUBLIC, ABSTRACT)
-                .addParameter(String.class, "key")
-                .build();
-
-MethodSpec method2 = MethodSpec.builder(INT, "sum", PUBLIC)
-        .addParameter(INT, "a")
-        .addParameter(INT, "b")
-        .beginMethodBody()
-        .addStatement("return a + b")
-        .end()
-        .build();
-
-MethodJavadoc methodJavadoc = MethodJavadoc.builder()
-        .addBlockTag(BlockTag.builder(BlockTagType.PARAM,"file").add("the file to be read.").build())
-        .addBlockTag(BlockTag.builder(BlockTagType.RETURN).add("the content of file.").build())
-        .addBlockTag(BlockTag.builder(IOException.class).add("if met error while read file").build())
-        .beginJavadoc()
-        .addDocument("read a file")
-        .end()
-        .build();
-
-MethodSpec method3 = MethodSpec.builder(String.class, "readFile", PUBLIC, ABSTRACT)
-        .addParameter(File.class, "file")
-        .addThrowable(IOException.class)
-        .setJavadoc(methodJavadoc)
-        .build();
-
-ClassSpec classSpec = ClassSpec.builder("MethodDemo", PUBLIC, ABSTRACT)
-        .addMethod(method1)
-        .addMethod(method2)
-        .addMethod(method3)
-        .build();
-```
-这是生成的代码：
-
-```java
-import java.io.File;
-import java.io.IOException;
-
-public abstract class MethodDemo {
-    public abstract void getValue(String key);
-
-    public int sum(int a, int b) {
-        return a + b;
-    }
-
-    /**
-     * read a file
-     *
-     * @param file the file to be read.
-     * @return the content of file.
-     * @throws IOException if met error while read file
-     */
-    public abstract String readFile(File file) throws IOException;
-}
-```
-
-## 定义构造函数
-
-### 定义接口
-
-### 定义类
-
-#### 定义类初始化块
-
-#### 定义静态类初始化块
-
-### 定义枚举
-
-### 定义注解
-
-### 定义泛型
-
-
-
-
-### 定义内部类
-
-### 定义匿名内部类
-
-### 定义注解实例
-
-### 定义javadoc
-
-### 输出
-
-JavaFile负责提供package和java文件的Java动词，并提供了输出到IO流的功能。
-
-
-
-
-
-
-
-
+- **GitHub**: https://github.com/zeatul/jdesigner
+- **Issues**: https://github.com/zeatul/jdesigner/issues
+- **Maven Central**: https://central.sonatype.com/artifact/io.github.zeatul/jdesigner

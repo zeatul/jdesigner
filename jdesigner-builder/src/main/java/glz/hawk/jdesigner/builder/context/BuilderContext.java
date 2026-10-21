@@ -83,4 +83,12 @@ public interface BuilderContext {
      */
     @Nonnull
     PackageGenerator getPackageGenerator();
+
+    /**
+     * Obtains the {@link ClassLoader} used for loading classes.
+     *
+     * @return the class loader, or {@code null} to use the system class loader
+     */
+    @Nullable
+    ClassLoader getClassLoader();
 }

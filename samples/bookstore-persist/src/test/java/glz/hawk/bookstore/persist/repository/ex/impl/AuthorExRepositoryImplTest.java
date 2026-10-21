@@ -21,6 +21,7 @@ import glz.hawk.bookstore.persist.po.AuthorPo;
 import glz.hawk.bookstore.persist.repository.AuthorRepository;
 import glz.hawk.bookstore.persist.repository.config.TestRepositoryConfig;
 import glz.hawk.bookstore.persist.repository.data.AuthorGenerator;
+import glz.hawk.bookstore.persist.repository.support.AuthorService;
 import glz.hawkframework.dao.pagination.PagedIterator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,6 +50,8 @@ public class AuthorExRepositoryImplTest {
     private AuthorExRepository authorExRepository;
     @Autowired
     private AuthorRepository authorRepository;
+    @Autowired
+    private AuthorService authorService;
 
     @Test
     public void pagedIterator_test() {
@@ -125,5 +129,30 @@ public class AuthorExRepositoryImplTest {
         assertThat(authorPoListInDb).hasSize(authodIdList.size());
         assertThat(authorPoListInDb.get(0).getAuthorId()).isEqualTo(authorPoList.get(0).getAuthorId());
         assertThat(authorPoListInDb.get(authorPoListInDb.size() - 1).getAuthorId()).isEqualTo(authorPoList.get(authorPoList.size() - 1).getAuthorId());
+    }
+
+    @Test
+    public void mix_batch_and_simple_test(){
+        AuthorPo authorPo = authorGenerator.generate();
+        List<AuthorPo> authorPoList = authorGenerator.generate(500);
+        authorService.insertSimpleAndBatch(authorPo, authorPoList);
+    }
+
+    @Test
+    public void mix_batch_and_simple_test_with_exception(){
+        AuthorPo authorPo = authorGenerator.generate();
+        List<AuthorPo> authorPoList = authorGenerator.generate(500);
+        try{
+        authorService.insertSimpleAndBatchWithException(authorPo, authorPoList);
+        }catch (Exception ignore){
+            // ignore
+        }
+
+        Optional<AuthorPo> optional = authorRepository.getByPrimaryKey(authorPo.getAuthorId());
+        if (optional.isPresent()) throw new IllegalStateException("Failed to rollback simple");
+
+        List<AuthorPo> insertedAuthors = authorExRepository.queryByIds(authorPoList.stream().map(AuthorPo::getAuthorId).collect(Collectors.toList()));
+
+        if (!insertedAuthors.isEmpty()) throw new IllegalStateException("Failed to rollback batch");
     }
 }

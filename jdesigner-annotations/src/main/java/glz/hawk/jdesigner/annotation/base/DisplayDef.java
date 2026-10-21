@@ -69,7 +69,7 @@ public @interface DisplayDef {
      * This annotation defines several {@link DisplayDef @DisplayDef} annotations on the same element.
      */
     @ModelOrSubModel
-    @Target({FIELD})
+    @Target({FIELD, TYPE, CONSTRUCTOR, METHOD, PARAMETER, ANNOTATION_TYPE})
     @Retention(RUNTIME)
     @Documented
     @Def

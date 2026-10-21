@@ -27,15 +27,19 @@ import org.springframework.core.annotation.MergedAnnotation;
  */
 public abstract class AnnotationParserHelper {
 
-    @SuppressWarnings("unchecked")
     public static void parseName(MergedAnnotation<?> mergedAnnotation, AbstractModelFactoryContext factoryContext) {
         factoryContext.setName(mergedAnnotation.getValue("name", String.class).orElse(""));
-        Class<?>[] c = mergedAnnotation.getValue("converterClass",Class[].class).orElse(null);
+        Class<?>[] c = mergedAnnotation.getValue("converterClass", Class[].class).orElse(null);
         if (ObjectHelper.isNotEmpty(c)) {
-            factoryContext.setConverterClass((Class<? extends NameConverter>) c[0]);
+            Class<?> clazz = c[0];
+            if (NameConverter.class.isAssignableFrom(clazz)) {
+                @SuppressWarnings("unchecked")
+                Class<? extends NameConverter> converterClass = (Class<? extends NameConverter>) clazz;
+                factoryContext.setConverterClass(converterClass);
+            } else {
+                throw new IllegalArgumentException("Converter class must implement NameConverter: " + clazz.getName());
+            }
         }
     }
-
-
 
 }

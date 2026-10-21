@@ -75,7 +75,7 @@ public class TypeFactorySupport {
         } else if (scale == 0 && precision > 0) {
             if (precision <= 9) {
                 return Integer.class;
-            } else if (precision <= 17) {
+            } else if (precision <= 18) {
                 return Long.class;
             } else {
                 return BigInteger.class;

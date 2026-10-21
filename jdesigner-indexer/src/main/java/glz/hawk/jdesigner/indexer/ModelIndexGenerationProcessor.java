@@ -42,6 +42,7 @@ import java.util.Set;
 @SupportedAnnotationTypes({"glz.hawk.jdesigner.annotation.meta.domain.DomainDefContainer", "glz.hawk.jdesigner.annotation.meta.metadata.MetadataDefContainer",
     "glz.hawk.jdesigner.annotation.database.TableDef", "glz.hawk.jdesigner.annotation.java.ClassDef"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedOptions({"indexerPackageName", "indexerClassName"})
 public class ModelIndexGenerationProcessor extends AbstractProcessor {
 
     private Types typeUtils;
@@ -70,7 +71,7 @@ public class ModelIndexGenerationProcessor extends AbstractProcessor {
         className = processingEnv.getOptions().get(keyForClass);
         if (className == null || className.trim().isEmpty()) {
             className = "DefaultIndexer";
-            messager.printMessage(Diagnostic.Kind.NOTE, String.format("Found no compile argument: '%s', use default indexer class name: '%s'",keyForClass,className));
+            messager.printMessage(Diagnostic.Kind.NOTE, String.format("Found no compile argument: '%s', use default indexer class name: '%s'", keyForClass, className));
         }
     }
 

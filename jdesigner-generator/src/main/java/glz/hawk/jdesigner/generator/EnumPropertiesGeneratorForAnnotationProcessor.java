@@ -43,6 +43,7 @@ public class EnumPropertiesGeneratorForAnnotationProcessor extends AbstractEnumP
 
     @Override
     protected void write(PropertiesFile propertiesFile) {
-        propertiesFile.toBuilder().setOriginatingElements(this.originatingElements).build().writeTo(filer);
+        propertiesFile = propertiesFile.toBuilder().setOriginatingElements(this.originatingElements).build();
+        propertiesFile.writeTo(filer);
     }
 }

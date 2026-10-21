@@ -41,14 +41,19 @@ import java.util.function.Supplier;
 public abstract class GeneratorUtils {
 
     public static boolean pass(Model model, String[] includePackages, String[] excludePackages) {
+        String namespace = model.getNamespace();
+        if (namespace == null) {
+            return false;
+        }
+
         for (String excludePackage : excludePackages) {
-            if (model.getNamespace().startsWith(excludePackage+".")) {
+            if (namespace.equals(excludePackage) || namespace.startsWith(excludePackage + ".")) {
                 return false;
             }
         }
 
         for (String includePackage : includePackages) {
-            if (model.getNamespace().startsWith(includePackage + ".")) {
+            if (namespace.equals(includePackage) || namespace.startsWith(includePackage + ".")) {
                return  true;
             }
         }
@@ -72,7 +77,7 @@ public abstract class GeneratorUtils {
 
     public static <T> T instance(Class<T> clazz) {
         try {
-            return clazz.newInstance();
+            return clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -121,7 +126,8 @@ public abstract class GeneratorUtils {
         ResourcePathIndexesWarehouseBuilder builder = new ResourcePathIndexesWarehouseBuilder(GeneratorUtils.class.getClassLoader(), builderContext, modelWarehouseProducer, Arrays.stream(resourceCollectors).map(c -> {
             messager.printMessage(Diagnostic.Kind.NOTE, "resourceCollector: " + c);
             try {
-                return (ResourcePathCollector) Class.forName(c).newInstance();
+                Class<?> clazz = Class.forName(c);
+                return (ResourcePathCollector) clazz.getDeclaredConstructor().newInstance();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

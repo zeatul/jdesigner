@@ -7,3 +7,9 @@ description = 'Provides definitions across three layers: Metadata (data types, d
 dependencies {
     api 'com.google.code.findbugs:jsr305'
 }
+
+// Apply BOM for version management
+dependencies {
+    implementation(platform('io.github.zeatul:hawk-dependencies-bom:1.3.0-SNAPSHOT'))
+    implementation(platform('io.github.zeatul:hawk-framework-bom:1.3.0-SNAPSHOT'))
+}

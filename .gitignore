@@ -68,3 +68,10 @@ Thumbs.db
 
 # exclude src/generated
 **/src/generated/
+
+# 本地保留但不纳入版本管理的模块（不参与构建、不发布）
+/fenris-designer/
+/java-assist-plugin-test/
+
+# 忽略所有以 . 开头的文件夹（任意层级）
+.*/

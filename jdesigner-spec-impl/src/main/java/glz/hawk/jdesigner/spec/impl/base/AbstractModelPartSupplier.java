@@ -58,10 +58,9 @@ public abstract class AbstractModelPartSupplier<O, P> implements ModelPartSuppli
         return Optional.ofNullable(extensions.get(key));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> Optional<T> getExtension(String key, Class<T> tClass) {
-        return Optional.ofNullable((T)extensions.get(key));
+        return Optional.ofNullable(tClass.cast(extensions.get(key)));
     }
 
     @Override

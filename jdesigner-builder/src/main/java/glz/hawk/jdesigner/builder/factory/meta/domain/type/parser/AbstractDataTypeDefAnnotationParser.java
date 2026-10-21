@@ -40,7 +40,7 @@ public abstract class AbstractDataTypeDefAnnotationParser<A extends Annotation> 
 
     protected int getType(Annotation annotation) {
         return Optional.ofNullable(annotation.annotationType().getAnnotation(DataTypeDef.class))
-                .orElseThrow(() -> new IllegalStateException(String.format("The annotation %s must be meta annotated with %s", annotation.getClass().getSimpleName(),
+                .orElseThrow(() -> new IllegalStateException(String.format("The annotation %s must be meta annotated with %s", annotation.annotationType().getSimpleName(),
                         DataTypeDef.class.getSimpleName())))
                 .type();
     }

@@ -34,6 +34,7 @@ import static glz.hawkframework.core.support.LogicSupport.throwIfFalse;
 public class FieldColumnSupplier extends SimpleColumnSupplier {
     private final Map<String, Column> fieldNameColumnMap;
     private final Field field;
+    private volatile Column cachedColumn;
 
     public FieldColumnSupplier(Metadata metadata, boolean nullable, Map<String, Column> fieldNameColumnMap, Field field, Map<String, Object> extensions) {
         super(metadata, nullable, extensions);
@@ -43,8 +44,18 @@ public class FieldColumnSupplier extends SimpleColumnSupplier {
 
     @Override
     public Column get() {
+        if (cachedColumn != null) {
+            return cachedColumn;
+        }
+        // Check if already in map first (idempotent)
+        Column existing = fieldNameColumnMap.get(field.getName());
+        if (existing != null) {
+            cachedColumn = existing;
+            return existing;
+        }
         Column column = super.get();
         throwIfFalse(fieldNameColumnMap.putIfAbsent(field.getName(), column) == null, () -> new IllegalArgumentException(String.format("Duplicated field name: %s", field.getName())));
+        cachedColumn = column;
         return column;
     }
 }

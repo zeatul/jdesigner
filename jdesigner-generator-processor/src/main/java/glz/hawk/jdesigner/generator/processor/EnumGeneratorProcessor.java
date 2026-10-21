@@ -77,15 +77,23 @@ public class EnumGeneratorProcessor extends AbstractProcessor {
 
         Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(EnumClassGeneratorDef.class);
         if (elements.isEmpty()) {
-            throw new IllegalStateException("Found no class annotated with " + EnumClassGeneratorDef.class);
+            messager.printMessage(Diagnostic.Kind.ERROR, "Found no class annotated with " + EnumClassGeneratorDef.class);
+            return true;
         } else if (elements.size() > 1) {
-            throw new IllegalStateException("Only one class can be annotated with " + EnumClassGeneratorDef.class);
+            messager.printMessage(Diagnostic.Kind.ERROR, "Only one class can be annotated with " + EnumClassGeneratorDef.class);
+            return true;
         }
 
         EnumClassGeneratorDef def = elements.iterator().next().getAnnotation(EnumClassGeneratorDef.class);
-        if (def == null) throw new IllegalStateException("Found no EnumClassGeneratorDef.");
+        if (def == null) {
+            messager.printMessage(Diagnostic.Kind.ERROR, "Found no EnumClassGeneratorDef.");
+            return true;
+        }
         String[] scanPackages = def.scanPackages();
-        if (ObjectHelper.isEmpty(scanPackages)) throw new IllegalStateException("The scanPackages attribute cannot be empty");
+        if (ObjectHelper.isEmpty(scanPackages)) {
+            messager.printMessage(Diagnostic.Kind.ERROR, "The scanPackages attribute cannot be empty");
+            return true;
+        }
         String[] includePackages = def.includePackages();
         String[] excludePackages = def.excludePackages();
         boolean useMethod = def.useMethod();

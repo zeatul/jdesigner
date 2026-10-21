@@ -21,7 +21,7 @@ import glz.hawk.jdesigner.spec.database.Table;
 import glz.hawk.jdesigner.spec.impl.base.AbstractModelPartSupplier;
 import glz.hawk.jdesigner.spec.meta.metadata.Metadata;
 
-import java.util.HashMap;
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotNull;
@@ -35,18 +35,17 @@ public class SimpleColumnSupplier extends AbstractModelPartSupplier<Table, Colum
 
     private final Metadata metadata;
     private final boolean nullable;
-    private final Map<String, Object> extensions = new HashMap<>();
 
     public SimpleColumnSupplier(Metadata metadata, boolean nullable, Map<String, Object> extensions) {
         this.metadata = argNotNull(metadata, "metadata");
         this.nullable = nullable;
         if (extensions != null) {
-            this.extensions.putAll(extensions);
+            putExtensions(extensions);
         }
     }
 
     @Override
     public Column get() {
-        return new SimpleColumn(getOwner(), metadata, nullable, extensions);
+        return new SimpleColumn(getOwner(), metadata, nullable, getAllExtensions());
     }
 }

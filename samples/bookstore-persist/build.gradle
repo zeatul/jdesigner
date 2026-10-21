@@ -1,6 +1,6 @@
 //file:noinspection GroovyAssignabilityCheck
 plugins {
-    id 'buildlogic.java-library-conventions'
+    id 'buildlogic.java-common-conventions'
 }
 
 description = 'The persist layer for the bookstore.'
@@ -17,30 +17,35 @@ configurations {
 }
 
 dependencies {
-    implementation 'io.github.zeatul:hawk-dao-base'
-    implementation 'io.github.zeatul:j4sql-mybatis'
-    implementation 'org.springframework:spring-context'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    implementation 'io.github.zeatul:hawk-dao-base:1.3.0-SNAPSHOT'
+    implementation 'io.github.zeatul:j4sql-mybatis:1.2.1-SNAPSHOT'
+    implementation 'org.springframework:spring-context:5.3.39'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.17.1'
 
-    compileOnly 'io.github.zeatul:j4sql-mybatis-annotations'
+    compileOnly 'io.github.zeatul:j4sql-mybatis-annotations:1.2.1-SNAPSHOT'
     compileOnly project(':samples:bookstore-designer')
-    annotationProcessor 'io.github.zeatul:j4sql-mybatis-processor'
+    annotationProcessor 'io.github.zeatul:j4sql-mybatis-processor:1.2.1-SNAPSHOT'
     annotationProcessor project(':samples:bookstore-designer')
 
-    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter'
-    testImplementation 'mysql:mysql-connector-java'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-log4j2'
-    testImplementation 'net.datafaker:datafaker'
-    testImplementation 'org.jeasy:easy-random-core'
-    testImplementation 'com.lmax:disruptor'
-    testImplementation 'org.apache.logging.log4j:log4j-core'
-    testImplementation 'org.apache.logging.log4j:log4j-api'
-    testImplementation 'org.apache.logging.log4j:log4j-slf4j2-impl'
-    testImplementation 'org.apache.logging.log4j:log4j-jul'
-    testImplementation 'org.slf4j:jul-to-slf4j'
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    testImplementation 'io.github.zeatul:j4sql-mybatis-spring:1.2.1-SNAPSHOT'
+    testImplementation 'com.mysql:mysql-connector-j:8.0.33'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.1.5'
+    testImplementation 'org.springframework.boot:spring-boot-starter-log4j2:3.1.5'
+    testImplementation 'net.datafaker:datafaker:2.0.3'
+    testImplementation 'org.jeasy:easy-random-core:5.1.0'
+    testImplementation 'com.lmax:disruptor:3.4.4'
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.23.1'
+    testImplementation 'org.apache.logging.log4j:log4j-api:2.23.1'
+    testImplementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.23.1'
+    testImplementation 'org.apache.logging.log4j:log4j-jul:2.23.1'
+    testImplementation 'org.slf4j:jul-to-slf4j:2.0.17'
+
+    // Import jdesigner-bom to manage transitive jdesigner dependencies from j4sql
+    implementation(platform('io.github.zeatul:jdesigner-bom:1.3.0-SNAPSHOT'))
 }
 
+// Don't delete this block
 compileJava {
 //     enable remote debug
 //    options.fork = true

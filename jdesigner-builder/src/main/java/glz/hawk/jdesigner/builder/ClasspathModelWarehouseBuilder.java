@@ -55,8 +55,7 @@ public class ClasspathModelWarehouseBuilder extends AbstractResourceModelWarehou
 
     @Override
     protected List<Resource> getResourceList() {
-        resourceScanner.setScanPackages(this.scanPackages);
-        return resourceScanner.scan();
+        return resourceScanner.scan(this.scanPackages);
     }
 
 

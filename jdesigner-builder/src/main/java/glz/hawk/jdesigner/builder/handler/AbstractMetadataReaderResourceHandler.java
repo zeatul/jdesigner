@@ -56,7 +56,10 @@ public abstract class AbstractMetadataReaderResourceHandler implements ResourceH
         this.metadataReader = argNotNull(metadataReader, "metadataReader");
         this.builderContext = argNotNull(builderContext, "builderContext");
         try {
-            classOfMetadataReader = Class.forName(metadataReader.getClassMetadata().getClassName());
+            ClassLoader classLoader = builderContext.getClassLoader();
+            classOfMetadataReader = classLoader != null
+                ? Class.forName(metadataReader.getClassMetadata().getClassName(), true, classLoader)
+                : Class.forName(metadataReader.getClassMetadata().getClassName());
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException(e);
         }
@@ -107,7 +110,6 @@ public abstract class AbstractMetadataReaderResourceHandler implements ResourceH
      * @param factoryContext   the factory context
      * @return {@code true} if the handling could be executed.
      */
-    @SuppressWarnings("unchecked")
     protected boolean beforeHandle(AnnotatedElement annotatedElement, Class<? extends Annotation> annotationClass, Object factoryContext) {
         Annotation[] annotations = annotatedElement.getAnnotations();
         MergedAnnotations mergedAnnotations = MergedAnnotations.from(annotations);
@@ -126,7 +128,7 @@ public abstract class AbstractMetadataReaderResourceHandler implements ResourceH
             AnnotationParser<?, ? extends Annotation> parser = (parserClasses.length > 0) ?
                     builderContext.getAnnotationParserFromParserClass(parserClasses[0]) :
                     builderContext.getAnnotationParserFromAnnotationClass(annotation.annotationType());
-            ((AnnotationParser<Object, Annotation>) Objects.requireNonNull(parser)).parse(factoryContext, annotation);
+            Objects.requireNonNull(parser).parseRaw(factoryContext, annotation);
         });
 
         return true;

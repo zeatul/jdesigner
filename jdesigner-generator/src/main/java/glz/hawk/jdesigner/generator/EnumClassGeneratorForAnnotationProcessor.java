@@ -43,7 +43,7 @@ public class EnumClassGeneratorForAnnotationProcessor extends AbstractEnumClassG
 
     @Override
     protected void write(JavaFile javaFile) {
-        javaFile.toBuilder().addOriginatingElements(this.originatingElements).build();
+        javaFile = javaFile.toBuilder().addOriginatingElements(this.originatingElements).build();
         javaFile.writeTo(filer);
     }
 }

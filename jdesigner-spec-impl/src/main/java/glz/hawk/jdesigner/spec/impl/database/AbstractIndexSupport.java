@@ -44,7 +44,6 @@ public class AbstractIndexSupport<T extends IndexSupport<T>> extends AbstractMod
         addIfSuppliersNotNull(indexColumnSuppliers, this::addIndexColumn, "indexColumnSuppliers");
     }
 
-    @SuppressWarnings("unchecked")
     @Nonnull
     @Override
     public IndexColumn<T>[] getIndexColumns() {

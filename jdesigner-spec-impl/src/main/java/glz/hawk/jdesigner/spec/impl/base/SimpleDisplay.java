@@ -28,6 +28,7 @@ import static glz.hawkframework.core.support.ArgumentSupport.argNotBlank;
 
 /**
  * This class is a simple implementation of {@link Display}. It doesn't support {@code I18N}.
+ * <p>This class doesn't support {@code I18N}.</p>
  *
  * @author Hawk
  */
@@ -45,7 +46,7 @@ public class SimpleDisplay implements Display {
     }
 
     public SimpleDisplay(String localeString, String displayName, String abbreviateName, String[] remark) {
-        this(localeString,displayName,abbreviateName,Arrays.asList(remark));
+        this(localeString, displayName, abbreviateName, Arrays.asList(remark));
     }
 
     @Override
@@ -62,7 +63,7 @@ public class SimpleDisplay implements Display {
 
     @Override
     public Optional<List<String>> getRemark(@Nonnull Locale locale) {
-        return Optional.of(remark);
+        return Optional.of(Collections.unmodifiableList(new ArrayList<>(remark)));
     }
 
 

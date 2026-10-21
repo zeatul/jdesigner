@@ -21,6 +21,8 @@ import glz.hawk.jdesigner.spec.java.type.TypeKind;
 import glz.hawk.jdesigner.spec.java.type.UniversalType;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.Objects;
 
 import static glz.hawkframework.core.helper.ObjectHelper.nullSafeEquals;
 
@@ -138,6 +140,17 @@ public class SimpleUniversalType implements UniversalType {
             && nullSafeEquals(this.upperBounds, that.getUpperBounds())
             && nullSafeEquals(this.lowerBounds, that.getLowerBounds())
             && nullSafeEquals(this.typeArguments, that.getTypeArguments());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(typeKind, packageName, name, componentType);
+        result = 31 * result + Arrays.hashCode(enclosingClassTypeNames);
+        result = 31 * result + Arrays.hashCode(bounds);
+        result = 31 * result + Arrays.hashCode(upperBounds);
+        result = 31 * result + Arrays.hashCode(lowerBounds);
+        result = 31 * result + Arrays.hashCode(typeArguments);
+        return result;
     }
 
     @Nonnull

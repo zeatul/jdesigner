@@ -34,6 +34,8 @@ public class ColumnFactoryContext extends AbstractModelFactoryContext implements
     private ReferencedMetadataContext referencedMetadataContext;
     private boolean nullable;
 
+    private java.lang.reflect.Field declaringField;
+
     public boolean isNullable() {
         return nullable;
     }
@@ -53,5 +55,13 @@ public class ColumnFactoryContext extends AbstractModelFactoryContext implements
     @Override
     public void setReferencedMetadataContext(@Nonnull ReferencedMetadataContext referencedMetadataContext) {
         this.referencedMetadataContext = argNotNull(referencedMetadataContext, "referencedMetadataContext");
+    }
+
+    public java.lang.reflect.Field getDeclaringField() {
+        return declaringField;
+    }
+
+    public void setDeclaringField(java.lang.reflect.Field declaringField) {
+        this.declaringField = declaringField;
     }
 }

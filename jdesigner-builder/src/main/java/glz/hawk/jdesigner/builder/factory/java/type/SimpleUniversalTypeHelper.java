@@ -165,7 +165,8 @@ public abstract class SimpleUniversalTypeHelper {
         }
 
         universalType.setTypeKind(TypeKind.CLASS_TYPE);
-        universalType.setPackageName(typeClass.getPackage().getName());
+        Package pkg = typeClass.getPackage();
+        universalType.setPackageName(pkg != null ? pkg.getName() : "");
         universalType.setName(typeClass.getSimpleName());
         universalType.setEnclosingClassTypeNames(getEnclosingClassTypeNames(typeClass));
 

@@ -70,6 +70,7 @@ import glz.hawkframework.core.support.StateSupport;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static glz.hawkframework.core.support.ArgumentSupport.argNotBlank;
@@ -92,8 +93,14 @@ public class ClasspathBuilderContextImpl implements ClasspathBuilderContext {
     private DataTypeBuilder dataTypeBuilder = new DataTypeBuilderImpl();
     private PackageGenerator packageGenerator;
     private TypeFactorySupport typeFactorySupport = new TypeFactorySupport();
+    private ClassLoader classLoader;
 
     public ClasspathBuilderContextImpl() {
+        this(null);
+    }
+
+    public ClasspathBuilderContextImpl(@Nullable ClassLoader classLoader) {
+        this.classLoader = classLoader;
         // Name Converter
         modelClassNameConverterMap.put(Field.class,new ToLowerCamelNameConverter());
 
@@ -166,8 +173,8 @@ public class ClasspathBuilderContextImpl implements ClasspathBuilderContext {
     @Override
     public AnnotationParser<?, ? extends Annotation> getAnnotationParserFromParserClass(Class<? extends AnnotationParser<?, ? extends Annotation>> annotationParserClass) {
         try {
-            return annotationParserClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            return annotationParserClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }
@@ -191,9 +198,9 @@ public class ClasspathBuilderContextImpl implements ClasspathBuilderContext {
         NameConverter nameConverter = converterClassNameConverterMap.get(nameConverterClass);
         if (nameConverter == null) {
             try {
-                nameConverter = nameConverterClass.newInstance();
+                nameConverter = nameConverterClass.getDeclaredConstructor().newInstance();
                 converterClassNameConverterMap.put(nameConverterClass, nameConverter);
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -263,5 +270,15 @@ public class ClasspathBuilderContextImpl implements ClasspathBuilderContext {
 
     public void setTypeFactorySupport(TypeFactorySupport typeFactorySupport) {
         this.typeFactorySupport = typeFactorySupport;
+    }
+
+    @Nullable
+    @Override
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    public void setClassLoader(@Nullable ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 }

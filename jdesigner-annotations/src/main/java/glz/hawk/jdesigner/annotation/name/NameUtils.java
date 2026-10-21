@@ -16,6 +16,8 @@
 
 package glz.hawk.jdesigner.annotation.name;
 
+import java.util.Locale;
+
 /**
  * This class is responsible for
  *
@@ -25,7 +27,7 @@ public abstract class NameUtils {
 
     public static String upperPrepare(String originalName) {
         originalName = originalName.replace("-", "_");
-        //TODO: 小写后面跟大写，中间插入一个下划线。
+        // TODO: 小写后面跟大写，中间插入一个下划线。
         StringBuilder sb = new StringBuilder();
         char[] chars = originalName.toCharArray();
         boolean preCharIsUpperCase = false;
@@ -33,14 +35,14 @@ public abstract class NameUtils {
         boolean preCharIsUnderscore = false;
         int lowerToUpperCount = 0;
         for (char ch : chars) {
-            if (ch >= 'A' && ch <= 'Z') {
+            if (Character.isUpperCase(ch)) {
                 preCharIsUpperCase = true;
                 preCharIsUnderscore = false;
                 if (preCharIsLowerCase) {
                     lowerToUpperCount++;
                 }
                 preCharIsLowerCase = false;
-            } else if (ch >= 'a' && ch <= 'z') {
+            } else if (Character.isLowerCase(ch)) {
                 preCharIsLowerCase = true;
                 preCharIsUnderscore = false;
                 if (preCharIsUpperCase) {
@@ -48,7 +50,7 @@ public abstract class NameUtils {
                 }
                 preCharIsUpperCase = false;
 
-            } else if (ch >= '0' && ch <= '9') {
+            } else if (Character.isDigit(ch)) {
                 preCharIsUnderscore = false;
             } else if (ch == '_') {
                 if (preCharIsUnderscore) {
@@ -58,7 +60,10 @@ public abstract class NameUtils {
                 preCharIsUpperCase = false;
                 preCharIsLowerCase = false;
             } else {
-                throw new IllegalArgumentException(String.format("The originalName('%s') has illegal character: '%c'", originalName, ch));
+                // Allow Unicode letters and other valid identifier characters
+                if (!Character.isLetter(ch) && ch != '_') {
+                    throw new IllegalArgumentException(String.format("The originalName('%s') has illegal character: '%c'", originalName, ch));
+                }
             }
 
             if (lowerToUpperCount > 0) {
@@ -68,6 +73,6 @@ public abstract class NameUtils {
             sb.append(ch);
         }
 
-        return sb.toString().toUpperCase();
+        return sb.toString().toUpperCase(Locale.ROOT);
     }
 }

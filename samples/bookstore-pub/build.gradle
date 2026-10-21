@@ -1,16 +1,16 @@
 plugins {
-    id 'buildlogic.java-library-conventions'
+    id 'buildlogic.java-common-conventions'
 }
 
 description = 'The pub layer for the bookstore.'
 
 dependencies {
-
-    api project(':samples:bookstore-annotations')
+    implementation project(':samples:bookstore-annotations')
     compileOnly project(':jdesigner-generator-annotations')
-    api 'com.fasterxml.jackson.core:jackson-annotations'
-    api 'io.github.zeatul:hawk-validator'
-    api 'io.github.zeatul:hawk-core'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.17.1'
+    implementation 'io.github.zeatul:hawk-validator:1.3.0-SNAPSHOT'
+    implementation 'io.github.zeatul:hawk-core:1.3.0-SNAPSHOT'
+    implementation 'org.springframework:spring-context:5.3.39'
 
     annotationProcessor project(':jdesigner-generator-processor')
     annotationProcessor project(':samples:bookstore-designer')

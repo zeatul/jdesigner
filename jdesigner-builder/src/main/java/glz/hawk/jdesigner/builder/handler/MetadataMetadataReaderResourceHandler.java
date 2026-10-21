@@ -19,9 +19,10 @@ package glz.hawk.jdesigner.builder.handler;
 import glz.hawk.jdesigner.annotation.meta.metadata.MetadataDef;
 import glz.hawk.jdesigner.annotation.meta.metadata.MetadataDefContainer;
 import glz.hawk.jdesigner.builder.context.ClasspathBuilderContext;
-import glz.hawk.jdesigner.builder.factory.java.common.AnnotationHelper;
+import glz.hawk.jdesigner.builder.factory.common.ExtensionKeys;
 import glz.hawk.jdesigner.builder.factory.meta.metadata.MetadataFactory;
 import glz.hawk.jdesigner.builder.factory.meta.metadata.MetadataFactoryContext;
+import glz.hawk.jdesigner.builder.factory.java.common.AnnotationHelper;
 import glz.hawk.jdesigner.spec.manager.ModelWarehouse;
 import org.springframework.core.type.classreading.MetadataReader;
 
@@ -55,7 +56,7 @@ public class MetadataMetadataReaderResourceHandler extends AbstractMetadataReade
         MetadataFactoryContext factoryContext = new MetadataFactoryContext();
         factoryContext.setAnnotatedElement(definingField);
         factoryContext.putNoDefAnnotations(AnnotationHelper.parse(definingField));
-        factoryContext.putExtension(Field.class.getCanonicalName(), definingField);
+        ExtensionKeys.putDeclaringExtension(factoryContext, ExtensionKeys.DECLARING_FIELD, ExtensionKeys.LEGACY_DECLARING_FIELD, definingField);
         return factoryContext;
     }
 

@@ -63,9 +63,14 @@ public abstract class AbstractCommonFactoryContext implements CommonFactoryConte
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Optional<List<Annotation>> getNoDefAnnotations() {
-        return Optional.of((List<Annotation>) extensions.get(Extensible.KEY_FOR_NO_DEF_ANNOTATIONS));
+        Object obj = extensions.get(Extensible.KEY_FOR_NO_DEF_ANNOTATIONS);
+        if (obj instanceof List<?>) {
+            @SuppressWarnings("unchecked")
+            List<Annotation> list = (List<Annotation>) obj;
+            return Optional.of(list);
+        }
+        return Optional.empty();
     }
 
     @Override
